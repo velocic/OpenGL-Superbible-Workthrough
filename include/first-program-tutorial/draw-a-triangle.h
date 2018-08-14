@@ -18,6 +18,7 @@ namespace Tutorial
             std::unique_ptr<Flare::Material> plainTriangleShader = nullptr;
             const std::string vertexShaderPath;
             const std::string fragmentShaderPath;
+            GLuint VAO = 0;
         public:
             DrawATriangle();
             void initialize() override;
