@@ -6,6 +6,13 @@
 
 namespace Tutorial
 {
+    DrawATriangle::DrawATriangle()
+    :
+        vertexShaderPath("../src/first-program-tutorial/shaders/vert.vsh"),
+        fragmentShaderPath("../src/first-program-tutorial/shaders/frag.fsh")
+    {
+    }
+
     void DrawATriangle::initialize()
     {
         renderWindow = std::make_unique<Flare::RenderWindow>(

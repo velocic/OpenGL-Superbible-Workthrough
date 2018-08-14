@@ -11,6 +11,9 @@ add_executable(
     ${SAMPLE_RUNNER_NAME}
     src/first-program-tutorial/draw-a-triangle.cpp
     src/flare/ui/renderwindow.cpp
+    src/flare/material/material.cpp
+    src/flare/utility/file.cpp
+    src/flare/utility/math.cpp
     src/gl3w/gl3w.c
     src/main.cpp
 )

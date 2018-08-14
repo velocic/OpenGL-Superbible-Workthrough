@@ -14,7 +14,9 @@ int main(int argc, char* argv[])
     unsigned long long elapsedTime = 0;
     for (unsigned int i = 0; i < numFramesToRender; ++i) {
         auto start = std::chrono::high_resolution_clock::now();
+
         firstProgramDrawTriangle.render(elapsedTime);
+
         std::this_thread::sleep_for(std::chrono::milliseconds(150));
         auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
         elapsedTime += duration;
