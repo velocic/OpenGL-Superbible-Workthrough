@@ -1,8 +1,7 @@
-#ifndef TUTORIAL_DRAW_A_TRIANGLE_H
-#define TUTORIAL_DRAW_A_TRIANGLE_H
+#ifndef TUTORIAL_SHADER_PIPELINE_H
+#define TUTORIAL_SHADER_PIPELINE_H
 
 #include <memory>
-#include <string>
 
 #include <GL/gl3w.h>
 #include <flare/application.h>
@@ -11,21 +10,19 @@
 
 namespace Tutorial
 {
-    class DrawATriangle : public Flare::Application
+    class ShaderPipeline : public Flare::Application
     {
         private:
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
-            std::unique_ptr<Flare::Material> plainTriangleShader = nullptr;
-            const std::string vertexShaderPath;
-            const std::string fragmentShaderPath;
+            std::unique_ptr<Flare::Material> shaderPipelineDemoShader = nullptr;
+            const std::string vertexShaderPath{"../src/3-gpu-shader-pipeline/shaders/vertex.vsh"};
+            const std::string fragmentShaderPath{"../src/3-gpu-shader-pipeline/shaders/fragment.fsh"};
             GLuint VAO = 0;
         public:
-            DrawATriangle();
             void initialize() override;
             void render(unsigned int deltaTime) override;
             void shutdown() override;
-
     };
-}
+};
 
 #endif
