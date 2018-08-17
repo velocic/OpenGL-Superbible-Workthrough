@@ -13,16 +13,38 @@ namespace Tutorial
 
         std::vector<uint8_t> vertexShaderSource;
         std::vector<uint8_t> fragmentShaderSource;
-
         Utility::File::getFileContents(vertexShaderSource, vertexShaderPath);
         Utility::File::getFileContents(fragmentShaderSource, fragmentShaderPath);
+
+        shaderPipelineDemoShader = std::make_unique<Flare::Material>(
+            vertexShaderSource,
+            std::vector<uint8_t>(),
+            fragmentShaderSource
+        );
+
+        shaderPipelineDemoShader->bind();
+
+        glCreateVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
     }
 
     void ShaderPipeline::render(unsigned int deltaTime)
     {
+        const GLfloat clearColor[] = {
+            (float)sin(deltaTime) * 0.5f + 0.5f,
+            (float)cos(deltaTime) * 0.5f + 0.5f,
+            0.0f,
+            1.0f
+        };
+
+        glClearBufferfv(GL_COLOR, 0, clearColor);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        SDL_GL_SwapWindow(renderWindow->getRenderWindowHandle());
     }
 
     void ShaderPipeline::shutdown()
     {
+        glDeleteVertexArrays(1, &VAO);
+        renderWindow->freeResources();
     }
 }
