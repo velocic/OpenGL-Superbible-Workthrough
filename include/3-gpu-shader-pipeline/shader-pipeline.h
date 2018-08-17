@@ -17,6 +17,7 @@ namespace Tutorial
             std::unique_ptr<Flare::Material> shaderPipelineDemoShader = nullptr;
             const std::string vertexShaderPath{"../src/3-gpu-shader-pipeline/shaders/vertex.vsh"};
             const std::string fragmentShaderPath{"../src/3-gpu-shader-pipeline/shaders/fragment.fsh"};
+            unsigned long long elapsedTime = 0;
             GLuint VAO = 0;
         public:
             void initialize() override;

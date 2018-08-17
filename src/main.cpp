@@ -16,15 +16,16 @@ int main(int argc, char* argv[])
     demoApp->initialize();
 
     //Fake a render loop at slow enough FPS to not blind myself
-    unsigned long long elapsedTime = 0;
+    auto previousFrameStartTime = std::chrono::high_resolution_clock::now();
     for (unsigned int i = 0; i < numFramesToRender; ++i) {
-        auto start = std::chrono::high_resolution_clock::now();
+        auto currentFrameStartTime = std::chrono::high_resolution_clock::now();
+        auto timeSinceLastFrame = std::chrono::duration_cast<std::chrono::milliseconds>(currentFrameStartTime - previousFrameStartTime).count();
 
-        demoApp->render(elapsedTime);
+        demoApp->render(timeSinceLastFrame);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(150));
-        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start).count();
-        elapsedTime += duration;
+
+        previousFrameStartTime = currentFrameStartTime;
     }
 
     demoApp->shutdown();

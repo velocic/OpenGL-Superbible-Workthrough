@@ -1,6 +1,7 @@
 #version 460 core
 
 layout (location = 0) in vec4 offset;
+out vec4 vs_color;
 
 void main(void)
 {
@@ -9,6 +10,8 @@ void main(void)
         vec4(-0.25, -0.25, 0.5, 1.0),
         vec4(0.25, 0.25, 0.5, 1.0)
     );
+
+    vs_color = offset;
 
     gl_Position = vertices[gl_VertexID] + offset;
 }
