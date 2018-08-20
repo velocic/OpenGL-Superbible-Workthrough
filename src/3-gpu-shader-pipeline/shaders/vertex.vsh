@@ -13,5 +13,6 @@ void main(void)
 
     vs_color = offset;
 
+    gl_Position = vertices[gl_VertexID];
     gl_Position = vertices[gl_VertexID] + offset;
 }

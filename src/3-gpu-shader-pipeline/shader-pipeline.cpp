@@ -26,7 +26,6 @@ namespace Tutorial
         shaderPipelineDemoShader->bind();
 
         glCreateVertexArrays(1, &VAO);
-        shaderPipelineDemoShader->addAttribute(VAO, "offset");
     }
 
     void ShaderPipeline::render(unsigned int deltaTime)
@@ -50,7 +49,7 @@ namespace Tutorial
         //update the "offset" attribute of the vertex shader, with
         //vertexOffset on the currently attached vertex array object
         glBindVertexArray(VAO);
-        glVertexAttrib4fv(shaderPipelineDemoShader->getAttribute(VAO, "offset"), vertexOffset);
+        glVertexAttrib4fv(0, vertexOffset);
         
         glClearBufferfv(GL_COLOR, 0, clearColor);
         glDrawArrays(GL_TRIANGLES, 0, 3);
