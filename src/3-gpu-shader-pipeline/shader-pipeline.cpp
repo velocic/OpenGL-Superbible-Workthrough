@@ -16,8 +16,12 @@ namespace Tutorial
 
         std::vector<uint8_t> vertexShaderSource;
         std::vector<uint8_t> fragmentShaderSource;
+        std::vector<uint8_t> tessellationControlShaderSource;
+        std::vector<uint8_t> tessellationEvaluationShaderSource;
         Utility::File::getFileContents(vertexShaderSource, vertexShaderPath);
         Utility::File::getFileContents(fragmentShaderSource, fragmentShaderPath);
+        Utility::File::getFileContents(tessellationControlShaderSource, tessellationControlShaderPath);
+        Utility::File::getFileContents(tessellationEvaluationShaderSource, tessellationEvaluationShaderPath);
 
         shaderPipelineDemoShader = std::make_unique<Flare::Material>(
             vertexShaderSource,

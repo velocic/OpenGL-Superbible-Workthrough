@@ -7,12 +7,22 @@ namespace Flare
 {
     Material::Material(
         const std::vector<uint8_t> &vertexShaderSource,
+        const std::vector<uint8_t> &tessellationControlShaderSource,
+        const std::vector<uint8_t> &tessellationEvaluationShaderSource,
         const std::vector<uint8_t> &geometryShaderSource,
         const std::vector<uint8_t> &fragmentShaderSource
     )
     {
         if (vertexShaderSource.size() > 0) {
             shaderStages.vertexShader = compileShaderProgramFromSource(vertexShaderSource, GL_VERTEX_SHADER);
+        }
+
+        if (tessellationControlShaderSource.size() > 0) {
+            shaderStages.tessellationControlShader = compileShaderProgramFromSource(tessellationControlShaderSource, GL_TESS_CONTROL_SHADER);
+        }
+
+        if (tessellationEvaluationShaderSource.size() > 0) {
+            shaderStages.tessellationEvaluationShader = compileShaderProgramFromSource(tessellationEvaluationShaderSource, GL_TESS_EVALUATION_SHADER);
         }
 
         if (geometryShaderSource.size() > 0) {
@@ -34,6 +44,8 @@ namespace Flare
     {
         //Calls to glDeleteShader(0) and glDeleteProgram(0) are silently ignored, according to OGL 4.5 spec
         glDeleteShader(shaderStages.vertexShader);
+        glDeleteShader(shaderStages.tessellationControlShader);
+        glDeleteShader(shaderStages.tessellationEvaluationShader);
         glDeleteShader(shaderStages.geometryShader);
         glDeleteShader(shaderStages.fragmentShader);
 
@@ -250,6 +262,16 @@ namespace Flare
         if (shaderStages.vertexShader != 0) {
             glAttachShader(program, shaderStages.vertexShader);
             vertexShaderAttached = true;
+        }
+
+        if (shaderStages.tessellationControlShader != 0) {
+            glAttachShader(program, shaderStages.tessellationControlShader);
+            tessellationControlShaderAttached = true;
+        }
+
+        if (shaderStages.tessellationEvaluationShader != 0) {
+            //TODO
+            glAttachShader();
         }
 
         if (shaderStages.geometryShader != 0) {

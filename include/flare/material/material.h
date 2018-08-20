@@ -12,6 +12,8 @@ namespace Flare
     struct ShaderProgramStages
     {
         GLuint vertexShader = 0;
+        GLuint tessellationControlShader = 0;
+        GLuint tessellationEvaluationShader = 0;
         GLuint geometryShader = 0;
         GLuint fragmentShader = 0;
     };
@@ -38,6 +40,8 @@ namespace Flare
         public:
             Material(
                 const std::vector<uint8_t> &vertexShaderSource,
+                const std::vector<uint8_t> &tessellationControlShaderSource,
+                const std::vector<uint8_t> &tessellationEvaluationShaderSource,
                 const std::vector<uint8_t> &geometryShaderSource,
                 const std::vector<uint8_t> &fragmentShaderSource
             );
@@ -71,7 +75,57 @@ namespace Flare
             );
             void unbind();
     };
-}
 
+    class MaterialBuilder
+    {
+        private:
+            std::vector<uint8_t> vertexShaderSource;
+            std::vector<uint8_t> tessellationControlShaderSource;
+            std::vector<uint8_t> tessellationEvaluationShaderSource;
+            std::vector<uint8_t> geometryShaderSource;
+            std::vector<uint8_t> fragmentShaderSource;
+        public:
+            virtual MaterialBuilder& addVertexShader(std::vector<uint8_t>&& vertexShaderSource)
+            {
+                this->vertexShaderSource = vertexShaderSource;
+                return *this;
+            }
+
+            virtual MaterialBuilder& addTessellationControlShader(std::vector<uint8_t>&& tessellationControlShaderSource)
+            {
+                this->tessellationControlShaderSource = tessellationControlShaderSource;
+                return *this;
+            }
+
+            virtual MaterialBuilder& addTessellationEvaluationShader(std::vector<uint8_t>&& tessellationEvaluationShaderSource)
+            {
+                this->tessellationEvaluationShaderSource = tessellationEvaluationShaderSource;
+                return *this;
+            }
+
+            virtual MaterialBuilder& addGeometryShaderSource(std::vector<uint8_t>&& geometryShaderSource)
+            {
+                this->geometryShaderSource = geometryShaderSource;
+                return *this;
+            }
+
+            virtual MaterialBuilder& addFragmentShaderSource(std::vector<uint8_t>&& fragmentShaderSource)
+            {
+                this->fragmentShaderSource = fragmentShaderSource;
+                return *this;
+            }
+
+            virtual std::unique_ptr<Material> build()
+            {
+                return std::make_unique<Flare::Material>(
+                    vertexShaderSource,
+                    tessellationControlShaderSource,
+                    tessellationEvaluationShaderSource,
+                    geometryShaderSource,
+                    fragmentShaderSource
+                );
+            }
+    };
+}
 
 #endif

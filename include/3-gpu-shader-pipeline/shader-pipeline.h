@@ -17,6 +17,8 @@ namespace Tutorial
             std::unique_ptr<Flare::Material> shaderPipelineDemoShader = nullptr;
             const std::string vertexShaderPath{"../src/3-gpu-shader-pipeline/shaders/vertex.vsh"};
             const std::string fragmentShaderPath{"../src/3-gpu-shader-pipeline/shaders/fragment.fsh"};
+            const std::string tessellationControlShaderPath{"../src/3-gpu-shader-pipeline/shaders/tessellation-control.glsl"};
+            const std::string tessellationEvaluationShaderPath{"../src/3-gpu-shader-pipeline/shaders/tessellation-evaluation.glsl"};
             unsigned long long elapsedTime = 0;
             GLuint VAO = 0;
         public:

@@ -1,4 +1,4 @@
-#version 460 core
+#version 430 core
 
 //matches the OUT interface block declaration from the fragment shader
 //but we can rename the instance variable here as "fs_in", instead of
