@@ -28,6 +28,13 @@ namespace Tutorial
 
         shaderPipelineDemoShader->bind();
 
+        //Number of vertices to use per patch for the tessellation control shader.
+        //3 is the default, so this call is unnecessary but good for demonstration.
+        glPatchParameteri(GL_PATCH_VERTICES, 3);
+
+        //Wireframe rendering to view tessellated triangles
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
         glCreateVertexArrays(1, &VAO);
     }
 
@@ -61,7 +68,10 @@ namespace Tutorial
         glVertexAttrib4fv(1, triangleColor);
         
         glClearBufferfv(GL_COLOR, 0, clearColor);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        //Have to draw GL_PATCHES instead of GL_TRIANGLES due to using the tessellation
+        //shaders. GL_TRIANGLES renders nothing.
+        glDrawArrays(GL_PATCHES, 0, 3);
         SDL_GL_SwapWindow(renderWindow->getRenderWindowHandle());
     }
 
