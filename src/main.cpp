@@ -6,7 +6,8 @@
 
 int main(int argc, char* argv[])
 {
-    unsigned int numFramesToRender = 30;
+    unsigned int numFramesToRender = 10 * 60;
+    auto targetFrameTimeMillis = 16.6;
 
     // Tutorial::DrawATriangle selectedTutorial;
     Tutorial::ShaderPipeline selectedTutorial;
@@ -23,7 +24,8 @@ int main(int argc, char* argv[])
 
         demoApp->render(timeSinceLastFrame);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(150));
+        long sleepTime = targetFrameTimeMillis - timeSinceLastFrame;
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
 
         previousFrameStartTime = currentFrameStartTime;
     }

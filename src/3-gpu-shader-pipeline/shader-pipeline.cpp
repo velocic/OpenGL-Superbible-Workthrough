@@ -48,17 +48,19 @@ namespace Tutorial
     {
         elapsedTime += deltaTime;
 
+        auto scaledElapsedTime = elapsedTime * .001f;
+
         const GLfloat clearColor[] = {
-            (float)sin(elapsedTime) * 0.5f + 0.5f,
-            (float)cos(elapsedTime) * 0.5f + 0.5f,
+            (float)sin(scaledElapsedTime) * 0.5f + 0.5f,
+            (float)cos(scaledElapsedTime) * 0.5f + 0.5f,
             0.0f,
             1.0f
         };
 
 
         GLfloat vertexOffset[] = {
-            (float)sin(elapsedTime) * 0.5f,
-            (float)cos(elapsedTime) * 0.6f,
+            (float)sin(scaledElapsedTime) * 0.5f,
+            (float)cos(scaledElapsedTime) * 0.6f,
             0.0f,
             0.0f
         };

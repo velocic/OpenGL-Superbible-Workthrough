@@ -11,8 +11,7 @@ void main(void)
     int i;
     for (i = 0; i < gl_in.length(); ++i) {
         gl_Position = gl_in[i].gl_Position;
+        gs_color = tes_color[0];
         EmitVertex();
     }
-
-    gs_color = tes_color[0];
 }
