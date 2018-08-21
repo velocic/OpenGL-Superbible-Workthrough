@@ -14,20 +14,17 @@ namespace Tutorial
             720
         );
 
-        std::vector<uint8_t> vertexShaderSource;
-        std::vector<uint8_t> fragmentShaderSource;
-        std::vector<uint8_t> tessellationControlShaderSource;
-        std::vector<uint8_t> tessellationEvaluationShaderSource;
-        Utility::File::getFileContents(vertexShaderSource, vertexShaderPath);
-        Utility::File::getFileContents(fragmentShaderSource, fragmentShaderPath);
-        Utility::File::getFileContents(tessellationControlShaderSource, tessellationControlShaderPath);
-        Utility::File::getFileContents(tessellationEvaluationShaderSource, tessellationEvaluationShaderPath);
+        auto vertexShaderSource = Utility::File::getFileContents(vertexShaderPath);
+        auto fragmentShaderSource = Utility::File::getFileContents(fragmentShaderPath);
+        auto tessellationControlShaderSource = Utility::File::getFileContents(tessellationControlShaderPath);
+        auto tessellationEvaluationShaderSource = Utility::File::getFileContents(tessellationEvaluationShaderPath);
 
-        shaderPipelineDemoShader = std::make_unique<Flare::Material>(
-            vertexShaderSource,
-            std::vector<uint8_t>(),
-            fragmentShaderSource
-        );
+        shaderPipelineDemoShader = Flare::MaterialBuilder()
+            .addVertexShader(std::move(vertexShaderSource))
+            .addFragmentShader(std::move(fragmentShaderSource))
+            .addTessellationControlShader(std::move(tessellationControlShaderSource))
+            .addTessellationEvaluationShader(std::move(tessellationEvaluationShaderSource))
+            .build();
 
         shaderPipelineDemoShader->bind();
 

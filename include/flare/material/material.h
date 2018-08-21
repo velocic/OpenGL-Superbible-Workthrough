@@ -1,6 +1,7 @@
 #ifndef MATERIAL_H
 #define MATERIAL_H
 
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -103,13 +104,13 @@ namespace Flare
                 return *this;
             }
 
-            virtual MaterialBuilder& addGeometryShaderSource(std::vector<uint8_t>&& geometryShaderSource)
+            virtual MaterialBuilder& addGeometryShader(std::vector<uint8_t>&& geometryShaderSource)
             {
                 this->geometryShaderSource = geometryShaderSource;
                 return *this;
             }
 
-            virtual MaterialBuilder& addFragmentShaderSource(std::vector<uint8_t>&& fragmentShaderSource)
+            virtual MaterialBuilder& addFragmentShader(std::vector<uint8_t>&& fragmentShaderSource)
             {
                 this->fragmentShaderSource = fragmentShaderSource;
                 return *this;

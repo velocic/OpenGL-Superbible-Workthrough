@@ -106,7 +106,7 @@ namespace Flare
     {
         if (isValid == false) {
             //TODO: Replace cout with logfile writing
-            std::cout << "bind called on Material instance with invalid state.";
+            std::cout << "bind called on Material instance with invalid state." << std::endl;
             return;
         }
 
@@ -256,6 +256,8 @@ namespace Flare
     {
         GLuint program = glCreateProgram();
         bool vertexShaderAttached = false;
+        bool tessellationControlShaderAttached = false;
+        bool tessellationEvaluationShaderAttached = false;
         bool geometryShaderAttached = false;
         bool fragmentShaderAttached = false;
 
@@ -270,8 +272,8 @@ namespace Flare
         }
 
         if (shaderStages.tessellationEvaluationShader != 0) {
-            //TODO
-            glAttachShader();
+            glAttachShader(program, shaderStages.tessellationEvaluationShader);
+            tessellationEvaluationShaderAttached = true;
         }
 
         if (shaderStages.geometryShader != 0) {
@@ -290,6 +292,14 @@ namespace Flare
             glDetachShader(program, shaderStages.vertexShader);
         }
 
+        if (tessellationControlShaderAttached) {
+            glDetachShader(program, shaderStages.tessellationControlShader);
+        }
+
+        if (tessellationEvaluationShaderAttached) {
+            glDetachShader(program, shaderStages.tessellationEvaluationShader);
+        }
+
         if (geometryShaderAttached) {
             glDetachShader(program, shaderStages.geometryShader);
         }
@@ -301,7 +311,7 @@ namespace Flare
         GLint linkSuccess = 0;
         glGetProgramiv(program, GL_LINK_STATUS, &linkSuccess);
         if (!linkSuccess) {
-            GLchar infoLog[1024];
+            GLchar infoLog[1024] = {0};
             glGetProgramInfoLog(program, sizeof(infoLog), nullptr, infoLog);
 
             for (int i = 0; i < 1024; ++i) {

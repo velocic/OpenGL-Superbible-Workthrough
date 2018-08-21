@@ -22,16 +22,13 @@ namespace Tutorial
             1080
         );
 
-        std::vector<uint8_t> vertexShaderSource;
-        std::vector<uint8_t> fragmentShaderSource;
-        Utility::File::getFileContents(vertexShaderSource, vertexShaderPath);
-        Utility::File::getFileContents(fragmentShaderSource, fragmentShaderPath);
+        auto vertexShaderSource = Utility::File::getFileContents(vertexShaderPath);
+        auto fragmentShaderSource = Utility::File::getFileContents(fragmentShaderPath);
 
-        plainTriangleShader = std::make_unique<Flare::Material>(
-            vertexShaderSource,
-            std::vector<uint8_t>(),
-            fragmentShaderSource
-        );
+        plainTriangleShader = Flare::MaterialBuilder()
+            .addVertexShader(std::move(vertexShaderSource))
+            .addFragmentShader(std::move(fragmentShaderSource))
+            .build();
 
         plainTriangleShader->bind();
 

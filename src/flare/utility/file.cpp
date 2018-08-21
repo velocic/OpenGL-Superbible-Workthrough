@@ -6,12 +6,14 @@ namespace Utility
 {
     namespace File
     {
-        bool getFileContents(std::vector<uint8_t> &fileBuffer, const std::string &filePath)
+        std::vector<uint8_t> getFileContents(const std::string &filePath)
         {
+            std::vector<uint8_t> fileBuffer;
+
             std::ifstream inFileStream(filePath, std::ios::binary);
 
             if (!inFileStream) {
-                return false;
+                return fileBuffer;
             }
 
             inFileStream.seekg(0, std::ios::end);
@@ -21,7 +23,7 @@ namespace Utility
             fileBuffer.resize(fileLength);
             inFileStream.read(reinterpret_cast<char *>(fileBuffer.data()), fileLength);
 
-            return true;
+            return fileBuffer;
         }
     }
 }

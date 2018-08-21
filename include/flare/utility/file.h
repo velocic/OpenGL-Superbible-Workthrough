@@ -8,7 +8,7 @@ namespace Utility
 {
     namespace File
     {
-        bool getFileContents(std::vector<uint8_t> &fileBuffer, const std::string &filePath);
+        std::vector<uint8_t>  getFileContents(const std::string &filePath);
     }
 }
 
