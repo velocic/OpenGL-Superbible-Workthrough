@@ -19,6 +19,7 @@ namespace Tutorial
             const std::string fragmentShaderPath{"../src/3-gpu-shader-pipeline/shaders/fragment.fsh"};
             const std::string tessellationControlShaderPath{"../src/3-gpu-shader-pipeline/shaders/tessellation-control.glsl"};
             const std::string tessellationEvaluationShaderPath{"../src/3-gpu-shader-pipeline/shaders/tessellation-evaluation.glsl"};
+            const std::string geometryShaderPath{"../src/3-gpu-shader-pipeline/shaders/geometry.glsl"};
             unsigned long long elapsedTime = 0;
             GLuint VAO = 0;
         public:

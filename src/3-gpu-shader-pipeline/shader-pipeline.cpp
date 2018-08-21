@@ -18,12 +18,14 @@ namespace Tutorial
         auto fragmentShaderSource = Utility::File::getFileContents(fragmentShaderPath);
         auto tessellationControlShaderSource = Utility::File::getFileContents(tessellationControlShaderPath);
         auto tessellationEvaluationShaderSource = Utility::File::getFileContents(tessellationEvaluationShaderPath);
+        auto geometryShaderSource = Utility::File::getFileContents(geometryShaderPath);
 
         shaderPipelineDemoShader = Flare::MaterialBuilder()
             .addVertexShader(std::move(vertexShaderSource))
             .addFragmentShader(std::move(fragmentShaderSource))
             .addTessellationControlShader(std::move(tessellationControlShaderSource))
             .addTessellationEvaluationShader(std::move(tessellationEvaluationShaderSource))
+            .addGeometryShader(std::move(geometryShaderSource))
             .build();
 
         shaderPipelineDemoShader->bind();
@@ -34,6 +36,10 @@ namespace Tutorial
 
         //Wireframe rendering to view tessellated triangles
         glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        //Geometry shader breaks the triangles down and emits points. So increase
+        //the point size for visibility for this demo
+        glPointSize(5);
 
         glCreateVertexArrays(1, &VAO);
     }
@@ -49,13 +55,14 @@ namespace Tutorial
             1.0f
         };
 
+
         GLfloat vertexOffset[] = {
             (float)sin(elapsedTime) * 0.5f,
             (float)cos(elapsedTime) * 0.6f,
             0.0f,
             0.0f
         };
-        GLfloat triangleColor[] = {1.0f, 0.5f, 0.25f, 1.0f};
+        GLfloat triangleColor[] = {1.0f, 1.0f, 0.25f, 1.0f};
 
         //update the "offset" attribute of the vertex shader, with
         //vertexOffset on the currently attached vertex array object

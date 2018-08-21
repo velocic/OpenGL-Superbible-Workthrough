@@ -1,11 +1,10 @@
 #version 460 core
 
-in vec4 tes_color;
+in vec4 gs_color;
 
 out vec4 color;
 
 void main(void)
 {
-    color = tes_color;
-    color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    color = gs_color;
 }
