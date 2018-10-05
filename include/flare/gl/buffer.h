@@ -1,6 +1,8 @@
 #ifndef FLARE_GL_BUFFER_H
 #define FLARE_GL_BUFFER_H
 
+#include <GL/gl3w.h>
+
 namespace Flare
 {
     namespace GL
@@ -30,8 +32,9 @@ namespace Flare
                 Buffer(const Buffer& other) = delete;
                 Buffer& operator=(const Buffer& other) = delete;
 
-                bind(GLenum target);
-                destroy();
+                void bind(GLenum target);
+                void destroy();
+                UsageFlags getUsageFlags() const;
 
                 /*Flags:
                  * GL_DYNAMIC_STORAGE_BIT - Buffer contents can be updated directly
@@ -40,7 +43,7 @@ namespace Flare
                  * GL_MAP_PERSISTENT_BIT - Buffer data store can be mapped persistently
                  * GL_MAP_COHERENT_BIT - Buffer maps are to be coherent
                  * GL_CLIENT_STORAGE_BIT - If all other conditions can be met, prefer CPU storage over GPU storage*/ 
-                namedBufferStorage(GLsizeiptr size, const void* data, GLbitfield flags);
+                void namedBufferStorage(GLsizei size, const void* data, GLbitfield flags);
         };
     }
 }
