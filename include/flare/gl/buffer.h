@@ -1,12 +1,15 @@
 #ifndef FLARE_GL_BUFFER_H
 #define FLARE_GL_BUFFER_H
 
+#include <memory>
 #include <GL/gl3w.h>
 
 namespace Flare
 {
     namespace GL
     {
+        class MappedBufferRange;
+
         class Buffer
         {
             private:
@@ -20,10 +23,14 @@ namespace Flare
                     bool clientStorage = false;
                 };
 
+                UsageFlags usageFlags;
                 GLuint glBuffer = 0;
                 GLsizei dataCapacityBytes = 0;
+                std::unique_ptr<MappedBufferRange> mappedBuffer;
+                bool isCurrentlyMapped = false;
                 bool isGPUStorageInitialized = false;
-                UsageFlags usageFlags;
+
+                void checkDynamicStorageFlagBeforeWrite();
             public:
                 Buffer();
                 ~Buffer();
@@ -35,6 +42,9 @@ namespace Flare
                 void bind(GLenum target);
                 void destroy();
                 UsageFlags getUsageFlags() const;
+                MappedBufferRange* mapNamedBufferRange(GLintptr offset, GLsizeiptr length);
+                void namedBufferData(GLsizei size, const void* data, GLenum usage);
+                void namedBufferSubData(GLintptr offset, GLsizeiptr size, const void* data);
 
                 /*Flags:
                  * GL_DYNAMIC_STORAGE_BIT - Buffer contents can be updated directly
@@ -44,6 +54,33 @@ namespace Flare
                  * GL_MAP_COHERENT_BIT - Buffer maps are to be coherent
                  * GL_CLIENT_STORAGE_BIT - If all other conditions can be met, prefer CPU storage over GPU storage*/ 
                 void namedBufferStorage(GLsizei size, const void* data, GLbitfield flags);
+                void unmap();
+        };
+
+        class MappedBufferRange
+        {
+            friend class Buffer;
+            private:
+                const Buffer& sourceBuffer;
+                GLintptr offset = 0;
+                GLsizeiptr length = 0;
+                bool valid = true;
+
+                MappedBufferRange(const Buffer& sourceBuffer, GLintptr offset, GLsizeiptr length, void* mappedData);
+            public:
+                void* mappedData = nullptr;
+
+                ~MappedBufferRange();
+                MappedBufferRange(MappedBufferRange&& other) = delete;
+                MappedBufferRange& operator=(MappedBufferRange&& other) = delete;
+                MappedBufferRange(const MappedBufferRange& other) = delete;
+                MappedBufferRange& operator=(const Buffer& other) = delete;
+
+                bool hasReadAccess();
+                bool hasWriteAccess();
+                bool isPersistent();
+                bool isCoherent();
+                bool isValid();
         };
     }
 }
