@@ -40,6 +40,8 @@ namespace Flare
                 Buffer& operator=(const Buffer& other) = delete;
 
                 void bind(GLenum target);
+                void clearNamedBufferSubData(GLenum internalFormat, GLintptr offset, GLsizeiptr size, GLenum format, GLenum type, const void* data);
+                void copyNamedBufferSubData(const Buffer& readBuffer, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size);
                 void destroy();
                 UsageFlags getUsageFlags() const;
                 MappedBufferRange* mapNamedBufferRange(GLintptr offset, GLsizeiptr length);

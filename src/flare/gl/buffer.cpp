@@ -60,6 +60,33 @@ namespace Flare
             glBindBuffer(target, glBuffer);
         }
 
+        void Buffer::clearNamedBufferSubData(GLenum internalFormat, GLintptr offset, GLsizeiptr size, GLenum format, GLenum type, const void* data)
+        {
+            if (isGPUStorageInitialized == false) {
+                auto message = "Attempting to clear buffer " + std::to_string(static_cast<unsigned int>(glBuffer)) +
+                    " before it has been initialized.";
+
+                throw std::runtime_error(message);
+                return;
+            }
+
+            glClearNamedBufferSubData(glBuffer, internalFormat, offset, size, format, type, data);
+        }
+
+        void Buffer::copyNamedBufferSubData(const Buffer& readBuffer, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size)
+        {
+            if (isGPUStorageInitialized == false || readBuffer.isGPUStorageInitialized == false ) {
+                auto message = "Attempting to copy data to or from an uninitialized buffer (buffers " +
+                    std::to_string(static_cast<unsigned int>(glBuffer)) + " and " +
+                    std::to_string(static_cast<unsigned int>(readBuffer.glBuffer)) + ").";
+
+                throw std::runtime_error(message);
+                return;
+            }
+
+            glCopyNamedBufferSubData(readBuffer.glBuffer, glBuffer, readOffset, writeOffset, size);
+        }
+
         void Buffer::destroy()
         {
             glDeleteBuffers(1, &glBuffer);
