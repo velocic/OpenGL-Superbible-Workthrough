@@ -50,11 +50,11 @@ namespace Flare
             //Delete shaders, linked program
             ~Material();
 
-            bool addAttribute(GLuint VAO, std::string attributeName);
-            bool addUniformAttribute(std::string uniformName);
+            bool addAttribute(GLuint VAO, const std::string &attributeName);
+            bool addUniformAttribute(const std::string &uniformName);
             void bind();
-            GLint getAttribute(GLuint VAO, std::string attributeName);
-            GLint getUniformAttribute(std::string uniformName);
+            GLint getAttribute(GLuint VAO, const std::string &attributeName);
+            GLint getUniformAttribute(const std::string &uniformName);
             const std::vector<unsigned int> &getDiffuseTextureUnits() const {return diffuseTextureUnitIndices;}
             const std::vector<unsigned int> &getSpecularTextureUnits() const {return specularTextureUnitIndices;}
             const std::vector<unsigned int> &getNormalTextureUnits() const {return normalTextureUnitIndices;}
@@ -67,7 +67,7 @@ namespace Flare
             //Defaults values assume non-normalized, tightly-packed data buffer
             void setGLVertexAttribPointer(
                 GLuint VAO,
-                std::string attributeName,
+                const std::string &attributeName,
                 GLint size,
                 GLenum type,
                 GLboolean normalized = GL_FALSE,

@@ -54,7 +54,7 @@ namespace Flare
         isValid = false;
     }
 
-    bool Material::addAttribute(GLuint VAO, std::string attributeName)
+    bool Material::addAttribute(GLuint VAO, const std::string &attributeName)
     {
         if (isValid == false) {
             //TODO: Replace cout with logfile writing
@@ -75,13 +75,13 @@ namespace Flare
         }
 
         shaderAttributes[VAO].emplace_back(attributeName, attributeLocation);
-        glEnableVertexAttribArray(attributeLocation);
+        glEnableVertexArrayAttrib(VAO, attributeLocation);
         glBindVertexArray(0);
 
         return true;
     }
 
-    bool Material::addUniformAttribute(std::string uniformName)
+    bool Material::addUniformAttribute(const std::string &uniformName)
     {
         if (isValid == false) {
             //TODO: Replace cout with logfile writing
@@ -115,7 +115,7 @@ namespace Flare
         glUseProgram(shaderProgram);
     }
 
-    GLint Material::getAttribute(GLuint VAO, std::string attributeName)
+    GLint Material::getAttribute(GLuint VAO, const std::string &attributeName)
     {
         auto attribIndex = std::find_if(
             shaderAttributes[VAO].begin(),
@@ -133,7 +133,7 @@ namespace Flare
 
     }
 
-    GLint Material::getUniformAttribute(std::string uniformName)
+    GLint Material::getUniformAttribute(const std::string &uniformName)
     {
         auto mapIterator = uniformAttributes.find(uniformName);
 
@@ -144,7 +144,7 @@ namespace Flare
         return mapIterator->second;
     }
 
-    void Material::setGLVertexAttribPointer(GLuint VAO, std::string attributeName, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *glPointer)
+    void Material::setGLVertexAttribPointer(GLuint VAO, const std::string &attributeName, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *glPointer)
     {
         if (isValid == false) {
             //TODO: Replace cout with logfile writing
