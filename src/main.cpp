@@ -3,6 +3,7 @@
 
 #include <first-program-tutorial/draw-a-triangle.h>
 #include <3-gpu-shader-pipeline/shader-pipeline.h>
+#include <flare/gl/datalayout.h>
 
 int main(int argc, char* argv[])
 {

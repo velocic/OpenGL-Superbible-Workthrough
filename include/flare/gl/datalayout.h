@@ -1,6 +1,7 @@
 #ifndef FLARE_GL_DATALAYOUT_H
 #define FLARE_GL_DATALAYOUT_H
 
+#include <string>
 #include <vector>
 
 namespace Flare
@@ -9,6 +10,7 @@ namespace Flare
     {
         struct VertexAttribute
         {
+            std::string attributeName;
             GLuint index = -1;
             GLint size = 0;
             GLenum type;
@@ -36,9 +38,9 @@ namespace Flare
                 std::vector<VertexAttribute> vertexAttributes;
                 GLsizei stride = 0;
             public:
-                DataLayoutBuilder& addVertexAttribute(GLuint index, GLint size, GLenum type, GLboolean normalized, GLuint relativeOffset)
+                DataLayoutBuilder& addVertexAttribute(const std::string &attributeName, GLuint index, GLint size, GLenum type, GLboolean normalized, GLuint relativeOffset)
                 {
-                    vertexAttributes.push_back(VertexAttribute{index, size, type, normalized, relativeOffset});
+                    vertexAttributes.push_back(VertexAttribute{attributeName, index, size, type, normalized, relativeOffset});
                     return *this;
                 }
 
