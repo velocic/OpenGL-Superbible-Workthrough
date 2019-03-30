@@ -6,7 +6,7 @@
 
 #include <GL/gl3w.h>
 #include <flare/application.h>
-#include <flare/material/material.h>
+#include <flare/gl/shaderprogram.h>
 #include <flare/ui/renderwindow.h>
 
 namespace Tutorial
@@ -15,7 +15,7 @@ namespace Tutorial
     {
         private:
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
-            std::unique_ptr<Flare::Material> plainTriangleShader = nullptr;
+            std::unique_ptr<Flare::ShaderProgram> plainTriangleShader = nullptr;
             const std::string vertexShaderPath;
             const std::string fragmentShaderPath;
             GLuint VAO = 0;

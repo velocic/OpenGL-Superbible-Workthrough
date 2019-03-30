@@ -12,8 +12,9 @@ add_executable(
     src/first-program-tutorial/draw-a-triangle.cpp
     src/3-gpu-shader-pipeline/shader-pipeline.cpp
     src/flare/gl/buffer.cpp
+    src/flare/gl/vertexarray.cpp
+    src/flare/gl/shaderprogram.cpp
     src/flare/ui/renderwindow.cpp
-    src/flare/material/material.cpp
     src/flare/utility/file.cpp
     src/flare/utility/math.cpp
     src/gl3w/gl3w.c

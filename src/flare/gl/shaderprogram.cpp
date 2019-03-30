@@ -5,7 +5,7 @@
 
 namespace Flare
 {
-    Material::Material(
+    ShaderProgram::ShaderProgram(
         const std::vector<uint8_t> &vertexShaderSource,
         const std::vector<uint8_t> &tessellationControlShaderSource,
         const std::vector<uint8_t> &tessellationEvaluationShaderSource,
@@ -36,11 +36,11 @@ namespace Flare
         shaderProgram = linkShaderProgram(shaderStages);
 
         if (shaderProgram > 0) {
-            isValid = true;
+            isShaderProgramValid() = true;
         }
     }
 
-    Material::~Material()
+    ShaderProgram::~ShaderProgram()
     {
         //Calls to glDeleteShader(0) and glDeleteProgram(0) are silently ignored, according to OGL 4.5 spec
         glDeleteShader(shaderStages.vertexShader);
@@ -51,41 +51,14 @@ namespace Flare
 
         glDeleteProgram(shaderProgram);
 
-        isValid = false;
+        isShaderProgramValid() = false;
     }
 
-    bool Material::addAttribute(GLuint VAO, const std::string &attributeName)
+    bool ShaderProgram::addUniformAttribute(const std::string &uniformName)
     {
-        if (isValid == false) {
+        if (isShaderProgramValid() == false) {
             //TODO: Replace cout with logfile writing
-            std::cout << "addAttribute called on Material instance with invalid state." << std::endl;
-            return false;
-        }
-
-        if (VAO == 0) {
-            std::cout << "addAttribute called on null vertex array object." << std::endl;
-            return false;
-        }
-
-        glBindVertexArray(VAO);
-        GLint attributeLocation = glGetAttribLocation(shaderProgram, attributeName.c_str());
-
-        if (attributeLocation == -1) {
-            return false;
-        }
-
-        shaderAttributes[VAO].emplace_back(attributeName, attributeLocation);
-        glEnableVertexArrayAttrib(VAO, attributeLocation);
-        glBindVertexArray(0);
-
-        return true;
-    }
-
-    bool Material::addUniformAttribute(const std::string &uniformName)
-    {
-        if (isValid == false) {
-            //TODO: Replace cout with logfile writing
-            std::cout << "addUniformAttribute called on Material instance with invalid state.";
+            std::cout << "addUniformAttribute called on ShaderProgram instance with invalid state.";
             return false;
         }
 
@@ -102,11 +75,11 @@ namespace Flare
         return true;
     }
 
-    void Material::bind()
+    void ShaderProgram::bind()
     {
-        if (isValid == false) {
+        if (isShaderProgramValid() == false) {
             //TODO: Replace cout with logfile writing
-            std::cout << "bind called on Material instance with invalid state." << std::endl;
+            std::cout << "bind called on ShaderProgram instance with invalid state." << std::endl;
             return;
         }
 
@@ -115,25 +88,7 @@ namespace Flare
         glUseProgram(shaderProgram);
     }
 
-    GLint Material::getAttribute(GLuint VAO, const std::string &attributeName)
-    {
-        auto attribIndex = std::find_if(
-            shaderAttributes[VAO].begin(),
-            shaderAttributes[VAO].end(),
-            [attributeName](const auto& entry) -> bool {
-                return entry.first == attributeName;
-            }
-        );
-
-        if (attribIndex == std::end(shaderAttributes[VAO])) {
-            return -1;
-        }
-
-        return attribIndex->second;
-
-    }
-
-    GLint Material::getUniformAttribute(const std::string &uniformName)
+    GLint ShaderProgram::getUniformAttribute(const std::string &uniformName)
     {
         auto mapIterator = uniformAttributes.find(uniformName);
 
@@ -144,33 +99,7 @@ namespace Flare
         return mapIterator->second;
     }
 
-    void Material::setGLVertexAttribPointer(GLuint VAO, const std::string &attributeName, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *glPointer)
-    {
-        if (isValid == false) {
-            //TODO: Replace cout with logfile writing
-            std::cout << "setGLVertexAttribPointer called on Material instance with invalid state." << std::endl;
-            return;
-        }
-
-        if (VAO == 0) {
-            std::cout << "setGLVertexAttribPointer called with a null vertex array object." << std::endl;
-        }
-
-        glBindVertexArray(VAO);
-
-        glVertexAttribPointer(
-            getAttribute(VAO, attributeName),
-            size,
-            type,
-            normalized,
-            stride,
-            glPointer
-        );
-
-        glBindVertexArray(0);
-    }
-
-    bool Material::setTextureUnits(unsigned int numDiffuseTextures, unsigned int numSpecularTextures, unsigned int numNormalTextures)
+    bool ShaderProgram::setTextureUnits(unsigned int numDiffuseTextures, unsigned int numSpecularTextures, unsigned int numNormalTextures)
     {
         unsigned int textureUnitIndex = 0;
 
@@ -220,13 +149,13 @@ namespace Flare
     }
 
 
-    void Material::unbind()
+    void ShaderProgram::unbind()
     {
         glUseProgram(0);
         glBindVertexArray(0);
     }
 
-    GLuint Material::compileShaderProgramFromSource(const std::vector<uint8_t> &shaderSource, GLenum shaderType)
+    GLuint ShaderProgram::compileShaderProgramFromSource(const std::vector<uint8_t> &shaderSource, GLenum shaderType)
     {
         GLuint shader = glCreateShader(shaderType);
         const GLchar *glFormatShaderSource = reinterpret_cast<const char *>(shaderSource.data());
@@ -252,7 +181,7 @@ namespace Flare
         return shader;
     }
 
-    GLuint Material::linkShaderProgram(const ShaderProgramStages& shaderStages)
+    GLuint ShaderProgram::linkShaderProgram(const ShaderProgramStages& shaderStages)
     {
         GLuint program = glCreateProgram();
         bool vertexShaderAttached = false;
@@ -325,7 +254,7 @@ namespace Flare
         return program;
     }
 
-    GLuint Material::getShaderProgram()
+    GLuint ShaderProgram::getShaderProgramId() const
     {
         return shaderProgram;
     }

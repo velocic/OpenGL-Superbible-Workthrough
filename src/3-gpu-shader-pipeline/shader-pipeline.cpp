@@ -20,7 +20,7 @@ namespace Tutorial
         auto tessellationEvaluationShaderSource = Utility::File::getFileContents(tessellationEvaluationShaderPath);
         auto geometryShaderSource = Utility::File::getFileContents(geometryShaderPath);
 
-        shaderPipelineDemoShader = Flare::MaterialBuilder()
+        shaderPipelineDemoShader = Flare::ShaderProgramBuilder()
             .addVertexShader(std::move(vertexShaderSource))
             .addFragmentShader(std::move(fragmentShaderSource))
             .addTessellationControlShader(std::move(tessellationControlShaderSource))

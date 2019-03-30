@@ -19,7 +19,7 @@ namespace Flare
         GLuint fragmentShader = 0;
     };
 
-    class Material
+    class ShaderProgram
     {
         private:
             ShaderProgramStages shaderStages;
@@ -36,10 +36,8 @@ namespace Flare
 
             GLuint compileShaderProgramFromSource(const std::vector<uint8_t> &shaderSource, GLenum shaderType);
             GLuint linkShaderProgram(const ShaderProgramStages& shaderStages);
-        protected:
-            GLuint getShaderProgram();
         public:
-            Material(
+            ShaderProgram(
                 const std::vector<uint8_t> &vertexShaderSource,
                 const std::vector<uint8_t> &tessellationControlShaderSource,
                 const std::vector<uint8_t> &tessellationEvaluationShaderSource,
@@ -48,36 +46,22 @@ namespace Flare
             );
 
             //Delete shaders, linked program
-            ~Material();
+            ~ShaderProgram();
 
-            bool addAttribute(GLuint VAO, const std::string &attributeName);
             bool addUniformAttribute(const std::string &uniformName);
             void bind();
-            GLint getAttribute(GLuint VAO, const std::string &attributeName);
+            GLuint getShaderProgramId() const;
             GLint getUniformAttribute(const std::string &uniformName);
             const std::vector<unsigned int> &getDiffuseTextureUnits() const {return diffuseTextureUnitIndices;}
             const std::vector<unsigned int> &getSpecularTextureUnits() const {return specularTextureUnitIndices;}
             const std::vector<unsigned int> &getNormalTextureUnits() const {return normalTextureUnitIndices;}
-            inline bool isMaterialValid() {return isValid;}
+            inline bool isShaderProgramValid() const {return isValid;}
             bool setTextureUnits(unsigned int numDiffuseTextures, unsigned int numSpecularTextures, unsigned int numNormalTextures);
 
-            //Calls glVertexAttribPointer, but allows use of shader attribute location
-            //by name. Must be called after proper VBO is bound, which needs to happen
-            //externally from this class.
-            //Defaults values assume non-normalized, tightly-packed data buffer
-            void setGLVertexAttribPointer(
-                GLuint VAO,
-                const std::string &attributeName,
-                GLint size,
-                GLenum type,
-                GLboolean normalized = GL_FALSE,
-                GLsizei stride = 0,
-                const GLvoid *glPointer = 0
-            );
             void unbind();
     };
 
-    class MaterialBuilder
+    class ShaderProgramBuilder
     {
         private:
             std::vector<uint8_t> vertexShaderSource;
@@ -86,39 +70,39 @@ namespace Flare
             std::vector<uint8_t> geometryShaderSource;
             std::vector<uint8_t> fragmentShaderSource;
         public:
-            virtual MaterialBuilder& addVertexShader(std::vector<uint8_t>&& vertexShaderSource)
+            virtual ShaderProgramBuilder& addVertexShader(std::vector<uint8_t>&& vertexShaderSource)
             {
                 this->vertexShaderSource = vertexShaderSource;
                 return *this;
             }
 
-            virtual MaterialBuilder& addTessellationControlShader(std::vector<uint8_t>&& tessellationControlShaderSource)
+            virtual ShaderProgramBuilder& addTessellationControlShader(std::vector<uint8_t>&& tessellationControlShaderSource)
             {
                 this->tessellationControlShaderSource = tessellationControlShaderSource;
                 return *this;
             }
 
-            virtual MaterialBuilder& addTessellationEvaluationShader(std::vector<uint8_t>&& tessellationEvaluationShaderSource)
+            virtual ShaderProgramBuilder& addTessellationEvaluationShader(std::vector<uint8_t>&& tessellationEvaluationShaderSource)
             {
                 this->tessellationEvaluationShaderSource = tessellationEvaluationShaderSource;
                 return *this;
             }
 
-            virtual MaterialBuilder& addGeometryShader(std::vector<uint8_t>&& geometryShaderSource)
+            virtual ShaderProgramBuilder& addGeometryShader(std::vector<uint8_t>&& geometryShaderSource)
             {
                 this->geometryShaderSource = geometryShaderSource;
                 return *this;
             }
 
-            virtual MaterialBuilder& addFragmentShader(std::vector<uint8_t>&& fragmentShaderSource)
+            virtual ShaderProgramBuilder& addFragmentShader(std::vector<uint8_t>&& fragmentShaderSource)
             {
                 this->fragmentShaderSource = fragmentShaderSource;
                 return *this;
             }
 
-            virtual std::unique_ptr<Material> build()
+            virtual std::unique_ptr<ShaderProgram> build()
             {
-                return std::make_unique<Flare::Material>(
+                return std::make_unique<Flare::ShaderProgram>(
                     vertexShaderSource,
                     tessellationControlShaderSource,
                     tessellationEvaluationShaderSource,

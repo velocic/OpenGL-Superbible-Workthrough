@@ -1,6 +1,7 @@
 #ifndef FLARE_GL_DATALAYOUT_H
 #define FLARE_GL_DATALAYOUT_H
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -30,6 +31,23 @@ namespace Flare
                 //based on the assigned vertex attributes
                 const GLsizei stride = 0;
                 const std::vector<VertexAttribute> vertexAttributes;
+
+                const VertexAttribute *getAttribute(const std::string &attributeName)
+                {
+                    const auto& result = std::find_if(
+                        vertexAttributes.begin(),
+                        vertexAttributes.end(),
+                        [attributeName](const auto& entry) {
+                            return entry.first == attributeName;
+                        }
+                    );
+
+                    if (result == std::end(vertexAttributes)) {
+                        return nullptr;
+                    }
+
+                    return &(*result);
+                }
         };
 
         class DataLayoutBuilder

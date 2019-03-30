@@ -25,7 +25,7 @@ namespace Tutorial
         auto vertexShaderSource = Utility::File::getFileContents(vertexShaderPath);
         auto fragmentShaderSource = Utility::File::getFileContents(fragmentShaderPath);
 
-        plainTriangleShader = Flare::MaterialBuilder()
+        plainTriangleShader = Flare::ShaderProgramBuilder()
             .addVertexShader(std::move(vertexShaderSource))
             .addFragmentShader(std::move(fragmentShaderSource))
             .build();

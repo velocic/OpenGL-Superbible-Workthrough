@@ -5,7 +5,7 @@
 
 #include <GL/gl3w.h>
 #include <flare/application.h>
-#include <flare/material/material.h>
+#include <flare/gl/shaderprogram.h>
 #include <flare/ui/renderwindow.h>
 
 namespace Tutorial
@@ -14,7 +14,7 @@ namespace Tutorial
     {
         private:
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
-            std::unique_ptr<Flare::Material> shaderPipelineDemoShader = nullptr;
+            std::unique_ptr<Flare::ShaderProgram> shaderPipelineDemoShader = nullptr;
             const std::string vertexShaderPath{"../src/3-gpu-shader-pipeline/shaders/vertex.vsh"};
             const std::string fragmentShaderPath{"../src/3-gpu-shader-pipeline/shaders/fragment.fsh"};
             const std::string tessellationControlShaderPath{"../src/3-gpu-shader-pipeline/shaders/tessellation-control.glsl"};
