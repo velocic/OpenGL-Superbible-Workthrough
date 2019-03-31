@@ -25,9 +25,6 @@ namespace Flare
             ShaderProgramStages shaderStages;
             GLuint shaderProgram = 0;
             bool isValid = false;
-            //Map of the variables we've enabled in the shader using glEnableVertexAttribArray after querying
-            //an attribute index with glGetAttribLocation, sorted per vertex array object
-            std::unordered_map<GLuint, std::vector<std::pair<std::string, GLint>>> shaderAttributes;
             std::unordered_map<std::string, GLint> uniformAttributes;
 
             std::vector<unsigned int> diffuseTextureUnitIndices;
@@ -44,6 +41,10 @@ namespace Flare
                 const std::vector<uint8_t> &geometryShaderSource,
                 const std::vector<uint8_t> &fragmentShaderSource
             );
+            ShaderProgram(ShaderProgram &&other);
+            ShaderProgram &operator=(ShaderProgram &&other);
+            ShaderProgram(const ShaderProgram &other) = delete;
+            ShaderProgram &operator=(const ShaderProgram &other) = delete;
 
             //Delete shaders, linked program
             ~ShaderProgram();

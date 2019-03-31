@@ -16,14 +16,17 @@ namespace Flare
         class VertexArray
         {
             private:
-                const ShaderProgram& shaderProgram;
-                // std::vector<const Buffer &> linkedBuffers;
+                std::reference_wrapper<const ShaderProgram> shaderProgram;
                 std::vector<std::reference_wrapper<const Buffer>> linkedBuffers;
                 GLuint VAO = 0;
 
                 void bindAttributesToBuffers(GLuint VAO, const ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const Buffer>> &linkedBuffers);
             public:
-                VertexArray(const ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const Buffer>> &linkedBuffers);
+                VertexArray(const ShaderProgram &shaderProgram, const std::vector<std::reference_wrapper<const Buffer>> &linkedBuffers);
+                VertexArray(VertexArray &&other);
+                VertexArray &operator=(VertexArray &&other);
+                VertexArray(const VertexArray &other) = delete;
+                VertexArray &operator=(const VertexArray &other) = delete;
                 ~VertexArray();
 
                 void bind();

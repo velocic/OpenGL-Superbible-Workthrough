@@ -15,6 +15,28 @@ namespace Flare
             bindAttributesToBuffers(VAO, shaderProgram, linkedBuffers);
         }
 
+        VertexArray::VertexArray(VertexArray &&other)
+        :
+            shaderProgram(other.shaderProgram),
+            linkedBuffers(other.linkedBuffers),
+            VAO(other.VAO)
+        {
+            other.linkedBuffers.clear();
+            other.VAO = 0;
+        }
+
+        VertexArray &VertexArray::operator=(VertexArray &&other)
+        {
+            shaderProgram = std::move(other.shaderProgram);
+            linkedBuffers = std::move(other.linkedBuffers);
+            VAO = other.VAO;
+
+            other.linkedBuffers.clear();
+            other.VAO = 0;
+
+            return *this;
+        }
+
         VertexArray::~VertexArray()
         {
             destroy();

@@ -40,6 +40,46 @@ namespace Flare
         }
     }
 
+    ShaderProgram::ShaderProgram(ShaderProgram &&other)
+    :
+        shaderStages(std::move(other.shaderStages)),
+        shaderProgram(other.shaderProgram),
+        isValid(other.isValid),
+        uniformAttributes(std::move(other.uniformAttributes)),
+        diffuseTextureUnitIndices(std::move(other.diffuseTextureUnitIndices)),
+        specularTextureUnitIndices(std::move(other.specularTextureUnitIndices)),
+        normalTextureUnitIndices(std::move(other.normalTextureUnitIndices))
+    {
+        other.shaderStages = ShaderProgramStages{};
+        other.shaderProgram = 0;
+        other.isValid = false;
+        other.uniformAttributes = std::unordered_map<std::string, GLint>();
+        other.diffuseTextureUnitIndices = std::vector<unsigned int>();
+        other.specularTextureUnitIndices = std::vector<unsigned int>();
+        other.normalTextureUnitIndices = std::vector<unsigned int>();
+    }
+
+    ShaderProgram &ShaderProgram::operator=(ShaderProgram &&other)
+    {
+        shaderStages = std::move(other.shaderStages);
+        shaderProgram = other.shaderProgram;
+        isValid = other.isValid;
+        uniformAttributes = std::move(other.uniformAttributes);
+        diffuseTextureUnitIndices = std::move(other.diffuseTextureUnitIndices);
+        specularTextureUnitIndices = std::move(other.specularTextureUnitIndices);
+        normalTextureUnitIndices = std::move(other.normalTextureUnitIndices);
+
+        other.shaderStages = ShaderProgramStages{};
+        other.shaderProgram = 0;
+        other.isValid = false;
+        other.uniformAttributes = std::unordered_map<std::string, GLint>();
+        other.diffuseTextureUnitIndices = std::vector<unsigned int>();
+        other.specularTextureUnitIndices = std::vector<unsigned int>();
+        other.normalTextureUnitIndices = std::vector<unsigned int>();
+
+        return *this;
+    }
+
     ShaderProgram::~ShaderProgram()
     {
         //Calls to glDeleteShader(0) and glDeleteProgram(0) are silently ignored, according to OGL 4.5 spec
