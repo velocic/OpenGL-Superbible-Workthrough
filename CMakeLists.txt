@@ -11,6 +11,7 @@ add_executable(
     ${SAMPLE_RUNNER_NAME}
     src/first-program-tutorial/draw-a-triangle.cpp
     src/3-gpu-shader-pipeline/shader-pipeline.cpp
+    src/5-data/data.cpp
     src/flare/gl/buffer.cpp
     src/flare/gl/vertexarray.cpp
     src/flare/gl/shaderprogram.cpp

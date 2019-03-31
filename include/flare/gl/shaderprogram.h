@@ -105,7 +105,7 @@ namespace Flare
 
                 virtual std::unique_ptr<ShaderProgram> build()
                 {
-                    return std::make_unique<Flare::ShaderProgram>(
+                    return std::make_unique<Flare::GL::ShaderProgram>(
                         vertexShaderSource,
                         tessellationControlShaderSource,
                         tessellationEvaluationShaderSource,

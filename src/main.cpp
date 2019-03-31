@@ -3,6 +3,7 @@
 
 #include <first-program-tutorial/draw-a-triangle.h>
 #include <3-gpu-shader-pipeline/shader-pipeline.h>
+#include <5-data/data.h>
 #include <flare/gl/datalayout.h>
 
 int main(int argc, char* argv[])
@@ -11,7 +12,8 @@ int main(int argc, char* argv[])
     auto targetFrameTimeMillis = 16.6;
 
     // Tutorial::DrawATriangle selectedTutorial;
-    Tutorial::ShaderPipeline selectedTutorial;
+    // Tutorial::ShaderPipeline selectedTutorial;
+    Tutorial::Data selectedTutorial;
 
     Flare::Application* demoApp = &selectedTutorial;
 
