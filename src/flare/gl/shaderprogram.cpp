@@ -1,4 +1,4 @@
-#include <flare/material/material.h>
+#include <flare/gl/shaderprogram.h>
 
 #include <algorithm>
 #include <iostream>
@@ -36,7 +36,7 @@ namespace Flare
         shaderProgram = linkShaderProgram(shaderStages);
 
         if (shaderProgram > 0) {
-            isShaderProgramValid() = true;
+            isValid = true;
         }
     }
 
@@ -51,13 +51,12 @@ namespace Flare
 
         glDeleteProgram(shaderProgram);
 
-        isShaderProgramValid() = false;
+        isValid = false;
     }
 
     bool ShaderProgram::addUniformAttribute(const std::string &uniformName)
     {
         if (isShaderProgramValid() == false) {
-            //TODO: Replace cout with logfile writing
             std::cout << "addUniformAttribute called on ShaderProgram instance with invalid state.";
             return false;
         }
@@ -78,7 +77,6 @@ namespace Flare
     void ShaderProgram::bind()
     {
         if (isShaderProgramValid() == false) {
-            //TODO: Replace cout with logfile writing
             std::cout << "bind called on ShaderProgram instance with invalid state." << std::endl;
             return;
         }
@@ -86,6 +84,11 @@ namespace Flare
         //Bind all necessary resources used by this material; Shader program,
         //textures & maps once available
         glUseProgram(shaderProgram);
+    }
+
+    GLint ShaderProgram::getAttribute(const std::string &attributeName) const
+    {
+        return glGetAttribLocation(shaderProgram, attributeName.c_str());
     }
 
     GLint ShaderProgram::getUniformAttribute(const std::string &uniformName)
@@ -252,10 +255,5 @@ namespace Flare
         }
 
         return program;
-    }
-
-    GLuint ShaderProgram::getShaderProgramId() const
-    {
-        return shaderProgram;
     }
 }

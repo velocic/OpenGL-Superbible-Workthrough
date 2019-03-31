@@ -11,8 +11,7 @@ namespace Flare
     {
         struct VertexAttribute
         {
-            std::string attributeName;
-            GLuint index = -1;
+            std::string name;
             GLint size = 0;
             GLenum type;
             GLboolean normalized = GL_FALSE;
@@ -24,12 +23,17 @@ namespace Flare
             friend class DataLayoutBuilder;
 
             private:
-                DataLayout(GLsizei stride, std::vector<VertexAttribute> &&vertexAttributes);
+                DataLayout(GLsizei stride, GLintptr offset, std::vector<VertexAttribute> &&vertexAttributes)
+                : stride(stride), offset(offset), vertexAttributes(vertexAttributes)
+                {
+                }
 
             public:
                 //if stride is set to 0, glVertexArrayVertexBuffer() will autocalculate it
                 //based on the assigned vertex attributes
                 const GLsizei stride = 0;
+                //always set to zero unless interleaving data blocks within a single buffer
+                const GLintptr offset = 0;
                 const std::vector<VertexAttribute> vertexAttributes;
 
                 const VertexAttribute *getAttribute(const std::string &attributeName)
@@ -38,7 +42,7 @@ namespace Flare
                         vertexAttributes.begin(),
                         vertexAttributes.end(),
                         [attributeName](const auto& entry) {
-                            return entry.first == attributeName;
+                            return entry.name == attributeName;
                         }
                     );
 
@@ -55,24 +59,32 @@ namespace Flare
             private:
                 std::vector<VertexAttribute> vertexAttributes;
                 GLsizei stride = 0;
+                GLintptr offset = 0;
             public:
-                DataLayoutBuilder& addVertexAttribute(const std::string &attributeName, GLuint index, GLint size, GLenum type, GLboolean normalized, GLuint relativeOffset)
+                DataLayoutBuilder &addVertexAttribute(const std::string &attributeName, GLint size, GLenum type, GLboolean normalized, GLuint relativeOffset)
                 {
-                    vertexAttributes.push_back(VertexAttribute{attributeName, index, size, type, normalized, relativeOffset});
+                    vertexAttributes.push_back(VertexAttribute{attributeName, size, type, normalized, relativeOffset});
                     return *this;
                 }
 
-                DataLayoutBuilder& setStride(GLsizei stride)
+                DataLayoutBuilder &setStride(GLsizei stride)
                 {
                     this->stride = stride;
                     return *this;
                 }
 
+                DataLayoutBuilder &setOffset(GLintptr offset)
+                {
+                    this->offset = offset;
+                    return *this;
+                }
+
                 DataLayout build()
                 {
-                    DataLayout result = DataLayout(stride, std::move(vertexAttributes));
+                    DataLayout result = DataLayout(stride, offset, std::move(vertexAttributes));
                     vertexAttributes = std::vector<VertexAttribute>();
                     stride = 0;
+                    offset = 0;
 
                     return result;
                 }

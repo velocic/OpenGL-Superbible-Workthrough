@@ -1,9 +1,11 @@
 #ifndef FLARE_GL_VERTEXARRAY_H
 #define FLARE_GL_VERTEXARRAY_H
 
+#include <functional>
 #include <string>
 
 #include <GL/gl3w.h>
+#include <flare/gl/buffer.h>
 #include <flare/gl/shaderprogram.h>
 #include <flare/gl/datalayout.h>
 
@@ -15,26 +17,18 @@ namespace Flare
         {
             private:
                 const ShaderProgram& shaderProgram;
-                const DataLayout dataLayout;
+                // std::vector<const Buffer &> linkedBuffers;
+                std::vector<std::reference_wrapper<const Buffer>> linkedBuffers;
+                GLuint VAO = 0;
 
-                //Calls glVertexAttribPointer, but allows use of shader attribute location
-                //by name. Must be called after proper VBO is bound, which needs to happen
-                //externally from this class.
-                //Defaults values assume non-normalized, tightly-packed data buffer
-                void setGLVertexAttribPointer(
-                    GLuint VAO,
-                    const std::string &attributeName,
-                    GLint size,
-                    GLenum type,
-                    GLboolean normalized = GL_FALSE,
-                    GLsizei stride = 0,
-                    const GLvoid *glPointer = 0
-                );
-                bool addAttribute(GLuint VAO, const std::string &attributeName);
+                void bindAttributesToBuffers(GLuint VAO, const ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const Buffer>> &linkedBuffers);
             public:
-                VertexArray(const ShaderProgram& shaderProgram, DataLayout dataLayout);
+                VertexArray(const ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const Buffer>> &linkedBuffers);
+                ~VertexArray();
 
-                GLint getAttribute(GLuint VAO, const std::string &attributeName);
+                void bind();
+                void destroy();
+                void unbind();
         };
     }
 }

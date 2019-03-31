@@ -6,63 +6,57 @@ namespace Flare
 {
     namespace GL
     {
-        VertexArray::VertexArray(const ShaderProgram& shaderProgram, DataLayout dataLayout)
+        VertexArray::VertexArray(const ShaderProgram& shaderProgram,  const std::vector<std::reference_wrapper<const Buffer>> &linkedBuffers)
         :
             shaderProgram(shaderProgram),
-            dataLayout(dataLayout)
+            linkedBuffers(linkedBuffers)
         {
+            glCreateVertexArrays(1, &VAO);
+            bindAttributesToBuffers(VAO, shaderProgram, linkedBuffers);
         }
 
-        bool VertexArray::addAttribute(GLuint VAO, const std::string &attributeName)
+        VertexArray::~VertexArray()
         {
-            if (shaderProgram.isShaderProgramValid() == false) {
-                //TODO: Replace cout with logfile writing
-                std::cout << "addAttribute called on Material instance with invalid state." << std::endl;
-                return false;
-            }
-
-            if (VAO == 0) {
-                std::cout << "addAttribute called on null vertex array object." << std::endl;
-                return false;
-            }
-
-            glBindVertexArray(VAO);
-            GLint attributeLocation = glGetAttribLocation(shaderProgram.getShaderProgramId(), attributeName.c_str());
-
-            if (attributeLocation == -1) {
-                return false;
-            }
-
-            shaderAttributes[VAO].emplace_back(attributeName, attributeLocation);
-            glEnableVertexArrayAttrib(VAO, attributeLocation);
-            glBindVertexArray(0);
-
-            return true;
+            destroy();
         }
 
-        void VertexArray::setGLVertexAttribPointer(GLuint VAO, const std::string &attributeName, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid *glPointer)
+        void VertexArray::bind()
         {
-            if (isShaderProgramValid() == false) {
-                //TODO: Replace cout with logfile writing
-                std::cout << "setGLVertexAttribPointer called on Material instance with invalid state." << std::endl;
-                return;
-            }
-
-            if (VAO == 0) {
-                std::cout << "setGLVertexAttribPointer called with a null vertex array object." << std::endl;
-            }
-
             glBindVertexArray(VAO);
+        }
 
-            glVertexAttribPointer(
-                getAttribute(VAO, attributeName),
-                size,
-                type,
-                normalized,
-                stride,
-                glPointer
-            );
+        void VertexArray::bindAttributesToBuffers(GLuint VAO, const ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const Buffer>> &linkedBuffers)
+        {
+            for (size_t bufferBindingIndex = 0; bufferBindingIndex < linkedBuffers.size(); ++bufferBindingIndex) {
+                const auto &buffer = linkedBuffers[bufferBindingIndex].get();
+                const auto &bufferLayout = buffer.getBufferContentDescription();
+                glVertexArrayVertexBuffer(VAO, bufferBindingIndex, buffer.getName(), bufferLayout.offset, bufferLayout.stride);
 
+                for (const auto &vertexAttribute : bufferLayout.vertexAttributes) {
+                    auto attributeIndex = shaderProgram.getAttribute(vertexAttribute.name);
+
+                    glVertexArrayAttribBinding(VAO, attributeIndex, bufferBindingIndex);
+                    glVertexArrayAttribFormat(
+                        VAO,
+                        attributeIndex,
+                        vertexAttribute.size,
+                        vertexAttribute.type,
+                        vertexAttribute.normalized,
+                        vertexAttribute.relativeOffset
+                    );
+                    glEnableVertexAttribArray(attributeIndex);
+                }
+            }
+        }
+
+        void VertexArray::destroy()
+        {
+            glDeleteVertexArrays(1, &VAO);
+            linkedBuffers.clear();
+        }
+
+        void VertexArray::unbind()
+        {
             glBindVertexArray(0);
         }
     }

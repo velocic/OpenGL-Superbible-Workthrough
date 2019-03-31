@@ -2,7 +2,9 @@
 #define FLARE_GL_BUFFER_H
 
 #include <memory>
+
 #include <GL/gl3w.h>
+#include <flare/gl/datalayout.h>
 
 namespace Flare
 {
@@ -23,6 +25,7 @@ namespace Flare
                     bool clientStorage = false;
                 };
 
+                DataLayout bufferContentDescription;
                 UsageFlags usageFlags;
                 GLuint glBuffer = 0;
                 GLsizei dataCapacityBytes = 0;
@@ -32,7 +35,7 @@ namespace Flare
 
                 void checkDynamicStorageFlagBeforeWrite();
             public:
-                Buffer();
+                Buffer(const DataLayout& bufferContentDescription);
                 ~Buffer();
                 Buffer(Buffer&& other);
                 Buffer& operator=(Buffer&& other);
@@ -43,6 +46,8 @@ namespace Flare
                 void clearNamedBufferSubData(GLenum internalFormat, GLintptr offset, GLsizeiptr size, GLenum format, GLenum type, const void* data);
                 void copyNamedBufferSubData(const Buffer& readBuffer, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size);
                 void destroy();
+                const DataLayout &getBufferContentDescription() const {return bufferContentDescription;}
+                GLuint getName() const {return glBuffer;}
                 UsageFlags getUsageFlags() const;
                 MappedBufferRange* mapNamedBufferRange(GLintptr offset, GLsizeiptr length);
                 void namedBufferData(GLsizei size, const void* data, GLenum usage);

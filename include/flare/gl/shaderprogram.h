@@ -1,5 +1,5 @@
-#ifndef MATERIAL_H
-#define MATERIAL_H
+#ifndef SHADERPROGRAM_H
+#define SHADERPROGRAM_H
 
 #include <memory>
 #include <string>
@@ -50,7 +50,7 @@ namespace Flare
 
             bool addUniformAttribute(const std::string &uniformName);
             void bind();
-            GLuint getShaderProgramId() const;
+            GLint getAttribute(const std::string &attributeName) const;
             GLint getUniformAttribute(const std::string &uniformName);
             const std::vector<unsigned int> &getDiffuseTextureUnits() const {return diffuseTextureUnitIndices;}
             const std::vector<unsigned int> &getSpecularTextureUnits() const {return specularTextureUnitIndices;}
