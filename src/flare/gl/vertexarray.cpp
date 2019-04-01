@@ -66,7 +66,8 @@ namespace Flare
                         vertexAttribute.normalized,
                         vertexAttribute.relativeOffset
                     );
-                    glEnableVertexAttribArray(attributeIndex);
+                    glEnableVertexArrayAttrib(VAO, attributeIndex);
+                    glEnableVertexAttribArray(bufferBindingIndex);
                 }
             }
         }
