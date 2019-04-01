@@ -1,6 +1,7 @@
 #include <5-data/data.h>
 #include <flare/utility/file.h>
 #include <glm-0.9.9/glm.hpp>
+#include <glm-0.9.9/gtc/matrix_transform.hpp>
 
 #include <iostream>
 
@@ -36,11 +37,6 @@ namespace Tutorial
             .setStride(sizeof(glm::vec4))
             .build();
 
-        auto vertexOffsetBufferLayout = Flare::GL::DataLayoutBuilder()
-            .addVertexAttribute("offset", 4, GL_FLOAT, GL_FALSE, 0)
-            .setStride(sizeof(glm::vec4))
-            .build();
-
         auto triangleColorBufferLayout = Flare::GL::DataLayoutBuilder()
             .addVertexAttribute("color", 4, GL_FLOAT, GL_FALSE, 0)
             .setStride(sizeof(glm::vec4))
@@ -48,13 +44,13 @@ namespace Tutorial
 
         //Create the actual buffers
         vertexPositionBuffer = std::make_unique<Flare::GL::Buffer>(positionBufferLayout);
-        vertexOffsetBuffer = std::make_unique<Flare::GL::Buffer>(vertexOffsetBufferLayout);
         triangleColorBuffer = std::make_unique<Flare::GL::Buffer>(triangleColorBufferLayout);
+
+        shaderPipelineDemoShader->addUniformAttribute("mvpMatrix");
 
         //Test out a VAO that sources inputs from multiple tightly-packed buffers
         auto VAOBuffers = std::vector<std::reference_wrapper<const Flare::GL::Buffer>>{
             *(vertexPositionBuffer.get()),
-            *(vertexOffsetBuffer.get()),
             *(triangleColorBuffer.get())
         };
 
@@ -78,7 +74,6 @@ namespace Tutorial
 
         vertexPositionBuffer->namedBufferStorage(sizeof(glm::vec4) * 3, &vertices[0], 0);
         triangleColorBuffer->namedBufferStorage((sizeof(glm::vec4)) * 3, &vertexColors[0], 0);
-        vertexOffsetBuffer->namedBufferStorage((sizeof(glm::vec4)), 0, GL_DYNAMIC_STORAGE_BIT);
 
         //Number of vertices to use per patch for the tessellation control shader.
         //3 is the default, so this call is unnecessary but good for demonstration.
@@ -105,14 +100,21 @@ namespace Tutorial
             1.0f
         };
 
-        auto vertexOffset = glm::vec4{
+        auto vertexOffset = glm::vec3{
             (float)sin(scaledElapsedTime) * 0.5f,
             (float)cos(scaledElapsedTime) * 0.6f,
-            0.0f,
-            0.0f
+            -0.5f
         };
 
-        vertexOffsetBuffer->namedBufferSubData(0, sizeof(glm::vec4), &vertexOffset[0]);
+        auto mvpMatrix = glm::translate(glm::mat4(), vertexOffset);
+        glUniformMatrix4fv(
+            shaderPipelineDemoShader->getUniformAttribute("mvpMatrix"),
+            1,
+            GL_FALSE,
+            &mvpMatrix[0][0]
+        );
+
+        // vertexOffsetBuffer->namedBufferSubData(0, sizeof(glm::vec4), &vertexOffset[0]);
 
         shaderPipelineDemoShaderVAO->bind();
         
