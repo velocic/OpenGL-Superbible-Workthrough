@@ -103,10 +103,17 @@ namespace Tutorial
         auto vertexOffset = glm::vec3{
             (float)sin(scaledElapsedTime) * 0.5f,
             (float)cos(scaledElapsedTime) * 0.6f,
-            -0.5f
+            0
         };
 
-        auto mvpMatrix = glm::translate(glm::mat4(), vertexOffset);
+        auto identityMatrix = glm::mat4(
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        );
+
+        auto mvpMatrix = glm::translate(identityMatrix, vertexOffset);
         glUniformMatrix4fv(
             shaderPipelineDemoShader->getUniformAttribute("mvpMatrix"),
             1,

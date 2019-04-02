@@ -16,5 +16,4 @@ void main(void)
     vs_out.color = color;
 
     gl_Position = position * mvpMatrix;
-    /* gl_Position = position; */
 }
