@@ -4,6 +4,7 @@
 #include <glm-0.9.9/gtc/matrix_transform.hpp>
 
 #include <iostream>
+#include <flare/gl/uniformblock.h>
 
 namespace Tutorial
 {
