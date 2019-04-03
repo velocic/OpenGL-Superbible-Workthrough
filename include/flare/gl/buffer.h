@@ -25,7 +25,7 @@ namespace Flare
                     bool clientStorage = false;
                 };
 
-                DataLayout bufferContentDescription;
+                VertexDataLayout bufferContentDescription;
                 UsageFlags usageFlags;
                 GLuint glBuffer = 0;
                 GLsizei dataCapacityBytes = 0;
@@ -35,7 +35,7 @@ namespace Flare
 
                 void checkDynamicStorageFlagBeforeWrite();
             public:
-                Buffer(const DataLayout& bufferContentDescription);
+                Buffer(const VertexDataLayout& bufferContentDescription);
                 ~Buffer();
                 Buffer(Buffer&& other);
                 Buffer& operator=(Buffer&& other);
@@ -46,7 +46,7 @@ namespace Flare
                 void clearNamedBufferSubData(GLenum internalFormat, GLintptr offset, GLsizeiptr size, GLenum format, GLenum type, const void* data);
                 void copyNamedBufferSubData(const Buffer& readBuffer, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size);
                 void destroy();
-                const DataLayout &getBufferContentDescription() const {return bufferContentDescription;}
+                const VertexDataLayout &getBufferContentDescription() const {return bufferContentDescription;}
                 GLuint getName() const {return glBuffer;}
                 UsageFlags getUsageFlags() const;
                 MappedBufferRange* mapNamedBufferRange(GLintptr offset, GLsizeiptr length);

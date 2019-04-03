@@ -7,7 +7,7 @@ namespace Flare
 {
     namespace GL
     {
-        Buffer::Buffer(const DataLayout& bufferContentDescription)
+        Buffer::Buffer(const VertexDataLayout& bufferContentDescription)
         :
             bufferContentDescription(bufferContentDescription)
         {

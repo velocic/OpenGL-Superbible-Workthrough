@@ -32,13 +32,13 @@ namespace Tutorial
         shaderPipelineDemoShader->bind();
 
         //Describe the contents of the vertex buffers
-        auto positionBufferLayout = Flare::GL::DataLayoutBuilder()
-            .addVertexAttribute("position", 4, GL_FLOAT, GL_FALSE, 0)
+        auto positionBufferLayout = Flare::GL::VertexDataLayoutBuilder()
+            .addAttribute("position", 4, GL_FLOAT, GL_FALSE, 0)
             .setStride(sizeof(glm::vec4))
             .build();
 
-        auto triangleColorBufferLayout = Flare::GL::DataLayoutBuilder()
-            .addVertexAttribute("color", 4, GL_FLOAT, GL_FALSE, 0)
+        auto triangleColorBufferLayout = Flare::GL::VertexDataLayoutBuilder()
+            .addAttribute("color", 4, GL_FLOAT, GL_FALSE, 0)
             .setStride(sizeof(glm::vec4))
             .build();
 

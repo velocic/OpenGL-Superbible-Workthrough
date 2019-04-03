@@ -18,12 +18,12 @@ namespace Flare
             GLuint relativeOffset = 0;
         };
 
-        struct DataLayout
+        struct VertexDataLayout
         {
-            friend class DataLayoutBuilder;
+            friend class VertexDataLayoutBuilder;
 
             private:
-                DataLayout(GLsizei stride, GLintptr offset, std::vector<VertexAttribute> &&vertexAttributes)
+                VertexDataLayout(GLsizei stride, GLintptr offset, std::vector<VertexAttribute> &&vertexAttributes)
                 : stride(stride), offset(offset), vertexAttributes(vertexAttributes)
                 {
                 }
@@ -54,39 +54,73 @@ namespace Flare
                 }
         };
 
-        class DataLayoutBuilder
+        class VertexDataLayoutBuilder
         {
             private:
                 std::vector<VertexAttribute> vertexAttributes;
                 GLsizei stride = 0;
                 GLintptr offset = 0;
             public:
-                DataLayoutBuilder &addVertexAttribute(const std::string &attributeName, GLint size, GLenum type, GLboolean normalized, GLuint relativeOffset)
+                VertexDataLayoutBuilder &addAttribute(const std::string &attributeName, GLint size, GLenum type, GLboolean normalized, GLuint relativeOffset)
                 {
                     vertexAttributes.push_back(VertexAttribute{attributeName, size, type, normalized, relativeOffset});
                     return *this;
                 }
 
-                DataLayoutBuilder &setStride(GLsizei stride)
+                VertexDataLayoutBuilder &setStride(GLsizei stride)
                 {
                     this->stride = stride;
                     return *this;
                 }
 
-                DataLayoutBuilder &setOffset(GLintptr offset)
+                VertexDataLayoutBuilder &setOffset(GLintptr offset)
                 {
                     this->offset = offset;
                     return *this;
                 }
 
-                DataLayout build()
+                VertexDataLayout build()
                 {
-                    DataLayout result = DataLayout(stride, offset, std::move(vertexAttributes));
+                    VertexDataLayout result = VertexDataLayout(stride, offset, std::move(vertexAttributes));
                     vertexAttributes = std::vector<VertexAttribute>();
                     stride = 0;
                     offset = 0;
 
                     return result;
+                }
+        };
+
+        struct UniformBufferObjectAttribute
+        {
+            std::string name;
+            GLint size = 0;
+            GLenum type;
+        };
+
+        struct UniformBufferObjectLayout
+        {
+        };
+
+        class UniformBufferObjectLayoutBuilder
+        {
+            private:
+                std::vector<UniformBufferObjectAttribute> uboAttributes;
+            public:
+                UniformBufferObjectLayoutBuilder &addAttribute(const std::string &name, GLint size, GLenum type)
+                {
+                    uboAttributes.push_back(UniformBufferAttribute{name, size, type});
+
+                    return *this;
+                }
+
+                UniformBufferObjectLayout build()
+                {
+                    //TODO: construct uniform buffer object layout using the rules of
+                    //UBO layout(std140). that object will autocalc where each parameter
+                    //should be placed based on its size, type, and the alignment rules
+                    //of layout(std140). that object can be queried for where each attribute
+                    //is laid out. It would be fantastic if this could be a template class that generates
+                    //strongly-typed object layouts that don't have to be runtime queried.
                 }
         };
     }
