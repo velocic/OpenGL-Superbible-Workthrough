@@ -8,37 +8,64 @@ namespace Flare
 {
     namespace GL
     {
-        template<typename GLSLType>
-        constexpr size_t glsl_size_bytes = sizeof(GLSLType);
-
-        template<typename GLSLType, unsigned int ArraySize>
-        constexpr size_t glsl_layout_std140_alignment = sizeof(GLSLType) * ArraySize;
-
-        // template<typename GLSLType>
-        // constexpr size_t glsl_layout_std140_alignment = sizeof(GLSLType);
-        //
-        // template<>
-        // constexpr size_t glsl_layout_std140_alignment<glm::vec2> = 8;
-        //
-        // template<>
-        // constexpr size_t glsl_layout_std140_alignment<glm::vec3> = 16;
-        //
-        // template<>
-        // constexpr size_t glsl_layout_std140_alignment<glm::vec4> = 16;
-        //
-        // template<>
-        // constexpr size_t glsl_layout_std140_alignment<glm::mat2> = 4;
-        //
-        // template<>
-        // constexpr size_t glsl_layout_std140_aligment<glm::mat3> = 4;
-        //
-        // template<>
-        // constexpr size_t glsl_layout_std140_alignment<glm::mat4> = 4;
-
-        template<typename... GLSLType>
-        class UniformBlock
+        namespace UBO
         {
-        };
+
+            template<typename GLSLType>
+            constexpr size_t glsl_layout_std140_alignment = sizeof(GLSLType);
+
+            template<>
+            constexpr size_t glsl_layout_std140_alignment<bool> = 4;
+
+            template<>
+            constexpr size_t glsl_layout_std140_alignment<glm::vec3> = 16;
+
+            template<>
+            constexpr size_t glsl_layout_std140_alignment<glm::mat2> = 16;
+
+            template<>
+            constexpr size_t glsl_layout_std140_alignment<glm::mat3> = 16;
+
+            template<>
+            constexpr size_t glsl_layout_std140_alignment<glm::mat4> = 16;
+
+            //layout(std140) alignment of each element of scalar arrays or vector arrays 
+            //(which must be of length > 1
+            template<typename GLSLType, unsigned int ArraySize>
+            constexpr size_t glsl_layout_std140_array_element_alignment = 16;
+
+            //Calculate UBO total size with padding using layout(std140) alignment rules
+            template<typename GLSLType>
+            constexpr size_t calculateUniformBlockSize()
+            {
+                return 0;
+            };
+
+            template<typename GLSLType, GLSLType...>
+            constexpr size_t calculateUniformBlockSize()
+            {
+                return sizeof(GLSLType) + (sizeof(GLSLType) % glsl_layout_std140_alignment<GLSLType>) + calculateUniformBlockSize<GLSLType, GLSLType...>();
+            }
+
+            // template<typename... GLSLType>
+            // class UniformBlock
+            // {
+            //     private:
+            //
+            //     public:
+            //         UniformBlock()
+            //         {
+            //         }
+            //
+            //         constexpr size_t getSize()
+            //         {
+            //         }
+            //
+            //         constexpr size_t getSize<GLSLType, GLSLType...>()
+            //         {
+            //         }
+            // };
+        }
     }
 }
 
