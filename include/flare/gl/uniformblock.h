@@ -2,7 +2,9 @@
 #define FLARE_GL_UNIFORMBLOCK_H
 
 #include <cstdlib>
+#include <tuple>
 #include <glm-0.9.9/glm.hpp>
+
 
 namespace Flare
 {
@@ -10,61 +12,55 @@ namespace Flare
     {
         namespace UBO
         {
-
-            template<typename GLSLType>
-            constexpr size_t glsl_layout_std140_alignment = sizeof(GLSLType);
-
-            template<>
-            constexpr size_t glsl_layout_std140_alignment<bool> = 4;
-
-            template<>
-            constexpr size_t glsl_layout_std140_alignment<glm::vec3> = 16;
-
-            template<>
-            constexpr size_t glsl_layout_std140_alignment<glm::mat2> = 16;
-
-            template<>
-            constexpr size_t glsl_layout_std140_alignment<glm::mat3> = 16;
-
-            template<>
-            constexpr size_t glsl_layout_std140_alignment<glm::mat4> = 16;
-
-            //layout(std140) alignment of each element of scalar arrays or vector arrays 
-            //(which must be of length > 1
-            template<typename GLSLType, unsigned int ArraySize>
-            constexpr size_t glsl_layout_std140_array_element_alignment = 16;
-
-            //Calculate UBO total size with padding using layout(std140) alignment rules
-            template<typename GLSLType>
-            constexpr size_t calculateUniformBlockSize()
-            {
-                return 0;
+            template<typename T>
+            struct GLSLType {
+                static constexpr size_t size = sizeof(T);
+                static constexpr size_t alignment = sizeof(T);
             };
 
-            template<typename GLSLType, GLSLType...>
-            constexpr size_t calculateUniformBlockSize()
+            template<>
+            struct GLSLType<bool> {
+                static constexpr size_t size = 4;
+                static constexpr size_t alignment = 4;
+            };
+
+            template<>
+            struct GLSLType<glm::vec3> {
+                static constexpr size_t size = 12;
+                static constexpr size_t alignment = 16;
+            };
+
+            template<>
+            struct GLSLType<glm::mat4> {
+                static constexpr size_t size = 64;
+                static constexpr size_t alignment = 16;
+            };
+
+            template<typename Last>
+            constexpr size_t calculateUniformBlockSize(Last last)
             {
-                return sizeof(GLSLType) + (sizeof(GLSLType) % glsl_layout_std140_alignment<GLSLType>) + calculateUniformBlockSize<GLSLType, GLSLType...>();
+                return Last::alignment;
             }
 
-            // template<typename... GLSLType>
-            // class UniformBlock
-            // {
-            //     private:
-            //
-            //     public:
-            //         UniformBlock()
-            //         {
-            //         }
-            //
-            //         constexpr size_t getSize()
-            //         {
-            //         }
-            //
-            //         constexpr size_t getSize<GLSLType, GLSLType...>()
-            //         {
-            //         }
-            // };
+            template<typename Current, typename... Remaining>
+            constexpr size_t calculateUniformBlockSize(Current current, Remaining... remaining)
+            {
+                return Current::size + Current::alignment % calculateUniformBlockSize(remaining...) + calculateUniformBlockSize(remaining...);
+                // return sizeof(GLSLType) + (sizeof(GLSLType) % glsl_layout_std140_alignment<GLSLType>) + calculateUniformBlockSize<GLSLType, GLSLType...>();
+            }
+
+            template<typename... GLSLType>
+            class UniformBlock
+            {
+                private:
+                    std::tuple<GLSLType...> blockEntries;
+
+                public:
+                    UniformBlock(GLSLType&&... values)
+                    {
+                        calculateUniformBlockSize(values...);
+                    }
+            };
         }
     }
 }
