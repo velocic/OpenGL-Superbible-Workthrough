@@ -5,7 +5,6 @@
 #include <tuple>
 #include <glm-0.9.9/glm.hpp>
 
-
 namespace Flare
 {
     namespace GL
@@ -39,27 +38,35 @@ namespace Flare
             template<typename Last>
             constexpr size_t calculateUniformBlockSize(Last last)
             {
-                return Last::alignment;
+                return Last::size;
             }
 
             template<typename Current, typename... Remaining>
             constexpr size_t calculateUniformBlockSize(Current current, Remaining... remaining)
             {
-                return Current::size + Current::alignment % calculateUniformBlockSize(remaining...) + calculateUniformBlockSize(remaining...);
-                // return sizeof(GLSLType) + (sizeof(GLSLType) % glsl_layout_std140_alignment<GLSLType>) + calculateUniformBlockSize<GLSLType, GLSLType...>();
+                constexpr auto totalSize = calculateUniformBlockSize(remaining...);
+
+                if constexpr (totalSize % Current::alignment == 0) {
+                    return totalSize + Current::size;
+                }
+
+                return totalSize + Current::size + (Current::alignment - (totalSize % Current::alignment));
             }
 
             template<typename... GLSLType>
             class UniformBlock
             {
                 private:
-                    std::tuple<GLSLType...> blockEntries;
+                    const size_t size;
+                    // std::tuple<GLSLType...> blockEntries;
 
                 public:
                     UniformBlock(GLSLType&&... values)
-                    {
-                        calculateUniformBlockSize(values...);
-                    }
+                    :
+                        size(calculateUniformBlockSize(values...))
+                    {}
+
+                    size_t getSize() {return size;}
             };
         }
     }
