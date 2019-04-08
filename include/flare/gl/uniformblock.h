@@ -35,22 +35,27 @@ namespace Flare
                 static constexpr size_t alignment = 16;
             };
 
-            template<typename Last>
+            template<size_t TotalBlockSize, typename Last>
             constexpr size_t calculateUniformBlockSize(Last last)
             {
-                return Last::size;
-            }
-
-            template<typename Current, typename... Remaining>
-            constexpr size_t calculateUniformBlockSize(Current current, Remaining... remaining)
-            {
-                constexpr auto totalSize = calculateUniformBlockSize(remaining...);
-
-                if constexpr (totalSize % Current::alignment == 0) {
-                    return totalSize + Current::size;
+                if constexpr (TotalBlockSize % Last::alignment == 0) {
+                    return Last::size + TotalBlockSize;
                 }
 
-                return totalSize + Current::size + (Current::alignment - (totalSize % Current::alignment));
+                return TotalBlockSize + Last::size + (Last::alignment - (TotalBlockSize % Last::alignment));
+            }
+
+            template<size_t TotalBlockSize = 0, typename Current, typename... Remaining>
+            constexpr size_t calculateUniformBlockSize(Current current, Remaining... remaining)
+            {
+                if constexpr (TotalBlockSize % Current::alignment == 0) {
+                    constexpr auto currentSize = Current::size + TotalBlockSize;
+                    return calculateUniformBlockSize<currentSize>(remaining...);
+                }
+
+                constexpr auto paddedCurrentSize = TotalBlockSize + Current::size + (Current::alignment - (TotalBlockSize % Current::alignment));
+
+                return calculateUniformBlockSize<paddedCurrentSize>(remaining...);
             }
 
             template<typename... GLSLType>
