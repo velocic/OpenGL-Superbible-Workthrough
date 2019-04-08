@@ -11,26 +11,37 @@ namespace Flare
     {
         namespace UBO
         {
+            template<typename T, size_t N>
+            struct GLSLArrayType {
+                using isArray = std::true_type;
+                static constexpr size_t size = 16 * N;
+                static constexpr size_t alignment = 16;
+            };
+
             template<typename T>
             struct GLSLType {
+                using isArray = std::false_type;
                 static constexpr size_t size = sizeof(T);
                 static constexpr size_t alignment = sizeof(T);
             };
 
             template<>
             struct GLSLType<bool> {
+                using isArray = std::false_type;
                 static constexpr size_t size = 4;
                 static constexpr size_t alignment = 4;
             };
 
             template<>
             struct GLSLType<glm::vec3> {
+                using isArray = std::false_type;
                 static constexpr size_t size = 12;
                 static constexpr size_t alignment = 16;
             };
 
             template<>
             struct GLSLType<glm::mat4> {
+                using isArray = std::false_type;
                 static constexpr size_t size = 64;
                 static constexpr size_t alignment = 16;
             };
@@ -48,6 +59,10 @@ namespace Flare
             template<size_t TotalBlockSize = 0, typename Current, typename... Remaining>
             constexpr size_t calculateUniformBlockSize(Current current, Remaining... remaining)
             {
+                // if constexpr (std::is_same<std::true_type, typename Current::isArray>::value) {
+                //     //call array case, then invoke next iteration of this function
+                // }
+
                 if constexpr (TotalBlockSize % Current::alignment == 0) {
                     constexpr auto currentSize = Current::size + TotalBlockSize;
                     return calculateUniformBlockSize<currentSize>(remaining...);

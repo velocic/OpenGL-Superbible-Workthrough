@@ -23,8 +23,11 @@ int main(int argc, char* argv[])
     using namespace Flare::GL::UBO;
     auto testBlock = UniformBlock(
         GLSLType<float>{},
-        GLSLType<glm::vec3>{}
-        // GLSLType<glm::mat4>{}
+        GLSLType<glm::vec3>{},
+        GLSLType<glm::mat4>{},
+        GLSLArrayType<float, 3>{},
+        GLSLType<bool>{},
+        GLSLType<int>{}
     );
 
     std::cout << "Uniform Block Size: " << testBlock.getSize() << std::endl;
