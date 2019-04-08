@@ -2,6 +2,7 @@
 #define FLARE_GL_UNIFORMBLOCK_H
 
 #include <cstdlib>
+#include <memory>
 #include <tuple>
 #include <glm-0.9.9/glm.hpp>
 
@@ -78,12 +79,14 @@ namespace Flare
             {
                 private:
                     const size_t size;
+                    std::unique_ptr<uint8_t[]> alignedBuffer;
                     // std::tuple<GLSLType...> blockEntries;
 
                 public:
                     UniformBlock(GLSLType&&... values)
                     :
-                        size(calculateUniformBlockSize(values...))
+                        size(calculateUniformBlockSize(values...)),
+                        alignedBuffer(std::make_unique<uint8_t[]>(calculateUniformBlockSize(values...)))
                     {}
 
                     size_t getSize() {return size;}
