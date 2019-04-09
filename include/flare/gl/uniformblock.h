@@ -74,6 +74,33 @@ namespace Flare
                 return calculateUniformBlockSize<paddedCurrentSize>(remaining...);
             }
 
+            template<size_t CurrentElementIndex, typename Last>
+            constexpr auto calculateUniformBlockAlignedElements(Last last)
+            {
+                if constexpr (CurrentElementIndex % Last::alignment == 0) {
+                    return std::make_tuple(CurrentElementIndex);
+                }
+
+                constexpr auto alignmentPadding = Last::alignment - (CurrentElementIndex % Last::alignment);
+
+                return std::make_tuple(CurrentElementIndex + alignmentPadding);
+            }
+
+            template<size_t CurrentElementIndex = 0, typename Current, typename... Remaining>
+            constexpr auto calculateUniformBlockAlignedElements(Current current, Remaining... remaining)
+            {
+                if constexpr (CurrentElementIndex % Current::alignment == 0) {
+                    constexpr auto nextElementCandidateIndex = CurrentElementIndex + Current::size;
+                    return std::tuple_cat(std::make_tuple(CurrentElementIndex), calculateUniformBlockAlignedElements<nextElementCandidateIndex>(remaining...));
+                }
+
+                constexpr auto alignmentPadding = Current::alignment - (CurrentElementIndex % Current::alignment);
+                constexpr auto currentElementAlignedIndex = CurrentElementIndex + alignmentPadding;
+                constexpr auto nextElementCandidateIndex = currentElementAlignedIndex + Current::size;
+
+                return std::tuple_cat(std::make_tuple(currentElementAlignedIndex), calculateUniformBlockAlignedElements<nextElementCandidateIndex>(remaining...));
+            }
+
             template<typename... GLSLType>
             class UniformBlock
             {
@@ -87,7 +114,10 @@ namespace Flare
                     :
                         size(calculateUniformBlockSize(values...)),
                         alignedBuffer(std::make_unique<uint8_t[]>(calculateUniformBlockSize(values...)))
-                    {}
+                    {
+                        auto bufferOffsets = calculateUniformBlockAlignedElements(values...);
+                        int debug = 5;
+                    }
 
                     size_t getSize() {return size;}
             };
