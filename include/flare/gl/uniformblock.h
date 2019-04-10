@@ -17,30 +17,35 @@ namespace Flare
             struct GLSLArrayType {
                 static constexpr size_t size = 16 * N;
                 static constexpr size_t alignment = 16;
+                using underlying_type = T*;
             };
 
             template<typename T>
             struct GLSLType {
                 static constexpr size_t size = sizeof(T);
                 static constexpr size_t alignment = sizeof(T);
+                using underlying_type = T;
             };
 
             template<>
             struct GLSLType<bool> {
                 static constexpr size_t size = 4;
                 static constexpr size_t alignment = 4;
+                using underlying_type = bool;
             };
 
             template<>
             struct GLSLType<glm::vec3> {
                 static constexpr size_t size = 12;
                 static constexpr size_t alignment = 16;
+                using underlying_type = glm::vec3;
             };
 
             template<>
             struct GLSLType<glm::mat4> {
                 static constexpr size_t size = 64;
                 static constexpr size_t alignment = 16;
+                using underlying_type = glm::mat4;
             };
 
             template<size_t TotalBlockSize, typename Last>
@@ -93,6 +98,18 @@ namespace Flare
                 return std::tuple_cat(std::make_tuple(currentElementAlignedIndex), calculateUniformBlockAlignedElements<nextElementCandidateIndex>(remaining...));
             }
 
+            template<typename BlockElement>
+            constexpr auto createElementPointerTuple(BlockElement last)
+            {
+                return std::tuple<typename BlockElement::underlying_type*>();
+            }
+
+            template<typename BlockElement, typename... BlockElements>
+            constexpr auto createElementPointerTuple(BlockElement current, BlockElements... remaining)
+            {
+                return std::tuple_cat(std::tuple<typename BlockElement::underlying_type*>(), createElementPointerTuple(remaining...));
+            }
+
             template<typename... GLSLType>
             class UniformBlock
             {
@@ -107,13 +124,15 @@ namespace Flare
                         size(calculateUniformBlockSize(values...)),
                         alignedBuffer(std::make_unique<uint8_t[]>(calculateUniformBlockSize(values...)))
                     {
-                        size_t it = 0;
-                        std::apply(
-                            [&](auto&&... args) {
-                                ((bufferOffsets[it++] = args), ...);
-                            },
-                            calculateUniformBlockAlignedElements(values...)
-                        );
+                        // size_t it = 0;
+                        // std::apply(
+                        //     [&](auto&&... args) {
+                        //         ((bufferOffsets[it++] = args), ...);
+                        //     },
+                        //     calculateUniformBlockAlignedElements(values...)
+                        // );
+                        auto destinationTuple = createElementPointerTuple(values...);
+                        int debug = 5;
                     }
 
                     uint8_t *getData() const {return alignedBuffer.get();}
