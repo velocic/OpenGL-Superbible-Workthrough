@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <memory>
 #include <tuple>
+
 #include <glm-0.9.9/glm.hpp>
 
 namespace Flare
@@ -98,7 +99,7 @@ namespace Flare
                 private:
                     const size_t size;
                     std::unique_ptr<uint8_t[]> alignedBuffer;
-                    std::tuple<> blockEntries;
+                    std::array<size_t, sizeof...(GLSLType)> bufferOffsets;
 
                 public:
                     UniformBlock(GLSLType&&... values)
@@ -106,13 +107,17 @@ namespace Flare
                         size(calculateUniformBlockSize(values...)),
                         alignedBuffer(std::make_unique<uint8_t[]>(calculateUniformBlockSize(values...)))
                     {
-                        auto bufferOffsets = calculateUniformBlockAlignedElements(values...);
-                        auto numElements = sizeof...(GLSLType);
-                        int debug = 5;
-                        blockEntries = bufferOffsets;
+                        size_t it = 0;
+                        std::apply(
+                            [&](auto&&... args) {
+                                ((bufferOffsets[it++] = args), ...);
+                            },
+                            calculateUniformBlockAlignedElements(values...)
+                        );
                     }
 
-                    size_t getSize() {return size;}
+                    uint8_t *getData() const {return alignedBuffer.get();}
+                    size_t getSize() const {return size;}
             };
         }
     }
