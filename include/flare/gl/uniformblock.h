@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <memory>
 #include <tuple>
+#include <utility>
 
 #include <glm-0.9.9/glm.hpp>
 
@@ -98,24 +99,48 @@ namespace Flare
                 return std::tuple_cat(std::make_tuple(currentElementAlignedIndex), calculateUniformBlockAlignedElements<nextElementCandidateIndex>(remaining...));
             }
 
-            template<typename BlockElement>
-            constexpr auto createElementPointerTuple(BlockElement last)
+            template<typename... GLSLType>
+            class UniformBlockMaker
             {
-                return std::tuple<typename BlockElement::underlying_type*>();
-            }
+                public:
+                    using BlockEntryPointersType = std::tuple<>;
 
-            template<typename BlockElement, typename... BlockElements>
-            constexpr auto createElementPointerTuple(BlockElement current, BlockElements... remaining)
+                    BlockEntryPointersType blockEntryPointers;
+            };
+
+            template<typename GLSLType, typename... GLSLTypes>
+            class UniformBlockMaker<GLSLType, GLSLTypes...>
             {
-                return std::tuple_cat(std::tuple<typename BlockElement::underlying_type*>(), createElementPointerTuple(remaining...));
-            }
+                public:
+                    using TailBlockEntryPointersType = typename UniformBlockMaker<GLSLTypes...>::BlockEntryPointersType;
+                    using BlockEntryPointersType = decltype(
+                        std::tuple_cat(
+                            std::tuple<typename GLSLType::underlying_type*>(),
+                            std::declval<TailBlockEntryPointersType>()
+                        )
+                    );
+
+                    BlockEntryPointersType blockEntryPointers;
+
+                    UniformBlockMaker(GLSLType first, GLSLTypes... rest)
+                    :
+                        blockEntryPointers(
+                            std::tuple_cat(
+                                std::tuple<typename GLSLType::underlying_type*>(),
+                                UniformBlockMaker<GLSLTypes...>(rest...).blockEntryPointers
+                            )
+                        )
+                    {
+                    }
+
+            };
 
             template<typename... GLSLType>
             class UniformBlock
             {
                 private:
-                    const size_t size;
-                    std::unique_ptr<uint8_t[]> alignedBuffer;
+                    const size_t size = 0;
+                    std::unique_ptr<uint8_t[]> alignedBuffer = nullptr;
                     std::array<size_t, sizeof...(GLSLType)> bufferOffsets;
 
                 public:
@@ -124,6 +149,9 @@ namespace Flare
                         size(calculateUniformBlockSize(values...)),
                         alignedBuffer(std::make_unique<uint8_t[]>(calculateUniformBlockSize(values...)))
                     {
+
+                        auto testBlockMaker = UniformBlockMaker<GLSLType...>(values...);
+                        int debug = 5;
                         // size_t it = 0;
                         // std::apply(
                         //     [&](auto&&... args) {
@@ -131,8 +159,8 @@ namespace Flare
                         //     },
                         //     calculateUniformBlockAlignedElements(values...)
                         // );
-                        auto destinationTuple = createElementPointerTuple(values...);
-                        int debug = 5;
+                        //
+                        // int debug = 5;
                     }
 
                     uint8_t *getData() const {return alignedBuffer.get();}
