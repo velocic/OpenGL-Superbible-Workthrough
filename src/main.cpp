@@ -21,7 +21,15 @@ int main(int argc, char* argv[])
 
     //DEBUG
     using namespace Flare::GL::UBO;
-    auto testBlock = UniformBlock(
+    // auto testBlock = UniformBlock(
+    //     GLSLType<float>{},
+    //     GLSLType<glm::vec3>{},
+    //     GLSLType<glm::mat4>{},
+    //     GLSLArrayType<float, 3>{},
+    //     GLSLType<bool>{},
+    //     GLSLType<int>{}
+    // );
+    auto testBlock = buildAlignedUniformBlockBuffer(
         GLSLType<float>{},
         GLSLType<glm::vec3>{},
         GLSLType<glm::mat4>{},
@@ -30,7 +38,11 @@ int main(int argc, char* argv[])
         GLSLType<int>{}
     );
 
-    std::cout << "Uniform Block Size: " << testBlock.getSize() << std::endl;
+    int debug = 5;
+
+    // std::cout << testBlock << std::endl;
+
+    // std::cout << "Uniform Block Size: " << testBlock.getSize() << std::endl;
 
     //END DEBUG
 

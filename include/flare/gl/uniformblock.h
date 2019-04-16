@@ -2,6 +2,7 @@
 #define FLARE_GL_UNIFORMBLOCK_H
 
 #include <cstdlib>
+#include <functional>
 #include <memory>
 #include <tuple>
 #include <utility>
@@ -18,7 +19,7 @@ namespace Flare
             struct GLSLArrayType {
                 static constexpr size_t size = 16 * N;
                 static constexpr size_t alignment = 16;
-                using underlying_type = T*;
+                using underlying_type = T;
             };
 
             template<typename T>
@@ -99,73 +100,51 @@ namespace Flare
                 return std::tuple_cat(std::make_tuple(currentElementAlignedIndex), calculateUniformBlockAlignedElements<nextElementCandidateIndex>(remaining...));
             }
 
-            template<typename... GLSLType>
-            class UniformBlockMaker
+            template<typename GLSLType>
+            constexpr auto buildEmptyUniformBlockElementPointerTuple(GLSLType last)
             {
-                public:
-                    using BlockEntryPointersType = std::tuple<>;
-
-                    BlockEntryPointersType blockEntryPointers;
-            };
+                return std::tuple<typename GLSLType::underlying_type*>();
+            }
 
             template<typename GLSLType, typename... GLSLTypes>
-            class UniformBlockMaker<GLSLType, GLSLTypes...>
+            constexpr auto buildEmptyUniformBlockElementPointerTuple(GLSLType current, GLSLTypes... rest)
             {
-                public:
-                    using TailBlockEntryPointersType = typename UniformBlockMaker<GLSLTypes...>::BlockEntryPointersType;
-                    using BlockEntryPointersType = decltype(
-                        std::tuple_cat(
-                            std::tuple<typename GLSLType::underlying_type*>(),
-                            std::declval<TailBlockEntryPointersType>()
-                        )
-                    );
+                return std::tuple_cat(std::tuple<typename GLSLType::underlying_type*>(), buildEmptyUniformBlockElementPointerTuple(rest...));
+            }
 
-                    BlockEntryPointersType blockEntryPointers;
-
-                    UniformBlockMaker(GLSLType first, GLSLTypes... rest)
-                    :
-                        blockEntryPointers(
-                            std::tuple_cat(
-                                std::tuple<typename GLSLType::underlying_type*>(),
-                                UniformBlockMaker<GLSLTypes...>(rest...).blockEntryPointers
-                            )
-                        )
-                    {
-                    }
-
-            };
-
-            template<typename... GLSLType>
-            class UniformBlock
+            template<typename... GLSLTypes>
+            constexpr auto buildAlignedUniformBlockBuffer(GLSLTypes... args)
             {
-                private:
-                    const size_t size = 0;
-                    std::unique_ptr<uint8_t[]> alignedBuffer = nullptr;
-                    std::array<size_t, sizeof...(GLSLType)> bufferOffsets;
+                constexpr auto bufferSize = calculateUniformBlockSize(args...);
+                constexpr auto alignedElementIndices = calculateUniformBlockAlignedElements(args...);
 
-                public:
-                    UniformBlock(GLSLType&&... values)
-                    :
-                        size(calculateUniformBlockSize(values...)),
-                        alignedBuffer(std::make_unique<uint8_t[]>(calculateUniformBlockSize(values...)))
-                    {
+                auto buffer = std::make_unique<uint8_t[]>(bufferSize);
 
-                        auto testBlockMaker = UniformBlockMaker<GLSLType...>(values...);
-                        int debug = 5;
-                        // size_t it = 0;
-                        // std::apply(
-                        //     [&](auto&&... args) {
-                        //         ((bufferOffsets[it++] = args), ...);
-                        //     },
-                        //     calculateUniformBlockAlignedElements(values...)
-                        // );
-                        //
-                        // int debug = 5;
-                    }
+                size_t elementIndex = 0;
+                std::array<size_t, sizeof...(args)> elementIndexArray{};
 
-                    uint8_t *getData() const {return alignedBuffer.get();}
-                    size_t getSize() const {return size;}
-            };
+                std::apply(
+                    [&](auto&&... alignedIndices) {
+                        ((elementIndexArray[elementIndex++] = alignedIndices), ...);
+                    },
+                    alignedElementIndices
+                );
+
+                elementIndex = 0;
+
+                // decltype(buildEmptyUniformBlockElementPointerTuple(args...)) destinationPointerTuple;
+
+                // std::apply(
+                //     [&](auto&&... elementPointers) {
+                //         destinationPointerTuple = std::tuple_cat();
+                //         // ((elementPointers = reinterpret_cast<decltype(elementPointers)>(buffer.get()[elementIndexArray[elementIndex++]])), ...);
+                //     },
+                //     bufferElementPointers
+                // );
+
+                // return std::tuple_cat(std::make_tuple(std::move(buffer)), std::move(destinationPointerTuple));
+                return elementIndex;
+            }
         }
     }
 }
