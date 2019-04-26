@@ -38,8 +38,27 @@ int main(int argc, char* argv[])
         GLSLType<int>{}
     );
 
-    int debug = 5;
+    auto&& [testBuffer, testFloat, testVec3, testMat4, testFloatArray3, testBool, testInt] = testBlock;
 
+    *testFloat = 32.5f;
+    *testVec3 = glm::vec3(-25, 25, 125);
+    *testMat4 = glm::mat4(
+        10, 10, 10, 10,
+        20, 20, 20, 20,
+        30, 30, 30, 30,
+        40, 40, 40, 40
+    );
+    testFloatArray3[0] = 25.0f;
+    testFloatArray3[1] = 50.2f;
+    testFloatArray3[2] = 75.5f;
+    *testBool = true;
+    *testInt = ~0;
+
+    for (int i = 0; i < 152; ++i) {
+        std::cout << (size_t)testBuffer.get()[i];
+    }
+
+    int debug = 5;
     // std::cout << testBlock << std::endl;
 
     // std::cout << "Uniform Block Size: " << testBlock.getSize() << std::endl;
