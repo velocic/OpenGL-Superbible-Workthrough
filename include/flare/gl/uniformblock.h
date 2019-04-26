@@ -115,6 +115,10 @@ namespace Flare
             template<typename... FirstTuplePack, typename... SecondTuplePack>
             constexpr auto zipTuples(const std::tuple<FirstTuplePack...> &t1, const std::tuple<SecondTuplePack...> &t2)
             {
+                if constexpr (sizeof...(FirstTuplePack) != sizeof...(SecondTuplePack)) {
+                    return std::tuple{};
+                }
+
                 return std::apply(
                     [&](const auto &... t1s) {
                         return std::apply(
@@ -126,7 +130,28 @@ namespace Flare
                     },
                     t1
                 );
-                // return zipTuples(std::make_integer_sequence<size_t, std::tuple_size<FirstTuple>::value>(), t1, t2);
+            }
+
+            template<typename... Pointers, typename... BufferOffsets>
+            constexpr auto assignPointersIntoBuffer(const std::tuple<Pointers...> &pointerTuple, const std::tuple<BufferOffsets...> &bufferOffsetsTuple, uint8_t *buffer)
+            {
+                if constexpr (sizeof...(Pointers) != sizeof...(BufferOffsets)) {
+                    return pointerTuple;
+                }
+
+                return std::apply(
+                    [&](const auto... pointers) {
+                        return std::apply(
+                            [&](const auto... bufferOffsets) {
+                                // return std::tuple<Pointers...>(&buffer[bufferOffsets]...);
+                                return std::tuple(reinterpret_cast<decltype(pointers)>(&buffer[bufferOffsets])...);
+                                // return std::tuple(&buffer[bufferOffsets]...);
+                            },
+                            bufferOffsetsTuple
+                        );
+                    },
+                    pointerTuple
+                );
             }
 
             template<typename... GLSLTypes>
@@ -139,19 +164,7 @@ namespace Flare
 
                 constexpr decltype(buildEmptyUniformBlockElementPointerTuple(args...)) destinationPointerTuple{};
 
-                // std::apply(
-                //     [&](auto&&... elementPointers) {
-                //         destinationPointerTuple = std::tuple_cat();
-                //         // ((elementPointers = reinterpret_cast<decltype(elementPointers)>(buffer.get()[elementIndexArray[elementIndex++]])), ...);
-                //     },
-                //     bufferElementPointers
-                // );
-                
-                // constexpr auto test = zipTuples(getIndexSequenceForTuple(alignedElementIndices), alignedElementIndices, destinationPointerTuple);
-                constexpr auto test = zipTuples(alignedElementIndices, destinationPointerTuple);
-
-                return std::tuple_cat(std::make_tuple(std::move(buffer)), std::move(destinationPointerTuple));
-                // return destinationPointerTuple;
+                return std::tuple_cat(std::make_tuple(std::move(buffer)), assignPointersIntoBuffer(destinationPointerTuple, alignedElementIndices, buffer.get()));
             }
         }
     }
