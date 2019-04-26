@@ -19,35 +19,35 @@ namespace Flare
             struct GLSLArrayType {
                 static constexpr size_t size = 16 * N;
                 static constexpr size_t alignment = 16;
-                using underlying_type = T;
+                using type = T;
             };
 
             template<typename T>
             struct GLSLType {
                 static constexpr size_t size = sizeof(T);
                 static constexpr size_t alignment = sizeof(T);
-                using underlying_type = T;
+                using type = T;
             };
 
             template<>
             struct GLSLType<bool> {
                 static constexpr size_t size = 4;
                 static constexpr size_t alignment = 4;
-                using underlying_type = bool;
+                using type = bool;
             };
 
             template<>
             struct GLSLType<glm::vec3> {
                 static constexpr size_t size = 12;
                 static constexpr size_t alignment = 16;
-                using underlying_type = glm::vec3;
+                using type = glm::vec3;
             };
 
             template<>
             struct GLSLType<glm::mat4> {
                 static constexpr size_t size = 64;
                 static constexpr size_t alignment = 16;
-                using underlying_type = glm::mat4;
+                using type = glm::mat4;
             };
 
             template<size_t TotalBlockSize, typename Last>
@@ -103,13 +103,30 @@ namespace Flare
             template<typename GLSLType>
             constexpr auto buildEmptyUniformBlockElementPointerTuple(GLSLType last)
             {
-                return std::tuple<typename GLSLType::underlying_type*>();
+                return std::tuple<typename GLSLType::type*>();
             }
 
             template<typename GLSLType, typename... GLSLTypes>
             constexpr auto buildEmptyUniformBlockElementPointerTuple(GLSLType current, GLSLTypes... rest)
             {
-                return std::tuple_cat(std::tuple<typename GLSLType::underlying_type*>(), buildEmptyUniformBlockElementPointerTuple(rest...));
+                return std::tuple_cat(std::tuple<typename GLSLType::type*>(), buildEmptyUniformBlockElementPointerTuple(rest...));
+            }
+
+            template<typename... FirstTuplePack, typename... SecondTuplePack>
+            constexpr auto zipTuples(const std::tuple<FirstTuplePack...> &t1, const std::tuple<SecondTuplePack...> &t2)
+            {
+                return std::apply(
+                    [&](const auto &... t1s) {
+                        return std::apply(
+                            [&](const auto &... t2s) {
+                                return std::tuple(std::pair(t1s, t2s)...);
+                            },
+                            t2
+                        );
+                    },
+                    t1
+                );
+                // return zipTuples(std::make_integer_sequence<size_t, std::tuple_size<FirstTuple>::value>(), t1, t2);
             }
 
             template<typename... GLSLTypes>
@@ -120,19 +137,7 @@ namespace Flare
 
                 auto buffer = std::make_unique<uint8_t[]>(bufferSize);
 
-                size_t elementIndex = 0;
-                std::array<size_t, sizeof...(args)> elementIndexArray{};
-
-                std::apply(
-                    [&](auto&&... alignedIndices) {
-                        ((elementIndexArray[elementIndex++] = alignedIndices), ...);
-                    },
-                    alignedElementIndices
-                );
-
-                elementIndex = 0;
-
-                // decltype(buildEmptyUniformBlockElementPointerTuple(args...)) destinationPointerTuple;
+                constexpr decltype(buildEmptyUniformBlockElementPointerTuple(args...)) destinationPointerTuple{};
 
                 // std::apply(
                 //     [&](auto&&... elementPointers) {
@@ -141,9 +146,12 @@ namespace Flare
                 //     },
                 //     bufferElementPointers
                 // );
+                
+                // constexpr auto test = zipTuples(getIndexSequenceForTuple(alignedElementIndices), alignedElementIndices, destinationPointerTuple);
+                constexpr auto test = zipTuples(alignedElementIndices, destinationPointerTuple);
 
-                // return std::tuple_cat(std::make_tuple(std::move(buffer)), std::move(destinationPointerTuple));
-                return elementIndex;
+                return std::tuple_cat(std::make_tuple(std::move(buffer)), std::move(destinationPointerTuple));
+                // return destinationPointerTuple;
             }
         }
     }
