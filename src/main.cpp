@@ -19,69 +19,23 @@ int main(int argc, char* argv[])
 
     Flare::Application* demoApp = &selectedTutorial;
 
-    //DEBUG
-    using namespace Flare::GL::UBO;
-    // auto testBlock = UniformBlock(
-    //     GLSLType<float>{},
-    //     GLSLType<glm::vec3>{},
-    //     GLSLType<glm::mat4>{},
-    //     GLSLArrayType<float, 3>{},
-    //     GLSLType<bool>{},
-    //     GLSLType<int>{}
-    // );
-    auto testBlock = buildAlignedUniformBlockBuffer(
-        GLSLType<float>{},
-        GLSLType<glm::vec3>{},
-        GLSLType<glm::mat4>{},
-        GLSLArrayType<float, 3>{},
-        GLSLType<bool>{},
-        GLSLType<int>{}
-    );
+    demoApp->initialize();
 
-    auto&& [testBuffer, testFloat, testVec3, testMat4, testFloatArray3, testBool, testInt] = testBlock;
+    //Fake a render loop at slow enough FPS to not blind myself
+    auto previousFrameStartTime = std::chrono::high_resolution_clock::now();
+    for (unsigned int i = 0; i < numFramesToRender; ++i) {
+        auto currentFrameStartTime = std::chrono::high_resolution_clock::now();
+        auto timeSinceLastFrame = std::chrono::duration_cast<std::chrono::milliseconds>(currentFrameStartTime - previousFrameStartTime).count();
 
-    *testFloat = 32.5f;
-    *testVec3 = glm::vec3(-25, 25, 125);
-    *testMat4 = glm::mat4(
-        10, 10, 10, 10,
-        20, 20, 20, 20,
-        30, 30, 30, 30,
-        40, 40, 40, 40
-    );
-    testFloatArray3[0] = 25.0f;
-    testFloatArray3[1] = 50.2f;
-    testFloatArray3[2] = 75.5f;
-    *testBool = true;
-    *testInt = ~0;
+        demoApp->render(timeSinceLastFrame);
 
-    for (int i = 0; i < 152; ++i) {
-        std::cout << (size_t)testBuffer.get()[i];
+        long sleepTime = targetFrameTimeMillis - timeSinceLastFrame;
+        std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
+
+        previousFrameStartTime = currentFrameStartTime;
     }
 
-    int debug = 5;
-    // std::cout << testBlock << std::endl;
-
-    // std::cout << "Uniform Block Size: " << testBlock.getSize() << std::endl;
-
-    //END DEBUG
-
-    // demoApp->initialize();
-    //
-    // //Fake a render loop at slow enough FPS to not blind myself
-    // auto previousFrameStartTime = std::chrono::high_resolution_clock::now();
-    // for (unsigned int i = 0; i < numFramesToRender; ++i) {
-    //     auto currentFrameStartTime = std::chrono::high_resolution_clock::now();
-    //     auto timeSinceLastFrame = std::chrono::duration_cast<std::chrono::milliseconds>(currentFrameStartTime - previousFrameStartTime).count();
-    //
-    //     demoApp->render(timeSinceLastFrame);
-    //
-    //     long sleepTime = targetFrameTimeMillis - timeSinceLastFrame;
-    //     std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
-    //
-    //     previousFrameStartTime = currentFrameStartTime;
-    // }
-    //
-    // demoApp->shutdown();
+    demoApp->shutdown();
 
     return 0;
 }
