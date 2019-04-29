@@ -155,12 +155,12 @@ namespace Flare
             dataCapacityBytes = size;
 
             usageFlags = UsageFlags{
-                flags & GL_DYNAMIC_STORAGE_BIT,
-                flags & GL_MAP_READ_BIT,
-                flags & GL_MAP_WRITE_BIT,
-                flags & GL_MAP_PERSISTENT_BIT,
-                flags & GL_MAP_COHERENT_BIT,
-                flags & GL_CLIENT_STORAGE_BIT
+                static_cast<bool>(flags & GL_DYNAMIC_STORAGE_BIT),
+                static_cast<bool>(flags & GL_MAP_READ_BIT),
+                static_cast<bool>(flags & GL_MAP_WRITE_BIT),
+                static_cast<bool>(flags & GL_MAP_PERSISTENT_BIT),
+                static_cast<bool>(flags & GL_MAP_COHERENT_BIT),
+                static_cast<bool>(flags & GL_CLIENT_STORAGE_BIT)
             };
         }
 
