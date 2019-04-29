@@ -20,14 +20,14 @@ int main(int argc, char* argv[])
     Flare::Application* demoApp = &selectedTutorial;
 
     //DEBUG
-    auto&& [testBuffer, testFloat, testVec3, testMat4, testFloatArray3, testBool, testInt] = Flare::GL::buildStd140AlignedUniformBlockBuffer(
-        Flare::GL::GLSLType<float>{},
-        Flare::GL::GLSLType<glm::vec3>{},
-        Flare::GL::GLSLType<glm::mat4>{},
-        Flare::GL::GLSLArrayType<float, 3>{},
-        Flare::GL::GLSLType<bool>{},
-        Flare::GL::GLSLType<int>{}
-    );
+    // auto&& [testBuffer, testFloat, testVec3, testMat4, testFloatArray3, testBool, testInt] = Flare::GL::buildStd140AlignedUniformBlockBuffer(
+    //     Flare::GL::GLSLType<float>{},
+    //     Flare::GL::GLSLType<glm::vec3>{},
+    //     Flare::GL::GLSLType<glm::mat4>{},
+    //     Flare::GL::GLSLArrayType<float, 3>{},
+    //     Flare::GL::GLSLType<bool>{},
+    //     Flare::GL::GLSLType<int>{}
+    // );
 
     // auto testBlock = UniformBlock(
     //     GLSLType<float>{},
@@ -37,6 +37,31 @@ int main(int argc, char* argv[])
     //     GLSLType<bool>{},
     //     GLSLType<int>{}
     // );
+    auto testBlock = Flare::GL::buildStd140AlignedUniformBlockBuffer(
+        Flare::GL::GLSLType<float>{},
+        Flare::GL::GLSLType<glm::vec3>{},
+        Flare::GL::GLSLType<glm::mat4>{},
+        Flare::GL::GLSLArrayType<float, 3>{},
+        Flare::GL::GLSLType<bool>{},
+        Flare::GL::GLSLType<int>{}
+    );
+
+    auto&& [testBuffer, testFloat, testVec3, testMat4, testFloatArray3, testBool, testInt] = testBlock;
+    //
+    *testFloat = 32.5f;
+    *testVec3 = glm::vec3(-25, 25, 125);
+    *testMat4 = glm::mat4(
+        10, 10, 10, 10,
+        20, 20, 20, 20,
+        30, 30, 30, 30,
+        40, 40, 40, 40
+    );
+    testFloatArray3[0] = 25.0f;
+    testFloatArray3[1] = 50.2f;
+    testFloatArray3[2] = 75.5f;
+    *testBool = true;
+    *testInt = ~0;
+
     // auto testBlock = Flare::GL::buildStd140AlignedUniformBlockBuffer(
     //     Flare::GL::GLSLType<float>{},
     //     Flare::GL::GLSLType<glm::vec3>{},
@@ -45,22 +70,7 @@ int main(int argc, char* argv[])
     //     Flare::GL::GLSLType<bool>{},
     //     Flare::GL::GLSLType<int>{}
     // );
-    //
-    // auto&& [testBuffer, testFloat, testVec3, testMat4, testFloatArray3, testBool, testInt] = testBlock;
-    //
-    // *testFloat = 32.5f;
-    // *testVec3 = glm::vec3(-25, 25, 125);
-    // *testMat4 = glm::mat4(
-    //     10, 10, 10, 10,
-    //     20, 20, 20, 20,
-    //     30, 30, 30, 30,
-    //     40, 40, 40, 40
-    // );
-    // testFloatArray3[0] = 25.0f;
-    // testFloatArray3[1] = 50.2f;
-    // testFloatArray3[2] = 75.5f;
-    // *testBool = true;
-    // *testInt = ~0;
+    int debug = 5;
     //END DEBUG
 
     demoApp->initialize();

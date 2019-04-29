@@ -59,7 +59,8 @@ namespace Flare
 
             constexpr decltype(HelperTemplates::buildEmptyUniformBlockElementPointerTuple(args...)) destinationPointerTuple{};
 
-            return std::tuple_cat(std::make_tuple(std::move(buffer)), HelperTemplates::assignPointersIntoBuffer(destinationPointerTuple, alignedElementIndices, buffer.get()));
+            auto underlyingBufferAddress = buffer.get();
+            return std::tuple_cat(std::make_tuple(std::move(buffer)), HelperTemplates::assignPointersIntoBuffer(destinationPointerTuple, alignedElementIndices, underlyingBufferAddress));
         }
     }
 }
