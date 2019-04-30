@@ -16,6 +16,8 @@ namespace Tutorial
     class SpinningCubes : public Flare::Application
     {
         private:
+            std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
+            std::array<GLfloat, 36> cubeVertexPositions;
         public:
             void initialize() override;
             void render(unsigned int deltaTime) override;
