@@ -4,6 +4,7 @@
 #include <first-program-tutorial/draw-a-triangle.h>
 #include <3-gpu-shader-pipeline/shader-pipeline.h>
 #include <5-data/data.h>
+#include <5b-spinning-cubes/spinning-cubes.h>
 #include <flare/gl/datalayout.h>
 
 #include <flare/gl/uniformblock.h>
@@ -15,7 +16,8 @@ int main(int argc, char* argv[])
 
     // Tutorial::DrawATriangle selectedTutorial;
     // Tutorial::ShaderPipeline selectedTutorial;
-    Tutorial::Data selectedTutorial;
+    // Tutorial::Data selectedTutorial;
+    Tutorial::SpinningCubes selectedTutorial;
 
     Flare::Application* demoApp = &selectedTutorial;
 
