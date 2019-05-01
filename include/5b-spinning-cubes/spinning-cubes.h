@@ -17,6 +17,11 @@ namespace Tutorial
     {
         private:
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
+            std::unique_ptr<Flare::GL::Buffer> cubeMeshBuffer = nullptr;
+            std::unique_ptr<Flare::GL::VertexArray> cubeMeshVAO = nullptr;
+            std::unique_ptr<Flare::GL::ShaderProgram> spinningCubeShader = nullptr;
+            const std::string vertexShaderPath{"../src/5b-spinning-cubes/shaders/vertex.glsl"};
+            const std::string fragmentShaderPath{"../src/5b-spinning-cubes/shaders/fragment.glsl"};
             std::array<GLfloat, 36> cubeVertexPositions;
         public:
             void initialize() override;
