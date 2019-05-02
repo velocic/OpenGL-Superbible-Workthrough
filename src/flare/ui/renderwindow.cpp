@@ -3,6 +3,8 @@
 namespace Flare
 {
     RenderWindow::RenderWindow(const std::string& windowTitle, unsigned int screenWidth, unsigned int screenHeight)
+    :
+        aspectRatio(static_cast<float>(screenWidth) / screenHeight)
     {
         SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);

@@ -14,9 +14,11 @@ namespace Flare
         private:
             SDL_Window* window = nullptr;
             SDL_GLContext renderContext;
+            float aspectRatio;
         public:
             RenderWindow(const std::string& windowTitle, unsigned int screenWidth, unsigned int screenHeight);
             ~RenderWindow();
+            float getAspectRatio() {return aspectRatio;};
             void freeResources();
             SDL_Window* getRenderWindowHandle();
     };

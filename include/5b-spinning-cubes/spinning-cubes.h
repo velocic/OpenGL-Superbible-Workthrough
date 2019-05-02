@@ -23,6 +23,9 @@ namespace Tutorial
             const std::string vertexShaderPath{"../src/5b-spinning-cubes/shaders/vertex.glsl"};
             const std::string fragmentShaderPath{"../src/5b-spinning-cubes/shaders/fragment.glsl"};
             std::array<GLfloat, 36> cubeVertexPositions;
+
+            unsigned int elapsedTime = 0;
+            static constexpr float PI = 3.14159265359;
         public:
             void initialize() override;
             void render(unsigned int deltaTime) override;
