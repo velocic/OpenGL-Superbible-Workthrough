@@ -99,7 +99,6 @@ namespace Tutorial
     {
         elapsedTime += deltaTime;
         auto dampeningValue = 0.00005f;
-        float f = static_cast<float>(elapsedTime) * PI * dampeningValue;
 
         auto identityMatrix = glm::mat4{
             1, 0, 0, 0,
@@ -107,30 +106,6 @@ namespace Tutorial
             0, 0, 1, 0,
             0, 0, 0, 1
         };
-
-        auto modelViewMatrix = 
-            glm::translate(
-                identityMatrix,
-                glm::vec3(0.0f, 0.0f, -4.0f)
-            ) *
-            glm::translate(
-                identityMatrix,
-                glm::vec3(
-                    sinf(2.1f * f) * 0.5f,
-                    cosf(1.7f * f) * 0.5f,
-                    sinf(1.3f * f) * cosf(1.5f * f) * 2.0f
-                )
-            ) *
-            glm::rotate(
-                identityMatrix,
-                static_cast<float>(elapsedTime * dampeningValue) * 45.0f,
-                glm::vec3(0.0f, 1.0f, 0.0f)
-            ) *
-            glm::rotate(
-                identityMatrix,
-                static_cast<float>(elapsedTime * dampeningValue) * 81.0f,
-                glm::vec3(1.0f, 0.0f, 0.0f)
-            );
 
         auto perspectiveMatrix = glm::perspective(
             50.0f,
@@ -142,13 +117,6 @@ namespace Tutorial
         cubeMeshVAO->bind();
 
         glUniformMatrix4fv(
-            spinningCubeShader->getUniformAttribute("mv_matrix"),
-            1,
-            GL_FALSE,
-            &modelViewMatrix[0][0]
-        );
-
-        glUniformMatrix4fv(
             spinningCubeShader->getUniformAttribute("proj_matrix"),
             1,
             GL_FALSE,
@@ -157,7 +125,44 @@ namespace Tutorial
 
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //Draw 24 cubes...
+        for (int i = 0; i < 24; ++i) {
+            float f = static_cast<float>(i) + static_cast<float>(elapsedTime) * 0.3f * dampeningValue;
+
+            auto modelViewMatrix = 
+                glm::translate(
+                    identityMatrix,
+                    glm::vec3(0.0f, 0.0f, -20.0f)
+                ) *
+                glm::rotate(
+                    identityMatrix,
+                    static_cast<float>(elapsedTime * dampeningValue) * 45.0f,
+                    glm::vec3(0.0f, 1.0f, 0.0f)
+                ) *
+                glm::rotate(
+                    identityMatrix,
+                    static_cast<float>(elapsedTime * dampeningValue) * 21.0f,
+                    glm::vec3(1.0f, 0.0f, 0.0f)
+                ) * 
+                glm::translate(
+                    identityMatrix,
+                    glm::vec3(
+                        sinf(2.1f * f) * 2.0f,
+                        cosf(1.7f * f) * 2.0f,
+                        sinf(1.3f * f) * cosf(1.5f * f) * 2.0f
+                    )
+                );
+
+            glUniformMatrix4fv(
+                spinningCubeShader->getUniformAttribute("mv_matrix"),
+                1,
+                GL_FALSE,
+                &modelViewMatrix[0][0]
+            );
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         SDL_GL_SwapWindow(renderWindow->getRenderWindowHandle());
     }
