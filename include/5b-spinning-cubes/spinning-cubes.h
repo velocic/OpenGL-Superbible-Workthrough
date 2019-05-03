@@ -22,7 +22,7 @@ namespace Tutorial
             std::unique_ptr<Flare::GL::ShaderProgram> spinningCubeShader = nullptr;
             const std::string vertexShaderPath{"../src/5b-spinning-cubes/shaders/vertex.glsl"};
             const std::string fragmentShaderPath{"../src/5b-spinning-cubes/shaders/fragment.glsl"};
-            std::array<GLfloat, 36> cubeVertexPositions;
+            std::array<GLfloat, 108> cubeVertexPositions;
 
             unsigned int elapsedTime = 0;
             static constexpr float PI = 3.14159265359;

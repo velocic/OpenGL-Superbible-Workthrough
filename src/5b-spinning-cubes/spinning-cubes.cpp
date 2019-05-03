@@ -23,19 +23,51 @@ namespace Tutorial
 
         spinningCubeShader->bind();
 
-        cubeVertexPositions = std::array<GLfloat, 36>{
+        cubeVertexPositions = std::array<GLfloat, 108>{
             -0.25f, 0.25f, -0.25f,
             -0.25f, -0.25f, -0.25f,
             0.25f, -0.25f, -0.25f,
-
+            
             0.25f, -0.25f, -0.25f,
             0.25f, 0.25f, -0.25f,
             -0.25f, 0.25f, -0.25f,
-
+            
+            0.25f, -0.25f, -0.25f,
+            0.25f, -0.25f, 0.25f,
+            0.25f, 0.25f, -0.25f,
+            
+            0.25f, -0.25f, 0.25f,
+            0.25f, 0.25f, 0.25f,
+            0.25f, 0.25f, -0.25f,
+            
+            0.25f, -0.25f, 0.25f,
+            -0.25f, -0.25f, 0.25f,
+            0.25f, 0.25f, 0.25f,
+            
+            -0.25f, -0.25f, 0.25f,
+            -0.25f, 0.25f, 0.25f,
+            0.25f, 0.25f, 0.25f,
+            
+            -0.25f, -0.25f, 0.25f,
+            -0.25f, -0.25f, -0.25f,
+            -0.25f, 0.25f, 0.25f,
+            
+            -0.25f, -0.25f, -0.25f,
+            -0.25f, 0.25f, -0.25f,
+            -0.25f, 0.25f, 0.25f,
+            
+            -0.25f, -0.25f, 0.25f,
+            0.25f, -0.25f, 0.25f,
+            0.25f, -0.25f, -0.25f,
+            
+            0.25f, -0.25f, -0.25f,
+            -0.25f, -0.25f, -0.25f,
+            -0.25f, -0.25f, 0.25f,
+            
             -0.25f, 0.25f, -0.25f,
             0.25f, 0.25f, -0.25f,
             0.25f, 0.25f, 0.25f,
-
+            
             0.25f, 0.25f, 0.25f,
             -0.25f, 0.25f, 0.25f,
             -0.25f, 0.25f, -0.25f
@@ -66,7 +98,8 @@ namespace Tutorial
     void SpinningCubes::render(unsigned int deltaTime)
     {
         elapsedTime += deltaTime;
-        float f = static_cast<float>(elapsedTime) * PI * 0.1f;
+        auto dampeningValue = 0.00005f;
+        float f = static_cast<float>(elapsedTime) * PI * dampeningValue;
 
         auto identityMatrix = glm::mat4{
             1, 0, 0, 0,
@@ -90,12 +123,12 @@ namespace Tutorial
             ) *
             glm::rotate(
                 identityMatrix,
-                static_cast<float>(elapsedTime) * 45.0f,
+                static_cast<float>(elapsedTime * dampeningValue) * 45.0f,
                 glm::vec3(0.0f, 1.0f, 0.0f)
             ) *
             glm::rotate(
                 identityMatrix,
-                static_cast<float>(elapsedTime) * 81.0f,
+                static_cast<float>(elapsedTime * dampeningValue) * 81.0f,
                 glm::vec3(1.0f, 0.0f, 0.0f)
             );
 
