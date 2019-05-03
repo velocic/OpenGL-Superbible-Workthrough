@@ -1,7 +1,5 @@
 #include <flare/gl/vertexarray.h>
 
-#include <iostream>
-
 namespace Flare
 {
     namespace GL

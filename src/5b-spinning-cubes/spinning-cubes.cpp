@@ -46,21 +46,21 @@ namespace Tutorial
             .setStride(sizeof(GLfloat) * 3)
             .build();
 
+        spinningCubeShader->addUniformAttribute("mv_matrix");
+        spinningCubeShader->addUniformAttribute("proj_matrix");
+
         cubeMeshBuffer = std::make_unique<Flare::GL::Buffer>(cubeMeshBufferLayout);
 
         auto bufferRefsForCubeMeshVAO = std::vector<std::reference_wrapper<const Flare::GL::Buffer>>{
             *(cubeMeshBuffer.get())
         };
 
-        spinningCubeShader->addUniformAttribute("mv_matrix");
-        spinningCubeShader->addUniformAttribute("proj_matrix");
-
         cubeMeshVAO = std::make_unique<Flare::GL::VertexArray>(
             *(spinningCubeShader.get()),
             bufferRefsForCubeMeshVAO
         );
 
-        cubeMeshBuffer->namedBufferStorage(cubeVertexPositions.max_size() * sizeof(GLfloat), cubeVertexPositions.data(), GL_STATIC_DRAW);
+        cubeMeshBuffer->namedBufferStorage(cubeVertexPositions.max_size() * sizeof(GLfloat), cubeVertexPositions.data(), 0);
     }
 
     void SpinningCubes::render(unsigned int deltaTime)
@@ -131,5 +131,6 @@ namespace Tutorial
 
     void SpinningCubes::shutdown()
     {
+        renderWindow->freeResources();
     }
 }
