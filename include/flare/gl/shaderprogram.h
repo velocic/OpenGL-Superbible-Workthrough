@@ -1,5 +1,5 @@
-#ifndef SHADERPROGRAM_H
-#define SHADERPROGRAM_H
+#ifndef FLARE_GL_SHADERPROGRAM_H
+#define FLARE_GL_SHADERPROGRAM_H
 
 #include <memory>
 #include <string>

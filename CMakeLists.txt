@@ -17,6 +17,7 @@ add_executable(
     src/flare/gl/uniformblock.cpp
     src/flare/gl/vertexarray.cpp
     src/flare/gl/shaderprogram.cpp
+    src/flare/gl/texture.cpp
     src/flare/ui/renderwindow.cpp
     src/flare/utility/file.cpp
     src/flare/utility/math.cpp
