@@ -1,6 +1,8 @@
 #ifndef FLARE_GL_TEXTURE_H
 #define FLARE_GL_TEXTURE_H
 
+#include <GL/gl3w.h>
+
 namespace Flare
 {
     namespace GL
