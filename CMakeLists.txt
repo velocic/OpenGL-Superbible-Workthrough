@@ -18,6 +18,7 @@ add_executable(
     src/flare/gl/vertexarray.cpp
     src/flare/gl/shaderprogram.cpp
     src/flare/gl/texture2d.cpp
+    src/flare/gl/sampler.cpp
     src/flare/ui/renderwindow.cpp
     src/flare/utility/file.cpp
     src/flare/utility/math.cpp
