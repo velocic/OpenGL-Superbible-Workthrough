@@ -26,13 +26,14 @@ namespace Flare
                 Texture2D(const Texture2D& other) = delete;
                 Texture2D& operator=(const Texture2D& other) = delete;
 
-                void textureSubImage2D(const GLvoid *pixels);
+                void textureSubImage2D(const GLvoid *pixels, GLenum type);
                 void textureSubImage2D(GLint level, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels);
-                void clearTexSubImage(); //TODO: easy utility that clears all params
-                void clearTexSubImage(); //TODO: full control of all params call
+                void clearTexSubImage(GLenum type, const void *data);
+                void clearTexSubImage(GLint level, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
+                void setTextureParameters(GLuint wrapModeS, GLuint wrapModeT, GLuint minFilter, GLuint magFilter, bool generateMipmaps);
                 void initialize() override;
                 void destroy() override;
-                void bind(GLenum target) override;
+                void bind() override;
         };
     }
 }

@@ -12,7 +12,7 @@ namespace Flare
             public:
                 virtual void initialize() = 0;
                 virtual void destroy() = 0;
-                virtual void bind(GLenum target) = 0;
+                virtual void bind() = 0;
         };
     }
 }
