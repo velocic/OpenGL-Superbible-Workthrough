@@ -6,7 +6,9 @@ namespace Flare
 {
     namespace GL
     {
-        Sampler::Sampler()
+        Sampler::Sampler(std::string_view name)
+        :
+            name(name)
         {
             initialize();
         }

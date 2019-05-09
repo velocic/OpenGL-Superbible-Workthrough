@@ -8,6 +8,8 @@
 
 #include <GL/gl3w.h>
 
+#include <flare/gl/sampler.h>
+
 namespace Flare
 {
     namespace GL
@@ -72,6 +74,7 @@ namespace Flare
                 std::vector<uint8_t> tessellationEvaluationShaderSource;
                 std::vector<uint8_t> geometryShaderSource;
                 std::vector<uint8_t> fragmentShaderSource;
+                std::vector<Sampler> samplers;
             public:
                 virtual ShaderProgramBuilder& addVertexShader(std::vector<uint8_t>&& vertexShaderSource)
                 {
@@ -100,6 +103,23 @@ namespace Flare
                 virtual ShaderProgramBuilder& addFragmentShader(std::vector<uint8_t>&& fragmentShaderSource)
                 {
                     this->fragmentShaderSource = fragmentShaderSource;
+                    return *this;
+                }
+
+                virtual ShaderProgramBuilder& addTextureUnit(Sampler &&sampler)
+                {
+                    this->samplers.push_back(sampler);
+                    return *this;
+                }
+
+                virtual ShaderProgramBuilder& addTextureUnit(const Sampler& sampler)
+                {
+                    this->samplers.push_back(sampler);
+                    return *this;
+                }
+
+                virtual ShaderProgramBuilder& addTextureUnitArray(std::vector<Sampler> &&samplers)
+                {
                     return *this;
                 }
 
