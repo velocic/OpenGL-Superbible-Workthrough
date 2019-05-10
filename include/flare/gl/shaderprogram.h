@@ -9,6 +9,7 @@
 #include <GL/gl3w.h>
 
 #include <flare/gl/sampler.h>
+#include <flare/gl/texture.h>
 
 namespace Flare
 {
@@ -26,17 +27,36 @@ namespace Flare
         class ShaderProgram
         {
             private:
+                struct TextureUnit {
+                    Sampler sampler;
+                    std::shared_ptr<Texture> texture;
+                    const unsigned int index = 0;
+                };
+
+                struct TextureUnitArray {
+                    Sampler sampler;
+                    std::vector<std::shared_ptr<Texture>> textures;
+                    const unsigned int firstIndex = 0;
+                    const unsigned int lastIndex = 0;
+                };
+
                 ShaderProgramStages shaderStages;
                 GLuint shaderProgram = 0;
-                bool isValid = false;
                 std::unordered_map<std::string, GLint> uniformAttributes;
-
-                std::vector<unsigned int> diffuseTextureUnitIndices;
-                std::vector<unsigned int> specularTextureUnitIndices;
-                std::vector<unsigned int> normalTextureUnitIndices;
+                std::vector<TextureUnit> textureUnits;
+                std::vector<TextureUnitArray> textureUnitArrays;
+                unsigned int totalAssignedTextureUnits = 0;
+                bool isValid = false;
 
                 GLuint compileShaderProgramFromSource(const std::vector<uint8_t> &shaderSource, GLenum shaderType);
                 GLuint linkShaderProgram(const ShaderProgramStages& shaderStages);
+                
+                //Creates one texture unit index paired with one sampler
+                void setTextureUnits(std::vector<Sampler> &&textureUnitSamplers);
+
+                //Creates a range of texture init indices all sharing a single sampler, which will bind to an array
+                //of texture samplers in glsl
+                void setTextureUnitArrays(std::vector<std::pair<Sampler, unsigned int>> &&textureUnitArraySamplers);
             public:
                 ShaderProgram(
                     const std::vector<uint8_t> &vertexShaderSource,
@@ -57,11 +77,7 @@ namespace Flare
                 void bind();
                 GLint getAttribute(const std::string &attributeName) const;
                 GLint getUniformAttribute(const std::string &uniformName);
-                const std::vector<unsigned int> &getDiffuseTextureUnits() const {return diffuseTextureUnitIndices;}
-                const std::vector<unsigned int> &getSpecularTextureUnits() const {return specularTextureUnitIndices;}
-                const std::vector<unsigned int> &getNormalTextureUnits() const {return normalTextureUnitIndices;}
                 inline bool isShaderProgramValid() const {return isValid;}
-                bool setTextureUnits(unsigned int numDiffuseTextures, unsigned int numSpecularTextures, unsigned int numNormalTextures);
 
                 void unbind();
         };
@@ -74,7 +90,8 @@ namespace Flare
                 std::vector<uint8_t> tessellationEvaluationShaderSource;
                 std::vector<uint8_t> geometryShaderSource;
                 std::vector<uint8_t> fragmentShaderSource;
-                std::vector<Sampler> samplers;
+                std::vector<Sampler> textureUnitSamplers;
+                std::vector<std::pair<Sampler, unsigned int>> textureUnitArraySamplers;
             public:
                 virtual ShaderProgramBuilder& addVertexShader(std::vector<uint8_t>&& vertexShaderSource)
                 {
@@ -108,18 +125,13 @@ namespace Flare
 
                 virtual ShaderProgramBuilder& addTextureUnit(Sampler &&sampler)
                 {
-                    this->samplers.push_back(sampler);
+                    this->textureUnitSamplers.emplace_back(std::move(sampler));
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& addTextureUnit(const Sampler& sampler)
+                virtual ShaderProgramBuilder& addTextureUnitArray(Sampler &&sampler, unsigned int numTextureUnits)
                 {
-                    this->samplers.push_back(sampler);
-                    return *this;
-                }
-
-                virtual ShaderProgramBuilder& addTextureUnitArray(std::vector<Sampler> &&samplers)
-                {
+                    this->textureUnitArraySamplers.emplace_back(std::move(sampler), numTextureUnits);
                     return *this;
                 }
 

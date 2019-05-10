@@ -46,38 +46,34 @@ namespace Flare
         :
             shaderStages(std::move(other.shaderStages)),
             shaderProgram(other.shaderProgram),
-            isValid(other.isValid),
             uniformAttributes(std::move(other.uniformAttributes)),
-            diffuseTextureUnitIndices(std::move(other.diffuseTextureUnitIndices)),
-            specularTextureUnitIndices(std::move(other.specularTextureUnitIndices)),
-            normalTextureUnitIndices(std::move(other.normalTextureUnitIndices))
+            textureUnits(std::move(other.textureUnits)),
+            textureUnitArrays(std::move(other.textureUnitArrays)),
+            isValid(other.isValid)
         {
             other.shaderStages = ShaderProgramStages{};
             other.shaderProgram = 0;
             other.isValid = false;
-            other.uniformAttributes = std::unordered_map<std::string, GLint>();
-            other.diffuseTextureUnitIndices = std::vector<unsigned int>();
-            other.specularTextureUnitIndices = std::vector<unsigned int>();
-            other.normalTextureUnitIndices = std::vector<unsigned int>();
+            other.uniformAttributes = std::unordered_map<std::string, GLint>{};
+            other.textureUnits = std::vector<TextureUnit>{};
+            other.textureUnitArrays = std::vector<TextureUnitArray>{};
         }
 
         ShaderProgram &ShaderProgram::operator=(ShaderProgram &&other)
         {
             shaderStages = std::move(other.shaderStages);
             shaderProgram = other.shaderProgram;
-            isValid = other.isValid;
             uniformAttributes = std::move(other.uniformAttributes);
-            diffuseTextureUnitIndices = std::move(other.diffuseTextureUnitIndices);
-            specularTextureUnitIndices = std::move(other.specularTextureUnitIndices);
-            normalTextureUnitIndices = std::move(other.normalTextureUnitIndices);
+            textureUnits = std::move(other.textureUnits);
+            textureUnitArrays = std::move(other.textureUnitArrays);
+            isValid = other.isValid;
 
             other.shaderStages = ShaderProgramStages{};
             other.shaderProgram = 0;
             other.isValid = false;
-            other.uniformAttributes = std::unordered_map<std::string, GLint>();
-            other.diffuseTextureUnitIndices = std::vector<unsigned int>();
-            other.specularTextureUnitIndices = std::vector<unsigned int>();
-            other.normalTextureUnitIndices = std::vector<unsigned int>();
+            other.uniformAttributes = std::unordered_map<std::string, GLint>{};
+            other.textureUnits = std::vector<TextureUnit>{};
+            other.textureUnitArrays = std::vector<TextureUnitArray>{};
 
             return *this;
         }
@@ -144,56 +140,6 @@ namespace Flare
             return mapIterator->second;
         }
 
-        bool ShaderProgram::setTextureUnits(unsigned int numDiffuseTextures, unsigned int numSpecularTextures, unsigned int numNormalTextures)
-        {
-            unsigned int textureUnitIndex = 0;
-
-            for (unsigned int i = 0; i < numDiffuseTextures; ++i) {
-                auto uniformName = "diffuse[" + std::to_string(i) + "]";
-                auto isValidUniform = addUniformAttribute(uniformName);
-
-                if (isValidUniform == false) {
-                    std::cout << uniformName << " is an invalid uniform name" << std::endl;
-                    return false;
-                }
-
-                auto texLocation = getUniformAttribute(uniformName);
-                glUniform1i(texLocation, textureUnitIndex); 
-                diffuseTextureUnitIndices.push_back(textureUnitIndex);
-                ++textureUnitIndex;
-            }
-
-            for (unsigned int i = 0; i < numSpecularTextures; ++i) {
-                auto uniformName = "specular[" + std::to_string(i) + "]";
-                auto isValidUniform = addUniformAttribute(uniformName);
-
-                if (isValidUniform == false) {
-                    std::cout << uniformName << " is an invalid uniform name" << std::endl;
-                    return false;
-                }
-
-                glUniform1i(getUniformAttribute(uniformName), textureUnitIndex);
-                specularTextureUnitIndices.push_back(textureUnitIndex);
-                ++textureUnitIndex;
-            }
-
-            for (unsigned int i = 0; i < numNormalTextures; ++i) {
-                auto uniformName = "normal[" + std::to_string(i) + "]";
-                auto isValidUniform = addUniformAttribute(uniformName);
-
-                if (isValidUniform == false) {
-                    std::cout << uniformName << " is an invalid uniform name" << std::endl;
-                }
-
-                glUniform1i(getUniformAttribute(uniformName), textureUnitIndex);
-                normalTextureUnitIndices.push_back(textureUnitIndex);
-                ++textureUnitIndex;
-            }
-
-            return true;
-        }
-
-
         void ShaderProgram::unbind()
         {
             glUseProgram(0);
@@ -224,6 +170,35 @@ namespace Flare
             }
 
             return shader;
+        }
+
+        void ShaderProgram::setTextureUnits(std::vector<Sampler> &&textureUnitSamplers)
+        {
+            for (auto &&sampler : textureUnitSamplers) {
+                textureUnits.push_back(TextureUnit{std::move(sampler), nullptr, totalAssignedTextureUnits++});
+            }
+
+            textureUnitSamplers = std::vector<Sampler>{};
+        }
+
+        void ShaderProgram::setTextureUnitArrays(std::vector<std::pair<Sampler, unsigned int>> &&textureUnitArraySamplers)
+        {
+            for (auto &&samplerArrayEntry : textureUnitArraySamplers) {
+                const auto &numArrayElements = samplerArrayEntry.second;
+
+                textureUnitArrays.push_back(
+                    TextureUnitArray{
+                        std::move(samplerArrayEntry.first),
+                        std::vector<std::shared_ptr<Texture>>(numArrayElements),
+                        totalAssignedTextureUnits,
+                        totalAssignedTextureUnits + numArrayElements
+                    }
+                );
+
+                totalAssignedTextureUnits += numArrayElements;
+            }
+
+            textureUnitArraySamplers = std::vector<std::pair<Sampler, unsigned int>>{};
         }
 
         GLuint ShaderProgram::linkShaderProgram(const ShaderProgramStages& shaderStages)
