@@ -29,7 +29,7 @@ namespace Flare
             return *this;
         }
 
-        void Texture2D::textureSubImage2D(const GLvoid *pixels, GLenum type)
+        void Texture2D::textureSubImage2D(const GLvoid *pixels, GLenum type, bool generateMipmaps)
         {
             glTextureSubImage2D(
                 glTexture,
@@ -40,9 +40,13 @@ namespace Flare
                 type,
                 pixels
             );
+
+            if (generateMipmaps) {
+                glGenerateTextureMipmap(glTexture);
+            }
         }
 
-        void Texture2D::textureSubImage2D(GLint level, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels)
+        void Texture2D::textureSubImage2D(GLint level, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels, bool generateMipmaps)
         {
             glTextureSubImage2D(
                 glTexture,
@@ -53,6 +57,10 @@ namespace Flare
                 type,
                 pixels
             );
+
+            if (generateMipmaps) {
+                glGenerateTextureMipmap(glTexture);
+            }
         }
 
         void Texture2D::clearTexSubImage(GLenum type, const void *data)
@@ -89,22 +97,6 @@ namespace Flare
             );
         }
 
-        void Texture2D::setTextureParameters(GLuint wrapModeS, GLuint wrapModeT, GLuint minFilter, GLuint magFilter, bool generateMipmaps)
-        {
-            bind();
-
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapModeS);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapModeT);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
-
-            if (generateMipmaps) {
-                glGenerateMipmap(GL_TEXTURE_2D);
-            }
-
-            glBindTexture(GL_TEXTURE_2D, 0);
-        }
-
         void Texture2D::initialize()
         {
             if (glTexture != 0) {
@@ -120,13 +112,13 @@ namespace Flare
             glDeleteTextures(1, &glTexture);
         }
 
-        void Texture2D::bind()
+        void Texture2D::bind(GLuint textureUnitIndex)
         {
             if (glTexture == 0) {
                 throw std::runtime_error("Attempting to bind an OpenGL texture that's uninitialized");
             }
 
-            glBindTexture(GL_TEXTURE_2D, glTexture);
+            glBindTextureUnit(textureUnitIndex, glTexture);
         }
     }
 }

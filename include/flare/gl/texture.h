@@ -25,7 +25,7 @@ namespace Flare
 
                 virtual void destroy() = 0;
                 virtual void initialize() = 0;
-                virtual void bind() = 0;
+                virtual void bind(GLuint textureUnitIndex) = 0;
         };
     }
 }

@@ -36,8 +36,8 @@ namespace Flare
                 struct TextureUnitArray {
                     Sampler sampler;
                     std::vector<std::shared_ptr<Texture>> textures;
-                    const unsigned int firstIndex = 0;
-                    const unsigned int lastIndex = 0;
+                    const unsigned int firstIndexInclusive = 0;
+                    const unsigned int lastIndexExclusive = 0;
                 };
 
                 ShaderProgramStages shaderStages;

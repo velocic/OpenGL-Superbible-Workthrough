@@ -119,9 +119,9 @@ namespace Flare
                 return;
             }
 
-            //Bind all necessary resources used by this material; Shader program,
-            //textures & maps once available
             glUseProgram(shaderProgram);
+
+            bindTextureUnits();
         }
 
         GLint ShaderProgram::getAttribute(const std::string &attributeName) const
@@ -144,6 +144,8 @@ namespace Flare
         {
             glUseProgram(0);
             glBindVertexArray(0);
+
+            //TODO: unbind all textures/samplers?
         }
 
         GLuint ShaderProgram::compileShaderProgramFromSource(const std::vector<uint8_t> &shaderSource, GLenum shaderType)
@@ -174,6 +176,20 @@ namespace Flare
 
         void ShaderProgram::bindTextureUnits()
         {
+            for (auto &textureUnit : textureUnits) {
+                textureUnit.texture->bind(textureUnit.index);
+                textureUnit.sampler.bind(textureUnit.index);
+            }
+
+            for (auto &textureUnitArray : textureUnitArrays) {
+                unsigned int currentTextureOffset = 0;
+
+                for (auto &texture : textureUnitArray.textures) {
+                    auto textureUnitIndex = textureUnitArray.firstIndexInclusive + currentTextureOffset;
+                    texture->bind(textureUnitIndex);
+                    textureUnitArray.sampler.bind(textureUnitIndex);
+                }
+            }
         }
 
         void ShaderProgram::setTextureUnits(std::vector<Sampler> &&textureUnitSamplers)
