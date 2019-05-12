@@ -28,23 +28,74 @@ namespace Flare
         {
             private:
                 struct TextureUnit {
+                    TextureUnit(Sampler &&sampler, std::shared_ptr<Texture> texture, unsigned int index)
+                    :
+                        sampler(std::move(sampler)), texture(texture), index(index)
+                    {}
+                    ~TextureUnit() {}
+                    TextureUnit(TextureUnit &&other)
+                    :
+                        sampler(std::move(other.sampler)), texture(std::move(other.texture)), index(other.index)
+                    {
+                        other.index = 0;
+                    }
+                    TextureUnit &operator=(TextureUnit &&other)
+                    {
+                        sampler = std::move(other.sampler);
+                        texture = std::move(other.texture);
+                        index = other.index;
+
+                        other.index = 0;
+
+                        return *this;
+                    }
+                    TextureUnit(const TextureUnit& other) = delete;
+                    TextureUnit &operator=(const TextureUnit &other) = delete;
+
                     Sampler sampler;
                     std::shared_ptr<Texture> texture;
-                    const unsigned int index = 0;
+                    unsigned int index = 0;
                 };
 
                 struct TextureUnitArray {
+                    TextureUnitArray(Sampler &&sampler, std::vector<std::shared_ptr<Texture>> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive)
+                    :
+                        sampler(std::move(sampler)), textures(std::move(textures)), firstIndexInclusive(firstIndexInclusive), lastIndexExclusive(lastIndexExclusive)
+                    {}
+                    ~TextureUnitArray() {}
+                    TextureUnitArray(TextureUnitArray &&other)
+                    :
+                        sampler(std::move(other.sampler)), textures(std::move(other.textures)), firstIndexInclusive(other.firstIndexInclusive), lastIndexExclusive(other.lastIndexExclusive)
+                    {
+                        other.firstIndexInclusive = 0;
+                        other.lastIndexExclusive = 0;
+                    }
+                    TextureUnitArray &operator=(TextureUnitArray &&other)
+                    {
+                        sampler = std::move(other.sampler);
+                        textures = std::move(other.textures);
+                        firstIndexInclusive = other.firstIndexInclusive;
+                        lastIndexExclusive = other.lastIndexExclusive;
+
+                        other.firstIndexInclusive = 0;
+                        other.lastIndexExclusive = 0;
+
+                        return *this;
+                    }
+                    TextureUnitArray(const TextureUnitArray& other) = delete;
+                    TextureUnitArray &operator=(const TextureUnitArray &other) = delete;
+
                     Sampler sampler;
                     std::vector<std::shared_ptr<Texture>> textures;
-                    const unsigned int firstIndexInclusive = 0;
-                    const unsigned int lastIndexExclusive = 0;
+                    unsigned int firstIndexInclusive = 0;
+                    unsigned int lastIndexExclusive = 0;
                 };
 
                 ShaderProgramStages shaderStages;
                 GLuint shaderProgram = 0;
                 std::unordered_map<std::string, GLint> uniformAttributes;
-                std::vector<TextureUnit> textureUnits;
-                std::vector<TextureUnitArray> textureUnitArrays;
+                std::unordered_map<std::string, TextureUnit> textureUnits;
+                std::unordered_map<std::string, TextureUnitArray> textureUnitArrays;
                 unsigned int totalAssignedTextureUnits = 0;
                 bool isValid = false;
 

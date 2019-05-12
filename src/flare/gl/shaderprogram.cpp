@@ -55,8 +55,8 @@ namespace Flare
             other.shaderProgram = 0;
             other.isValid = false;
             other.uniformAttributes = std::unordered_map<std::string, GLint>{};
-            other.textureUnits = std::vector<TextureUnit>{};
-            other.textureUnitArrays = std::vector<TextureUnitArray>{};
+            other.textureUnits = std::unordered_map<std::string, TextureUnit>{};
+            other.textureUnitArrays = std::unordered_map<std::string, TextureUnitArray>{};
         }
 
         ShaderProgram &ShaderProgram::operator=(ShaderProgram &&other)
@@ -72,8 +72,8 @@ namespace Flare
             other.shaderProgram = 0;
             other.isValid = false;
             other.uniformAttributes = std::unordered_map<std::string, GLint>{};
-            other.textureUnits = std::vector<TextureUnit>{};
-            other.textureUnitArrays = std::vector<TextureUnitArray>{};
+            other.textureUnits = std::unordered_map<std::string, TextureUnit>{};
+            other.textureUnitArrays = std::unordered_map<std::string, TextureUnitArray>{};
 
             return *this;
         }
@@ -176,12 +176,14 @@ namespace Flare
 
         void ShaderProgram::bindTextureUnits()
         {
-            for (auto &textureUnit : textureUnits) {
+            for (auto &textureUnitKVPair : textureUnits) {
+                auto &textureUnit = textureUnitKVPair.second;
                 textureUnit.texture->bind(textureUnit.index);
                 textureUnit.sampler.bind(textureUnit.index);
             }
 
-            for (auto &textureUnitArray : textureUnitArrays) {
+            for (auto &textureUnitArrayKVPair : textureUnitArrays) {
+                auto &textureUnitArray = textureUnitArrayKVPair.second;
                 unsigned int currentTextureOffset = 0;
 
                 for (auto &texture : textureUnitArray.textures) {
@@ -195,7 +197,8 @@ namespace Flare
         void ShaderProgram::setTextureUnits(std::vector<Sampler> &&textureUnitSamplers)
         {
             for (auto &&sampler : textureUnitSamplers) {
-                textureUnits.push_back(TextureUnit{std::move(sampler), nullptr, totalAssignedTextureUnits++});
+                auto name = std::string(sampler.getName());
+                textureUnits.insert_or_assign(name, TextureUnit(std::move(sampler), nullptr, totalAssignedTextureUnits++));
             }
 
             textureUnitSamplers = std::vector<Sampler>{};
@@ -205,14 +208,16 @@ namespace Flare
         {
             for (auto &&samplerArrayEntry : textureUnitArraySamplers) {
                 const auto &numArrayElements = samplerArrayEntry.second;
+                auto samplerName = std::string(samplerArrayEntry.first.getName());
 
-                textureUnitArrays.push_back(
-                    TextureUnitArray{
+                textureUnitArrays.insert_or_assign(
+                    samplerName,
+                    TextureUnitArray(
                         std::move(samplerArrayEntry.first),
                         std::vector<std::shared_ptr<Texture>>(numArrayElements),
                         totalAssignedTextureUnits,
                         totalAssignedTextureUnits + numArrayElements
-                    }
+                    )
                 );
 
                 totalAssignedTextureUnits += numArrayElements;

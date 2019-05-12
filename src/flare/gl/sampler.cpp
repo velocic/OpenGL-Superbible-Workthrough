@@ -34,6 +34,11 @@ namespace Flare
             return *this;
         }
 
+        std::string_view Sampler::getName()
+        {
+            return name;
+        }
+
         void Sampler::samplerParameteri(GLenum pName, GLint param)
         {
             glSamplerParameteri(glSampler, pName, param);
