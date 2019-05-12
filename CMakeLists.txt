@@ -23,7 +23,8 @@ add_executable(
     src/flare/ui/renderwindow.cpp
     src/flare/utility/file.cpp
     src/flare/utility/math.cpp
-    src/gl3w/gl3w.c
+    lib/gl3w/gl3w.c
+    lib/lodepng/lodepng.cpp
     src/main.cpp
 )
 
@@ -38,5 +39,6 @@ target_include_directories(
     ${SAMPLE_RUNNER_NAME}
     PUBLIC
     "include"
-    "include/gl3w"
+    "lib"
+    "lib/gl3w"
 )
