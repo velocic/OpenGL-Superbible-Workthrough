@@ -197,8 +197,10 @@ namespace Flare
         void ShaderProgram::setTextureUnits(std::vector<Sampler> &&textureUnitSamplers)
         {
             for (auto &&sampler : textureUnitSamplers) {
-                auto name = std::string(sampler.getName());
-                textureUnits.insert_or_assign(name, TextureUnit(std::move(sampler), nullptr, totalAssignedTextureUnits++));
+                textureUnits.insert_or_assign(
+                    std::string(sampler.getName()),
+                    TextureUnit(std::move(sampler), nullptr, totalAssignedTextureUnits++)
+                );
             }
 
             textureUnitSamplers = std::vector<Sampler>{};
@@ -299,6 +301,50 @@ namespace Flare
             return program;
         }
 
+        bool ShaderProgram::setTexture(const std::string &textureUnitName, std::shared_ptr<Texture> texture)
+        {
+            auto mapIterator = textureUnits.find(textureUnitName);
+
+            if (mapIterator == textureUnits.end()) {
+                return false;
+            }
+
+            mapIterator->second.texture = texture;
+
+            return true;
+        }
+
+        bool ShaderProgram::setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, std::shared_ptr<Texture> texture)
+        {
+            auto mapIterator = textureUnitArrays.find(textureUnitArrayName);
+
+            if (mapIterator == textureUnitArrays.end()) {
+                return false;
+            }
+
+            mapIterator->second.textures[index] = texture;
+
+            return true;
+        }
+
+        bool ShaderProgram::setTextureArray(const std::string &textureUnitArrayName, std::vector<std::shared_ptr<Texture>> textures)
+        {
+            auto mapIterator = textureUnitArrays.find(textureUnitArrayName);
+
+            if (mapIterator == textureUnitArrays.end()) {
+                return false;
+            }
+
+            auto &textureUnitArray = mapIterator->second;
+
+            unsigned int counter = 0;
+
+            for (auto &storedTexture : textureUnitArray.textures) {
+                storedTexture = textures[counter++];
+            }
+
+            return true;
+        }
 
         ShaderProgram::TextureUnit::TextureUnit(Sampler &&sampler, std::shared_ptr<Texture> texture, unsigned int index)
         :

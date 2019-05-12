@@ -94,6 +94,9 @@ namespace Flare
                 GLint getAttribute(const std::string &attributeName) const;
                 GLint getUniformAttribute(const std::string &uniformName);
                 inline bool isShaderProgramValid() const {return isValid;}
+                bool setTexture(const std::string &textureUnitName, std::shared_ptr<Texture> texture);
+                bool setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, std::shared_ptr<Texture> texture);
+                bool setTextureArray(const std::string &textureUnitArrayName, std::vector<std::shared_ptr<Texture>> textures);
 
                 void unbind();
         };
