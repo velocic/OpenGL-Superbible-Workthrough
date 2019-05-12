@@ -26,6 +26,8 @@ namespace Flare
 
         class ShaderProgram
         {
+            friend class ShaderProgramBuilder;
+
             private:
                 struct TextureUnit {
                     TextureUnit(Sampler &&sampler, std::shared_ptr<Texture> texture, unsigned int index);
@@ -73,7 +75,7 @@ namespace Flare
                 //Creates a range of texture init indices all sharing a single sampler, which will bind to an array
                 //of texture samplers in glsl
                 void setTextureUnitArrays(std::vector<std::pair<Sampler, unsigned int>> &&textureUnitArraySamplers);
-        public:
+            public:
                 ShaderProgram(
                     const std::vector<uint8_t> &vertexShaderSource,
                     const std::vector<uint8_t> &tessellationControlShaderSource,
@@ -156,13 +158,18 @@ namespace Flare
 
                 virtual std::unique_ptr<ShaderProgram> build()
                 {
-                    return std::make_unique<Flare::GL::ShaderProgram>(
+                    auto shader = std::make_unique<Flare::GL::ShaderProgram>(
                         vertexShaderSource,
                         tessellationControlShaderSource,
                         tessellationEvaluationShaderSource,
                         geometryShaderSource,
                         fragmentShaderSource
                     );
+
+                    shader->setTextureUnits(std::move(textureUnitSamplers));
+                    shader->setTextureUnitArrays(std::move(textureUnitArraySamplers));
+
+                    return shader;
                 }
         };
     }
