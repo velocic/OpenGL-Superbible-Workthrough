@@ -298,5 +298,59 @@ namespace Flare
 
             return program;
         }
+
+
+        ShaderProgram::TextureUnit::TextureUnit(Sampler &&sampler, std::shared_ptr<Texture> texture, unsigned int index)
+        :
+            sampler(std::move(sampler)), texture(texture), index(index)
+        {}
+
+        ShaderProgram::TextureUnit::~TextureUnit() {}
+
+        ShaderProgram::TextureUnit::TextureUnit(TextureUnit &&other)
+        :
+            sampler(std::move(other.sampler)), texture(std::move(other.texture)), index(other.index)
+        {
+            other.index = 0;
+        }
+
+        ShaderProgram::TextureUnit &ShaderProgram::TextureUnit::operator=(TextureUnit &&other)
+        {
+            sampler = std::move(other.sampler);
+            texture = std::move(other.texture);
+            index = other.index;
+
+            other.index = 0;
+
+            return *this;
+        }
+
+        ShaderProgram::TextureUnitArray::TextureUnitArray(Sampler &&sampler, std::vector<std::shared_ptr<Texture>> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive)
+        :
+            sampler(std::move(sampler)), textures(std::move(textures)), firstIndexInclusive(firstIndexInclusive), lastIndexExclusive(lastIndexExclusive)
+        {}
+
+        ShaderProgram::TextureUnitArray::~TextureUnitArray() {}
+
+        ShaderProgram::TextureUnitArray::TextureUnitArray(TextureUnitArray &&other)
+        :
+            sampler(std::move(other.sampler)), textures(std::move(other.textures)), firstIndexInclusive(other.firstIndexInclusive), lastIndexExclusive(other.lastIndexExclusive)
+        {
+            other.firstIndexInclusive = 0;
+            other.lastIndexExclusive = 0;
+        }
+
+        ShaderProgram::TextureUnitArray &ShaderProgram::TextureUnitArray::operator=(TextureUnitArray &&other)
+        {
+            sampler = std::move(other.sampler);
+            textures = std::move(other.textures);
+            firstIndexInclusive = other.firstIndexInclusive;
+            lastIndexExclusive = other.lastIndexExclusive;
+
+            other.firstIndexInclusive = 0;
+            other.lastIndexExclusive = 0;
+
+            return *this;
+        }
     }
 }

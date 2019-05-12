@@ -28,27 +28,10 @@ namespace Flare
         {
             private:
                 struct TextureUnit {
-                    TextureUnit(Sampler &&sampler, std::shared_ptr<Texture> texture, unsigned int index)
-                    :
-                        sampler(std::move(sampler)), texture(texture), index(index)
-                    {}
-                    ~TextureUnit() {}
-                    TextureUnit(TextureUnit &&other)
-                    :
-                        sampler(std::move(other.sampler)), texture(std::move(other.texture)), index(other.index)
-                    {
-                        other.index = 0;
-                    }
-                    TextureUnit &operator=(TextureUnit &&other)
-                    {
-                        sampler = std::move(other.sampler);
-                        texture = std::move(other.texture);
-                        index = other.index;
-
-                        other.index = 0;
-
-                        return *this;
-                    }
+                    TextureUnit(Sampler &&sampler, std::shared_ptr<Texture> texture, unsigned int index);
+                    ~TextureUnit();
+                    TextureUnit(TextureUnit &&other);
+                    TextureUnit &operator=(TextureUnit &&other);
                     TextureUnit(const TextureUnit& other) = delete;
                     TextureUnit &operator=(const TextureUnit &other) = delete;
 
@@ -58,30 +41,10 @@ namespace Flare
                 };
 
                 struct TextureUnitArray {
-                    TextureUnitArray(Sampler &&sampler, std::vector<std::shared_ptr<Texture>> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive)
-                    :
-                        sampler(std::move(sampler)), textures(std::move(textures)), firstIndexInclusive(firstIndexInclusive), lastIndexExclusive(lastIndexExclusive)
-                    {}
-                    ~TextureUnitArray() {}
-                    TextureUnitArray(TextureUnitArray &&other)
-                    :
-                        sampler(std::move(other.sampler)), textures(std::move(other.textures)), firstIndexInclusive(other.firstIndexInclusive), lastIndexExclusive(other.lastIndexExclusive)
-                    {
-                        other.firstIndexInclusive = 0;
-                        other.lastIndexExclusive = 0;
-                    }
-                    TextureUnitArray &operator=(TextureUnitArray &&other)
-                    {
-                        sampler = std::move(other.sampler);
-                        textures = std::move(other.textures);
-                        firstIndexInclusive = other.firstIndexInclusive;
-                        lastIndexExclusive = other.lastIndexExclusive;
-
-                        other.firstIndexInclusive = 0;
-                        other.lastIndexExclusive = 0;
-
-                        return *this;
-                    }
+                    TextureUnitArray(Sampler &&sampler, std::vector<std::shared_ptr<Texture>> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive);
+                    ~TextureUnitArray();
+                    TextureUnitArray(TextureUnitArray &&other);
+                    TextureUnitArray &operator=(TextureUnitArray &&other);
                     TextureUnitArray(const TextureUnitArray& other) = delete;
                     TextureUnitArray &operator=(const TextureUnitArray &other) = delete;
 
