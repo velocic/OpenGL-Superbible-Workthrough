@@ -6,10 +6,7 @@ namespace Flare
     {
         Texture2D::Texture2D(GLsizei numMipmapLevels, GLenum internalFormat, GLsizei textureWidth, GLsizei textureHeight)
         :
-            numMipmapLevels(numMipmapLevels),
-            internalFormat(internalFormat),
-            textureWidth(textureWidth),
-            textureHeight(textureHeight)
+            Texture(numMipmapLevels, internalFormat, textureWidth, textureHeight)
         {
             initialize();
         }
@@ -21,30 +18,13 @@ namespace Flare
 
         Texture2D::Texture2D(Texture2D&& other)
         :
-            numMipmapLevels(other.numMipmapLevels),
-            internalFormat(other.internalFormat),
-            textureWidth(other.textureWidth),
-            textureHeight(other.textureHeight)
+            Texture(std::move(other))
         {
-            other.glTexture = 0;
-            other.numMipmapLevels = 0;
-            other.internalFormat = GL_RGBA;
-            other.textureWidth = 0;
-            other.textureHeight = 0;
         }
 
         Texture2D& Texture2D::operator=(Texture2D&& other)
         {
-            glTexture = other.glTexture;
-            numMipmapLevels = other.numMipmapLevels;
-            textureWidth = other.textureWidth;
-            textureHeight = other.textureHeight;
-
-            other.glTexture = 0;
-            other.numMipmapLevels = 0;
-            other.internalFormat = GL_RGBA;
-            other.textureWidth = 0;
-            other.textureHeight = 0;
+            Texture::operator=(std::move(other));
 
             return *this;
         }

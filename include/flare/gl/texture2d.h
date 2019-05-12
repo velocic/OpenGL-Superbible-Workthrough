@@ -13,14 +13,9 @@ namespace Flare
         class Texture2D : public Texture
         {
             private:
-                GLuint glTexture = 0;
-                GLsizei numMipmapLevels = 0;
-                GLenum internalFormat = GL_RGBA;
-                GLsizei textureWidth = 0;
-                GLsizei textureHeight = 0;
             public:
                 Texture2D(GLsizei numMipmapLevels, GLenum internalFormat, GLsizei textureWidth, GLsizei textureHeight);
-                ~Texture2D();
+                virtual ~Texture2D();
                 Texture2D(Texture2D&& other);
                 Texture2D& operator=(Texture2D&& other);
                 Texture2D(const Texture2D& other) = delete;

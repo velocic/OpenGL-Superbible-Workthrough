@@ -172,6 +172,10 @@ namespace Flare
             return shader;
         }
 
+        void ShaderProgram::bindTextureUnits()
+        {
+        }
+
         void ShaderProgram::setTextureUnits(std::vector<Sampler> &&textureUnitSamplers)
         {
             for (auto &&sampler : textureUnitSamplers) {

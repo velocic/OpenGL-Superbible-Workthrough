@@ -51,13 +51,15 @@ namespace Flare
                 GLuint compileShaderProgramFromSource(const std::vector<uint8_t> &shaderSource, GLenum shaderType);
                 GLuint linkShaderProgram(const ShaderProgramStages& shaderStages);
                 
+                void bindTextureUnits();
+
                 //Creates one texture unit index paired with one sampler
                 void setTextureUnits(std::vector<Sampler> &&textureUnitSamplers);
 
                 //Creates a range of texture init indices all sharing a single sampler, which will bind to an array
                 //of texture samplers in glsl
                 void setTextureUnitArrays(std::vector<std::pair<Sampler, unsigned int>> &&textureUnitArraySamplers);
-            public:
+        public:
                 ShaderProgram(
                     const std::vector<uint8_t> &vertexShaderSource,
                     const std::vector<uint8_t> &tessellationControlShaderSource,
