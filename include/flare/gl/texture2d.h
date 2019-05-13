@@ -21,7 +21,7 @@ namespace Flare
                 Texture2D(const Texture2D& other) = delete;
                 Texture2D& operator=(const Texture2D& other) = delete;
 
-                void textureSubImage2D(const GLvoid *pixels, GLenum type, bool generateMipmaps);
+                void textureSubImage2D(GLenum format, GLenum type, const GLvoid *pixels, bool generateMipmaps);
                 void textureSubImage2D(GLint level, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels, bool generateMipmaps);
                 void clearTexSubImage(GLenum type, const void *data);
                 void clearTexSubImage(GLint level, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);

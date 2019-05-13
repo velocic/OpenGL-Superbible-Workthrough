@@ -29,14 +29,14 @@ namespace Flare
             return *this;
         }
 
-        void Texture2D::textureSubImage2D(const GLvoid *pixels, GLenum type, bool generateMipmaps)
+        void Texture2D::textureSubImage2D(GLenum format, GLenum type, const GLvoid *pixels, bool generateMipmaps)
         {
             glTextureSubImage2D(
                 glTexture,
                 0,
                 0, 0,
                 textureWidth, textureHeight,
-                internalFormat,
+                format,
                 type,
                 pixels
             );
