@@ -2,9 +2,13 @@
 
 #include <cmath>
 
+#include <flare/gl/sampler.h>
+#include <flare/gl/texture2d.h>
 #include <flare/utility/file.h>
+
 #include <glm-0.9.9/glm.hpp>
 #include <glm-0.9.9/gtc/matrix_transform.hpp>
+#include <lodepng/lodepng.h>
 
 namespace Tutorial
 {
@@ -16,10 +20,24 @@ namespace Tutorial
             720
         );
 
+        auto demoTextureSampler = Flare::GL::Sampler("demoTexture");
+
         spinningCubeShader = Flare::GL::ShaderProgramBuilder()
             .addVertexShader(Utility::File::getFileContents(vertexShaderPath))
             .addFragmentShader(Utility::File::getFileContents(fragmentShaderPath))
+            .addTextureUnit(std::move(demoTextureSampler))
             .build();
+
+        {
+            std::vector<unsigned char> decodedPNG;
+            unsigned int imageWidth;
+            unsigned int imageHeight;
+
+            auto resultCode = lodepng::decode(decodedPNG, imageWidth, imageHeight, "../src/5b-spinning-cubes/textures/brick.png");
+            auto demoTexture = std::make_shared<Flare::GL::Texture2D>(1, GL_RGBA8, imageWidth, imageHeight);
+            demoTexture->textureSubImage2D(&decodedPNG[0], GL_UNSIGNED_INT_8_8_8_8, false);
+            spinningCubeShader->setTexture("demoTexture", demoTexture);
+        }
 
         spinningCubeShader->bind();
 

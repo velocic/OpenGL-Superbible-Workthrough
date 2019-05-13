@@ -197,8 +197,10 @@ namespace Flare
         void ShaderProgram::setTextureUnits(std::vector<Sampler> &&textureUnitSamplers)
         {
             for (auto &&sampler : textureUnitSamplers) {
+                auto samplerName = std::string(sampler.getName());
+
                 textureUnits.insert_or_assign(
-                    std::string(sampler.getName()),
+                    samplerName,
                     TextureUnit(std::move(sampler), nullptr, totalAssignedTextureUnits++)
                 );
             }

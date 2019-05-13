@@ -11,7 +11,7 @@ namespace Flare
         {
             protected:
                 GLuint glTexture = 0;
-                GLsizei numMipmapLevels = 0;
+                GLsizei numMipmapLevels = 1;
                 GLenum internalFormat = GL_RGBA;
                 GLsizei textureWidth = 0;
                 GLsizei textureHeight = 0;

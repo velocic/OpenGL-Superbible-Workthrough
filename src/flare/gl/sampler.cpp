@@ -20,7 +20,8 @@ namespace Flare
 
         Sampler::Sampler(Sampler&& other)
         :
-            glSampler(other.glSampler)
+            glSampler(other.glSampler),
+            name(std::move(other.name))
         {
             other.glSampler = 0;
         }
@@ -28,6 +29,7 @@ namespace Flare
         Sampler& Sampler::operator=(Sampler&& other)
         {
             glSampler = other.glSampler;
+            name = other.name;
 
             other.glSampler = 0;
 
