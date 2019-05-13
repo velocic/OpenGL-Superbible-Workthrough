@@ -58,7 +58,8 @@ namespace Flare
                 pixels
             );
 
-            if (generateMipmaps) {
+            //Mipmaps are generated from the image stored in level 0, so ignore requests to gen mipmaps if another level is being set
+            if (generateMipmaps && level == 0) {
                 glGenerateTextureMipmap(glTexture);
             }
         }
