@@ -44,5 +44,15 @@ namespace Flare
 
             return *this;
         }
+
+        void Texture::textureParameterf(GLenum pname, GLfloat param)
+        {
+            glTextureParameterf(glTexture, pname, param);
+        }
+
+        void Texture::textureParameteri(GLenum pname, GLint param)
+        {
+            glTextureParameteri(glTexture, pname, param);
+        }
     }
 }

@@ -21,6 +21,8 @@ namespace Tutorial
         );
 
         auto demoTextureSampler = Flare::GL::Sampler("demoTexture");
+        demoTextureSampler.samplerParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        demoTextureSampler.samplerParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         spinningCubeShader = Flare::GL::ShaderProgramBuilder()
             .addVertexShader(Utility::File::getFileContents(vertexShaderPath))

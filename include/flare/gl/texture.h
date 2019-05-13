@@ -23,6 +23,9 @@ namespace Flare
                 Texture(const Texture& other) = delete;
                 Texture& operator=(const Texture& other) = delete;
 
+                virtual void textureParameterf(GLenum pname, GLfloat param);
+                virtual void textureParameteri(GLenum pname, GLint param);
+
                 virtual void destroy() = 0;
                 virtual void initialize() = 0;
                 virtual void bind(GLuint textureUnitIndex) = 0;
