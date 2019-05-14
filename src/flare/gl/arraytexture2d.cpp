@@ -69,6 +69,21 @@ namespace Flare
 
         void ArrayTexture2D::clearTexSubImage(GLint level, GLint xOffset, GLint yOffset, GLint zOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data)
         {
+            if (glTexture == 0) {
+                throw std::runtime_error("Attempting to clear an OpenGL array texture that is uninitialized.");
+            }
+
+            glClearTexSubImage(
+                glTexture,
+                level,
+                xOffset, yOffset,
+                zOffset,
+                width, height,
+                1,
+                format,
+                type,
+                data
+            );
         }
 
         void ArrayTexture2D::initialize()

@@ -81,7 +81,7 @@ namespace Flare
             }
         }
 
-        void Texture2D::clearTexSubImage(GLenum type, const void *data)
+        void Texture2D::clearTexSubImage(GLenum format, GLenum type, const void *data)
         {
             if (glTexture == 0) {
                 throw std::runtime_error("Attempting to clear an OpenGL texture that is uninitialized.");
@@ -92,7 +92,7 @@ namespace Flare
                 0,
                 0, 0, 0,
                 textureWidth, textureHeight, 0,
-                internalFormat,
+                format,
                 type,
                 data
             );
