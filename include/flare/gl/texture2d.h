@@ -1,8 +1,6 @@
 #ifndef FLARE_GL_TEXTURE2D_H
 #define FLARE_GL_TEXTURE2D_H
 
-#include <memory>
-
 #include <GL/gl3w.h>
 #include <flare/gl/texture.h>
 
@@ -12,7 +10,8 @@ namespace Flare
     {
         class Texture2D : public Texture
         {
-            private:
+            protected:
+                GLsizei textureHeight = 0;
             public:
                 Texture2D(GLsizei numMipmapLevels, GLenum internalFormat, GLsizei textureWidth, GLsizei textureHeight);
                 virtual ~Texture2D() override;

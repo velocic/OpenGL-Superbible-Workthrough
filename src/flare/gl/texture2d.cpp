@@ -1,12 +1,16 @@
 #include <flare/gl/texture2d.h>
 
+#include <algorithm>
+#include <stdexcept>
+
 namespace Flare
 {
     namespace GL
     {
         Texture2D::Texture2D(GLsizei numMipmapLevels, GLenum internalFormat, GLsizei textureWidth, GLsizei textureHeight)
         :
-            Texture(numMipmapLevels, internalFormat, textureWidth, textureHeight)
+            Texture(numMipmapLevels, internalFormat, textureWidth),
+            textureHeight(textureHeight)
         {
             initialize();
         }
@@ -18,19 +22,28 @@ namespace Flare
 
         Texture2D::Texture2D(Texture2D&& other)
         :
-            Texture(std::move(other))
+            Texture(std::move(other)),
+            textureHeight(other.textureHeight)
         {
+            other.textureHeight = 0;
         }
 
         Texture2D& Texture2D::operator=(Texture2D&& other)
         {
+            textureHeight = other.textureHeight;
             Texture::operator=(std::move(other));
+
+            other.textureHeight = 0;
 
             return *this;
         }
 
         void Texture2D::textureSubImage2D(GLenum format, GLenum type, const GLvoid *pixels, bool generateMipmaps)
         {
+            if (glTexture == 0) {
+                throw std::runtime_error("Attempting to buffer data to an OpenGL texture that is uninitialized.");
+            }
+
             glTextureSubImage2D(
                 glTexture,
                 0,
@@ -48,6 +61,10 @@ namespace Flare
 
         void Texture2D::textureSubImage2D(GLint level, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels, bool generateMipmaps)
         {
+            if (glTexture == 0) {
+                throw std::runtime_error("Attempting to buffer data to an OpenGL texture that is uninitialized.");
+            }
+
             glTextureSubImage2D(
                 glTexture,
                 level,

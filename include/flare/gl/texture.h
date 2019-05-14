@@ -14,9 +14,8 @@ namespace Flare
                 GLsizei numMipmapLevels = 1;
                 GLenum internalFormat = GL_RGBA;
                 GLsizei textureWidth = 0;
-                GLsizei textureHeight = 0;
             public:
-                Texture(GLsizei numMipmapLevels, GLenum internalFormat, GLsizei textureWidth, GLsizei textureHeight);
+                Texture(GLsizei numMipmapLevels, GLenum internalFormat, GLsizei textureWidth);
                 virtual ~Texture();
                 Texture(Texture&& other);
                 Texture& operator=(Texture&& other);

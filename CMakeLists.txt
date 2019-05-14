@@ -19,6 +19,7 @@ add_executable(
     src/flare/gl/shaderprogram.cpp
     src/flare/gl/texture.cpp
     src/flare/gl/texture2d.cpp
+    src/flare/gl/arraytexture2d.cpp
     src/flare/gl/sampler.cpp
     src/flare/ui/renderwindow.cpp
     src/flare/utility/file.cpp

@@ -25,7 +25,6 @@ namespace Tutorial
             std::array<GLfloat, 108> cubeVertexPositions;
 
             unsigned int elapsedTime = 0;
-            static constexpr float PI = 3.14159265359;
         public:
             void initialize() override;
             void render(unsigned int deltaTime) override;
