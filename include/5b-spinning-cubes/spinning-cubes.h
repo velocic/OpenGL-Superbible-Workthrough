@@ -8,7 +8,6 @@
 #include <flare/gl/buffer.h>
 #include <flare/gl/vertexarray.h>
 #include <flare/gl/shaderprogram.h>
-#include <flare/gl/uniformblock.h>
 #include <flare/ui/renderwindow.h>
 
 namespace Tutorial

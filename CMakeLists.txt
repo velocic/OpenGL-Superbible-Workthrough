@@ -13,6 +13,7 @@ add_executable(
     src/3-gpu-shader-pipeline/shader-pipeline.cpp
     src/5-data/data.cpp
     src/5b-spinning-cubes/spinning-cubes.cpp
+    src/5c-array-textures/array-textures.cpp
     src/flare/gl/buffer.cpp
     src/flare/gl/uniformblock.cpp
     src/flare/gl/vertexarray.cpp
