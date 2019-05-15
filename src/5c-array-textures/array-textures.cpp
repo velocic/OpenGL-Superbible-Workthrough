@@ -1,6 +1,7 @@
 #include <5c-array-textures/array-textures.h>
 
 #include <flare/gl/arraytexture2d.h>
+#include <flare/gl/uniformblock.h>
 #include <flare/utility/file.h>
 
 #include <glm-0.9.9/glm.hpp>
@@ -62,6 +63,17 @@ namespace Tutorial
         );
         basicVAO->bind();
         dropletShader->bind();
+
+        //create uniform buffer object, fill with droplet instance data
+        // auto [dropletInstanceDataBuffer, dropletInstanceDataHandle] = Flare::GL::buildStd140AlignedUniformBlockBuffer(
+        //     Flare::GL::GLSLType<glm::vec4>{}
+        // );
+
+        //DEBUG
+        Flare::GL::buildStd140AlignedUniformBlockBuffer(
+            Flare::GL::GLSLType<glm::vec4>{}
+        );
+        //END DEBUG
     }
 
     void ArrayTextures::render(unsigned int deltaTime)

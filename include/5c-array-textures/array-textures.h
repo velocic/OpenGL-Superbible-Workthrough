@@ -23,6 +23,12 @@ namespace Tutorial
                 std::vector<unsigned char> rawImageData;
             };
 
+            struct DropletInstanceData {
+                float x_offset = 0;
+                float y_offset = 0;
+                float orientation = 0;
+            };
+
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
             std::unique_ptr<Flare::GL::VertexArray> basicVAO = nullptr;
             std::unique_ptr<Flare::GL::ShaderProgram> dropletShader = nullptr;
