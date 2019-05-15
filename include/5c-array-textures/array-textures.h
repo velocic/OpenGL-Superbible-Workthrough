@@ -17,10 +17,16 @@ namespace Tutorial
     class ArrayTextures : public Flare::Application
     {
         private:
+            struct LoadedDropletImageData {
+                unsigned int imageWidth = 0;
+                unsigned int imageHeight = 0;
+                std::vector<unsigned char> rawImageData;
+            };
+
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
             std::unique_ptr<Flare::GL::VertexArray> basicVAO = nullptr;
             std::unique_ptr<Flare::GL::ShaderProgram> dropletShader = nullptr;
-            std::array<std::string, 10> dropletFiles{
+            const std::array<std::string, 10> dropletFiles{
                 "../src/5c-array-textures/test1.png",
                 "../src/5c-array-textures/test2.png",
                 "../src/5c-array-textures/test3.png",
@@ -32,6 +38,9 @@ namespace Tutorial
                 "../src/5c-array-textures/test9.png",
                 "../src/5c-array-textures/test10.png"
             };
+
+            const std::string vertexShaderPath = "../src/5c-array-textures/shaders/vertex.glsl";
+            const std::string fragmentShaderPath = "../src/5c-array-textures/shaders/fragment.glsl";
             unsigned int elapsedTime = 0;
         public:
             void initialize() override;
