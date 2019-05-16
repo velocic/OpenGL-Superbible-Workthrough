@@ -7,6 +7,8 @@
 #include <tuple>
 #include <utility>
 
+#include <iostream>
+
 #include <glm-0.9.9/glm.hpp>
 #include <flare/gl/uniformblock_priv.h>
 
@@ -53,6 +55,7 @@ namespace Flare
         constexpr auto buildStd140AlignedUniformBlockBuffer(GLSLTypes... args)
         {
             constexpr auto bufferSize = HelperTemplates::calculateUniformBlockSize(args...);
+
             constexpr auto alignedElementIndices = HelperTemplates::calculateUniformBlockAlignedElements(args...);
 
             auto buffer = std::make_unique<uint8_t[]>(bufferSize);

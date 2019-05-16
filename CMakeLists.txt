@@ -4,7 +4,7 @@ project(OpenGL-Superbible-Workthrough)
 
 set(SAMPLE_RUNNER_NAME sample-browser)
 
-set(CMAKE_CXX_FLAGS "-std=c++17 -Wall -ggdb3")
+add_compile_options(-std=c++17 -Wall -ggdb3)
 set(PROJECT_SOURCE_DIR "${PROJECT_BINARY_DIR}/src")
 
 add_executable(

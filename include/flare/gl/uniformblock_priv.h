@@ -7,6 +7,12 @@ namespace Flare
     {
         namespace HelperTemplates
         {
+            template<size_t TotalBlockSize>
+            constexpr size_t calculateUniformBlockSize()
+            {
+                return TotalBlockSize;
+            }
+
             template<size_t TotalBlockSize, typename Last>
             constexpr size_t calculateUniformBlockSize(Last last)
             {
@@ -28,6 +34,12 @@ namespace Flare
                 constexpr auto paddedCurrentSize = TotalBlockSize + Current::size + (Current::alignment - (TotalBlockSize % Current::alignment));
 
                 return calculateUniformBlockSize<paddedCurrentSize>(remaining...);
+            }
+
+            template<size_t CurrentElementIndex>
+            constexpr auto calculateUniformBlockAlignedElements()
+            {
+                return std::tuple();
             }
 
             template<size_t CurrentElementIndex, typename Last>

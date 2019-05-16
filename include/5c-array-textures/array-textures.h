@@ -6,6 +6,7 @@
 
 #include <GL/gl3w.h>
 
+#include <flare/gl/uniformblock.h>
 #include <flare/application.h>
 #include <flare/gl/buffer.h>
 #include <flare/gl/vertexarray.h>
@@ -27,7 +28,12 @@ namespace Tutorial
                 float x_offset = 0;
                 float y_offset = 0;
                 float orientation = 0;
+                float padding = 0;
             };
+
+            std::array<float, 256> dropletXOffset{}; 
+            std::array<float, 256> dropletRotSpeed{};
+            std::array<float, 256> dropletFallSpeed{};
 
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
             std::unique_ptr<Flare::GL::VertexArray> basicVAO = nullptr;
@@ -48,6 +54,15 @@ namespace Tutorial
             const std::string vertexShaderPath = "../src/5c-array-textures/shaders/vertex.glsl";
             const std::string fragmentShaderPath = "../src/5c-array-textures/shaders/fragment.glsl";
             unsigned int elapsedTime = 0;
+
+            decltype(Flare::GL::buildStd140AlignedUniformBlockBuffer(Flare::GL::GLSLArrayType<DropletInstanceData, 256>{})) dropletBufferAndHandleTuple =
+                Flare::GL::buildStd140AlignedUniformBlockBuffer(
+                    Flare::GL::GLSLArrayType<DropletInstanceData, 256>{}
+                );
+            GLuint glUniformBufferHandle = 0;
+
+            void initializeRandomizedDropletInstanceParams();
+
         public:
             void initialize() override;
             void render(unsigned int deltaTime) override;
