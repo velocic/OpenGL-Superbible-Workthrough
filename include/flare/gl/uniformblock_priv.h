@@ -39,7 +39,7 @@ namespace Flare
             template<size_t CurrentElementIndex>
             constexpr auto calculateUniformBlockAlignedElements()
             {
-                return std::tuple();
+                return std::make_tuple();
             }
 
             template<size_t CurrentElementIndex, typename Last>
