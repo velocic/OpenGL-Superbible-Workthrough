@@ -72,18 +72,26 @@ namespace Tutorial
                     GL_RGBA,
                     GL_UNSIGNED_BYTE,
                     &(imageData[i % 10].rawImageData[0]),
-                    false
+                    true
                 );
             }
         }
 
         dropletShader->setTexture("tex_droplets", arrayTexture);
 
-        //create basic VAO with no associated buffers and bind. I believe it's necessary to have
-        //a VAO bound to do rendering at all, even if using no buffers
+        auto dropletIndexBufferLayout = Flare::GL::VertexDataLayoutBuilder()
+            .addAttribute("droplet_index", 1, GL_INT, GL_FALSE, 0)
+            .setStride(sizeof(int))
+            .build();
+
+        dropletIndexBuffer = std::make_unique<Flare::GL::Buffer>(dropletIndexBufferLayout);
+        dropletIndexBuffer->namedBufferStorage(sizeof(int), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
         basicVAO = std::make_unique<Flare::GL::VertexArray>(
             *(dropletShader.get()),
-            std::vector<std::reference_wrapper<const Flare::GL::Buffer>>()
+            std::vector<std::reference_wrapper<const Flare::GL::Buffer>>{
+                *(dropletIndexBuffer.get())
+            }
         );
         basicVAO->bind();
         dropletShader->bind();
@@ -101,7 +109,7 @@ namespace Tutorial
     void ArrayTextures::render(unsigned int deltaTime)
     {
         elapsedTime += deltaTime;
-        auto t = static_cast<float>(deltaTime * .0001);
+        auto t = static_cast<float>(elapsedTime * .003);
 
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
         auto &[dropletBuffer, dropletArrayHandle] = dropletUniformBufferObject->getHandles();
@@ -119,7 +127,7 @@ namespace Tutorial
 
         glClearBufferfv(GL_COLOR, 0, clearColor);
         for (unsigned int dropletIndex = 0; dropletIndex < 256; ++dropletIndex) {
-            glVertexAttribI1i(0, dropletIndex);
+            dropletIndexBuffer->namedBufferSubData(0, sizeof(int), &dropletIndex);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         }
 

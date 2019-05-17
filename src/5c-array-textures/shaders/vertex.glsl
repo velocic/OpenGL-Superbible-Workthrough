@@ -16,7 +16,7 @@ struct droplet_t
     float unused;
 };
 
-layout (std140) uniform droplets
+layout (std140, binding = 0) uniform droplets
 {
     droplet_t droplet[256];
 };
@@ -45,4 +45,6 @@ void main(void)
         0.5,
         1.0
     );
+
+    vs_out.droplet = droplet_index % 64;
 }

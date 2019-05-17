@@ -38,6 +38,7 @@ namespace Tutorial
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
             std::unique_ptr<Flare::GL::VertexArray> basicVAO = nullptr;
             std::unique_ptr<Flare::GL::ShaderProgram> dropletShader = nullptr;
+            std::unique_ptr<Flare::GL::Buffer> dropletIndexBuffer = nullptr;
             decltype(Flare::GL::buildStd140AlignedUniformBlockBuffer(Flare::GL::GLSLArrayType<DropletInstanceData, 256>{})) dropletUniformBufferObject;
 
             const std::array<std::string, 10> dropletFiles{
