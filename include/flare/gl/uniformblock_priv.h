@@ -81,8 +81,8 @@ namespace Flare
                 return std::tuple_cat(std::tuple<typename GLSLType::type*>(), buildEmptyUniformBlockElementPointerTuple(rest...));
             }
 
-            template<typename... Pointers, typename... BufferOffsets>
-            constexpr auto assignPointersIntoBuffer(const std::tuple<Pointers...> &pointerTuple, const std::tuple<BufferOffsets...> &bufferOffsetsTuple, uint8_t *buffer)
+            template<size_t BufferSize, typename... Pointers, typename... BufferOffsets>
+            constexpr auto assignPointersIntoBuffer(const std::tuple<Pointers...> &pointerTuple, const std::tuple<BufferOffsets...> &bufferOffsetsTuple, std::array<uint8_t, BufferSize> *buffer)
             {
                 if constexpr (sizeof...(Pointers) != sizeof...(BufferOffsets)) {
                     return pointerTuple;

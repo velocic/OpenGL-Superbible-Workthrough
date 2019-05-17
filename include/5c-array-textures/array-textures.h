@@ -38,6 +38,8 @@ namespace Tutorial
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
             std::unique_ptr<Flare::GL::VertexArray> basicVAO = nullptr;
             std::unique_ptr<Flare::GL::ShaderProgram> dropletShader = nullptr;
+            decltype(Flare::GL::buildStd140AlignedUniformBlockBuffer(Flare::GL::GLSLArrayType<DropletInstanceData, 256>{})) dropletUniformBufferObject;
+
             const std::array<std::string, 10> dropletFiles{
                 "../src/5c-array-textures/textures/test1.png",
                 "../src/5c-array-textures/textures/test2.png",
@@ -54,12 +56,6 @@ namespace Tutorial
             const std::string vertexShaderPath = "../src/5c-array-textures/shaders/vertex.glsl";
             const std::string fragmentShaderPath = "../src/5c-array-textures/shaders/fragment.glsl";
             unsigned int elapsedTime = 0;
-
-            decltype(Flare::GL::buildStd140AlignedUniformBlockBuffer(Flare::GL::GLSLArrayType<DropletInstanceData, 256>{})) dropletBufferAndHandleTuple =
-                Flare::GL::buildStd140AlignedUniformBlockBuffer(
-                    Flare::GL::GLSLArrayType<DropletInstanceData, 256>{}
-                );
-            GLuint glUniformBufferHandle = 0;
 
             void initializeRandomizedDropletInstanceParams();
 

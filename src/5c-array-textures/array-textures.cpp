@@ -88,8 +88,9 @@ namespace Tutorial
         basicVAO->bind();
         dropletShader->bind();
 
-        //TODO: make uniform buffer wrapper class
-        glCreateBuffers(1, &glUniformBufferHandle);
+        dropletUniformBufferObject = Flare::GL::buildStd140AlignedUniformBlockBuffer(
+            Flare::GL::GLSLArrayType<DropletInstanceData, 256>{}
+        );
 
         initializeRandomizedDropletInstanceParams();
 
@@ -103,10 +104,9 @@ namespace Tutorial
         auto t = static_cast<float>(deltaTime * .0001);
 
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
-        auto &[dropletBuffer, dropletArrayHandle] = dropletBufferAndHandleTuple;
+        auto &[dropletBuffer, dropletArrayHandle] = dropletUniformBufferObject->getHandles();
 
-        //TODO: make uniform buffer wrapper class
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, glUniformBufferHandle);
+        dropletUniformBufferObject->bindBufferBase(0);
 
         for (unsigned int i = 0; i < 256; ++i) {
             dropletArrayHandle[i].x_offset = dropletXOffset[i];
@@ -115,12 +115,7 @@ namespace Tutorial
             dropletArrayHandle[i].padding = 0.0f;
         }
 
-        glNamedBufferData(
-            glUniformBufferHandle,
-            256 * sizeof(DropletInstanceData),
-            &dropletArrayHandle[0],
-            GL_DYNAMIC_DRAW
-        );
+        dropletUniformBufferObject->namedBufferData(GL_DYNAMIC_DRAW);
 
         glClearBufferfv(GL_COLOR, 0, clearColor);
         for (unsigned int dropletIndex = 0; dropletIndex < 256; ++dropletIndex) {

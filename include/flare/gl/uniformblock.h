@@ -9,6 +9,8 @@
 
 #include <iostream>
 
+#include <GL/gl3w.h>
+
 #include <glm-0.9.9/glm.hpp>
 #include <flare/gl/uniformblock_priv.h>
 
@@ -51,6 +53,76 @@ namespace Flare
             using type = glm::mat4;
         };
 
+        template<typename UniformBlockTupleType>
+        class UniformBuffer
+        {
+            private:
+                GLuint boundIndex = 0;
+                GLuint glBuffer = 0;
+                UniformBlockTupleType uniformBlock;
+            public:
+                UniformBuffer(UniformBlockTupleType &&uniformBlock)
+                :
+                    uniformBlock(std::move(uniformBlock))
+                {
+                    glCreateBuffers(1, &glBuffer);
+                }
+
+                ~UniformBuffer()
+                {
+                    glDeleteBuffers(1, &glBuffer);
+                }
+
+                UniformBuffer(UniformBuffer &&other)
+                :
+                    boundIndex(other.boundIndex),
+                    glBuffer(other.glBuffer),
+                    uniformBlock(std::move(other.uniformBlock))
+                {
+                    other.boundIndex = 0;
+                    other.glBuffer = 0;
+                }
+
+                UniformBuffer &operator=(UniformBuffer &&other)
+                {
+                    boundIndex = other.boundIndex;
+                    glBuffer = other.glBuffer;
+                    uniformBlock = std::move(other.uniformBlock);
+
+                    other.boundIndex = 0;
+                    other.glBuffer = 0;
+                }
+
+                UniformBuffer(const UniformBuffer &other) = delete;
+                UniformBuffer &operator=(const UniformBuffer &other) = delete;
+
+                void bindBufferBase(GLuint index)
+                {
+                    boundIndex = index;
+                    glBindBufferBase(GL_UNIFORM_BUFFER, index, glBuffer);
+                }
+
+                void unbind()
+                {
+                    glBindBufferBase(GL_UNIFORM_BUFFER, boundIndex, 0);
+                }
+
+                UniformBlockTupleType &getHandles()
+                {
+                    return uniformBlock;
+                }
+
+                void namedBufferData(GLenum usage)
+                {
+                    glNamedBufferData(
+                        glBuffer,
+                        std::get<0>(uniformBlock)->size(),
+                        std::get<0>(uniformBlock).get()->data(),
+                        usage
+                    );
+                }
+        };
+
         template<typename... GLSLTypes>
         constexpr auto buildStd140AlignedUniformBlockBuffer(GLSLTypes... args)
         {
@@ -58,13 +130,21 @@ namespace Flare
 
             constexpr auto alignedElementIndices = HelperTemplates::calculateUniformBlockAlignedElements(args...);
 
-            auto buffer = std::make_unique<uint8_t[]>(bufferSize);
+            auto buffer = std::make_unique<std::array<uint8_t, bufferSize>>();
 
             constexpr decltype(HelperTemplates::buildEmptyUniformBlockElementPointerTuple(args...)) destinationPointerTuple{};
 
             auto underlyingBufferAddress = buffer.get();
-            return std::tuple_cat(std::make_tuple(std::move(buffer)), HelperTemplates::assignPointersIntoBuffer(destinationPointerTuple, alignedElementIndices, underlyingBufferAddress));
+            auto alignedBlockTuple = std::tuple_cat(
+                std::make_tuple(
+                    std::move(buffer)
+                ),
+                HelperTemplates::assignPointersIntoBuffer<bufferSize>(destinationPointerTuple, alignedElementIndices, underlyingBufferAddress)
+            );
+
+            return std::make_unique<UniformBuffer<decltype(alignedBlockTuple)>>(std::move(alignedBlockTuple));
         }
+
     }
 }
 
