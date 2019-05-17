@@ -39,16 +39,16 @@ namespace Tutorial
             std::unique_ptr<Flare::GL::VertexArray> basicVAO = nullptr;
             std::unique_ptr<Flare::GL::ShaderProgram> dropletShader = nullptr;
             const std::array<std::string, 10> dropletFiles{
-                "../src/5c-array-textures/test1.png",
-                "../src/5c-array-textures/test2.png",
-                "../src/5c-array-textures/test3.png",
-                "../src/5c-array-textures/test4.png",
-                "../src/5c-array-textures/test5.png",
-                "../src/5c-array-textures/test6.png",
-                "../src/5c-array-textures/test7.png",
-                "../src/5c-array-textures/test8.png",
-                "../src/5c-array-textures/test9.png",
-                "../src/5c-array-textures/test10.png"
+                "../src/5c-array-textures/textures/test1.png",
+                "../src/5c-array-textures/textures/test2.png",
+                "../src/5c-array-textures/textures/test3.png",
+                "../src/5c-array-textures/textures/test4.png",
+                "../src/5c-array-textures/textures/test5.png",
+                "../src/5c-array-textures/textures/test6.png",
+                "../src/5c-array-textures/textures/test7.png",
+                "../src/5c-array-textures/textures/test8.png",
+                "../src/5c-array-textures/textures/test9.png",
+                "../src/5c-array-textures/textures/test10.png"
             };
 
             const std::string vertexShaderPath = "../src/5c-array-textures/shaders/vertex.glsl";

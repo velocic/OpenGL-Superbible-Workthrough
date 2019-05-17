@@ -100,7 +100,7 @@ namespace Tutorial
     void ArrayTextures::render(unsigned int deltaTime)
     {
         elapsedTime += deltaTime;
-        auto t = static_cast<float>(deltaTime);
+        auto t = static_cast<float>(deltaTime * .0001);
 
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
         auto &[dropletBuffer, dropletArrayHandle] = dropletBufferAndHandleTuple;
