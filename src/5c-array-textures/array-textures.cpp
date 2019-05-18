@@ -123,7 +123,7 @@ namespace Tutorial
             dropletArrayHandle[i].padding = 0.0f;
         }
 
-        dropletUniformBufferObject->namedBufferData(GL_DYNAMIC_DRAW);
+        dropletUniformBufferObject->namedBufferSubData();
 
         glClearBufferfv(GL_COLOR, 0, clearColor);
         for (unsigned int dropletIndex = 0; dropletIndex < 256; ++dropletIndex) {

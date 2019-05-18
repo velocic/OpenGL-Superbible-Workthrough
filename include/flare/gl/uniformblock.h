@@ -60,12 +60,23 @@ namespace Flare
                 GLuint boundIndex = 0;
                 GLuint glBuffer = 0;
                 UniformBlockTupleType uniformBlock;
+
+                void namedBufferStorage(GLsizei size, const void* data, GLbitfield flags)
+                {
+                    glNamedBufferStorage(glBuffer, size, data, flags);
+                }
             public:
                 UniformBuffer(UniformBlockTupleType &&uniformBlock)
                 :
                     uniformBlock(std::move(uniformBlock))
                 {
                     glCreateBuffers(1, &glBuffer);
+
+                    namedBufferStorage(
+                        std::get<0>(uniformBlock)->size(),
+                        nullptr,
+                        GL_DYNAMIC_STORAGE_BIT
+                    );
                 }
 
                 ~UniformBuffer()
@@ -112,13 +123,13 @@ namespace Flare
                     return uniformBlock;
                 }
 
-                void namedBufferData(GLenum usage)
+                void namedBufferSubData()
                 {
-                    glNamedBufferData(
+                    glNamedBufferSubData(
                         glBuffer,
+                        0,
                         std::get<0>(uniformBlock)->size(),
-                        std::get<0>(uniformBlock).get()->data(),
-                        usage
+                        std::get<0>(uniformBlock)->data()
                     );
                 }
         };
