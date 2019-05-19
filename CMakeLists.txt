@@ -14,7 +14,6 @@ add_executable(
     src/5-data/data.cpp
     src/5b-spinning-cubes/spinning-cubes.cpp
     src/5c-array-textures/array-textures.cpp
-    src/5d-writing-images-from-shaders/writing-images-from-shaders.cpp
     src/flare/gl/buffer.cpp
     src/flare/gl/vertexarray.cpp
     src/flare/gl/shaderprogram.cpp

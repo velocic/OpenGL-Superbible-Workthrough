@@ -50,4 +50,9 @@ namespace Flare
     {
         return window;
     }
+
+    void RenderWindow::swapWindow()
+    {
+        SDL_GL_SwapWindow(window);
+    }
 }

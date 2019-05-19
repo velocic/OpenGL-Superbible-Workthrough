@@ -21,6 +21,7 @@ namespace Flare
             float getAspectRatio() {return aspectRatio;};
             void freeResources();
             SDL_Window* getRenderWindowHandle();
+            void swapWindow();
     };
 };
 

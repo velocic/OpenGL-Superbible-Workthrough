@@ -123,7 +123,7 @@ namespace Tutorial
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         }
 
-        SDL_GL_SwapWindow(renderWindow->getRenderWindowHandle());
+        renderWindow->swapWindow();
     }
 
     void ArrayTextures::shutdown()

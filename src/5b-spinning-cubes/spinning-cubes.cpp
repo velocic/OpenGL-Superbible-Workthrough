@@ -186,7 +186,7 @@ namespace Tutorial
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-        SDL_GL_SwapWindow(renderWindow->getRenderWindowHandle());
+        renderWindow->swapWindow();
     }
 
     void SpinningCubes::shutdown()

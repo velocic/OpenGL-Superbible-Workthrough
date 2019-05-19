@@ -131,7 +131,7 @@ namespace Tutorial
         //Have to draw GL_PATCHES instead of GL_TRIANGLES due to using the tessellation
         //shaders. GL_TRIANGLES renders nothing.
         glDrawArrays(GL_PATCHES, 0, 3);
-        SDL_GL_SwapWindow(renderWindow->getRenderWindowHandle());
+        renderWindow->swapWindow();
     }
 
     void Data::shutdown()

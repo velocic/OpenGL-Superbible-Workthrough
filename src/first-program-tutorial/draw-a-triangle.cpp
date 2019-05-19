@@ -47,7 +47,7 @@ namespace Tutorial
 
         glClearBufferfv(GL_COLOR, 0, clearColor);
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        SDL_GL_SwapWindow(renderWindow->getRenderWindowHandle());
+        renderWindow->swapWindow();
     }
 
     void DrawATriangle::shutdown()
