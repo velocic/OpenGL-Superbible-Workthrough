@@ -89,40 +89,6 @@ namespace Flare
                     return result;
                 }
         };
-
-    //     struct UniformBufferObjectAttribute
-    //     {
-    //         std::string name;
-    //         GLint size = 0;
-    //         GLenum type;
-    //     };
-    //
-    //     struct UniformBufferObjectLayout
-    //     {
-    //     };
-    //
-    //     class UniformBufferObjectLayoutBuilder
-    //     {
-    //         private:
-    //             std::vector<UniformBufferObjectAttribute> uboAttributes;
-    //         public:
-    //             UniformBufferObjectLayoutBuilder &addAttribute(const std::string &name, GLint size, GLenum type)
-    //             {
-    //                 uboAttributes.push_back(UniformBufferAttribute{name, size, type});
-    //
-    //                 return *this;
-    //             }
-    //
-    //             UniformBufferObjectLayout build()
-    //             {
-    //                 //TODO: construct uniform buffer object layout using the rules of
-    //                 //UBO layout(std140). that object will autocalc where each parameter
-    //                 //should be placed based on its size, type, and the alignment rules
-    //                 //of layout(std140). that object can be queried for where each attribute
-    //                 //is laid out. It would be fantastic if this could be a template class that generates
-    //                 //strongly-typed object layouts that don't have to be runtime queried.
-    //             }
-    //     };
     }
 }
 
