@@ -24,9 +24,10 @@ namespace Flare
                 void textureSubImage2D(GLint level, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels, bool generateMipmaps);
                 void clearTexSubImage(GLenum format, GLenum type, const void *data);
                 void clearTexSubImage(GLint level, GLint xOffset, GLint yOffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *data);
-                void initialize() override;
-                void destroy() override;
-                void bind(GLuint textureUnitIndex) override;
+                virtual void initialize() override;
+                virtual void destroy() override;
+                virtual void bind(GLuint textureUnitIndex) override;
+                virtual void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format) override;
         };
     }
 }

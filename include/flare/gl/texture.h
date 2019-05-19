@@ -28,6 +28,7 @@ namespace Flare
                 virtual void destroy() = 0;
                 virtual void initialize() = 0;
                 virtual void bind(GLuint textureUnitIndex) = 0;
+                virtual void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format) = 0;
         };
     }
 }
