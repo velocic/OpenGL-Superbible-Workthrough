@@ -29,9 +29,9 @@ namespace Tutorial
             unsigned long long elapsedTime = 0;
             GLuint VAO = 0;
         public:
-            void initialize() override;
-            void render(unsigned int deltaTime) override;
-            void shutdown() override;
+            virtual void initialize() override;
+            virtual void render(unsigned int deltaTime) override;
+            virtual void shutdown() override;
     };
 };
 

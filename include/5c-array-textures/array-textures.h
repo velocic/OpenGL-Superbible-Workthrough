@@ -61,9 +61,9 @@ namespace Tutorial
             void initializeRandomizedDropletInstanceParams();
 
         public:
-            void initialize() override;
-            void render(unsigned int deltaTime) override;
-            void shutdown() override;
+            virtual void initialize() override;
+            virtual void render(unsigned int deltaTime) override;
+            virtual void shutdown() override;
     };
 }
 
