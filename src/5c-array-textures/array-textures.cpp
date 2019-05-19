@@ -79,18 +79,9 @@ namespace Tutorial
 
         dropletShader->setTexture("tex_droplets", arrayTexture);
 
-        auto dropletIndexBufferLayout = Flare::GL::VertexDataLayoutBuilder()
-            .addAttribute("droplet_index", 1, GL_INT, GL_FALSE, 0)
-            .setStride(sizeof(int))
-            .build();
-
-        dropletIndexBuffer = std::make_unique<Flare::GL::Buffer>(dropletIndexBufferLayout);
-        dropletIndexBuffer->namedBufferStorage(sizeof(int), nullptr, GL_DYNAMIC_STORAGE_BIT);
-
         basicVAO = std::make_unique<Flare::GL::VertexArray>(
             *(dropletShader.get()),
             std::vector<std::reference_wrapper<const Flare::GL::Buffer>>{
-                *(dropletIndexBuffer.get())
             }
         );
         basicVAO->bind();
@@ -109,7 +100,7 @@ namespace Tutorial
     void ArrayTextures::render(unsigned int deltaTime)
     {
         elapsedTime += deltaTime;
-        auto t = static_cast<float>(elapsedTime * .003);
+        auto t = static_cast<float>(elapsedTime * .0015);
 
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
         auto &[dropletBuffer, dropletArrayHandle] = dropletUniformBufferObject->getHandles();
@@ -126,8 +117,9 @@ namespace Tutorial
         dropletUniformBufferObject->namedBufferSubData();
 
         glClearBufferfv(GL_COLOR, 0, clearColor);
-        for (unsigned int dropletIndex = 0; dropletIndex < 256; ++dropletIndex) {
-            dropletIndexBuffer->namedBufferSubData(0, sizeof(int), &dropletIndex);
+
+        for (int dropletIndex = 0; dropletIndex < 256; ++dropletIndex) {
+            glVertexAttribI1i(0, dropletIndex);
             glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         }
 
