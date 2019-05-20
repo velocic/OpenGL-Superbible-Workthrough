@@ -14,18 +14,12 @@ namespace Tutorial
             720
         );
 
-        auto vertexShaderSource = Utility::File::getFileContents(vertexShaderPath);
-        auto fragmentShaderSource = Utility::File::getFileContents(fragmentShaderPath);
-        auto tessellationControlShaderSource = Utility::File::getFileContents(tessellationControlShaderPath);
-        auto tessellationEvaluationShaderSource = Utility::File::getFileContents(tessellationEvaluationShaderPath);
-        auto geometryShaderSource = Utility::File::getFileContents(geometryShaderPath);
-
         shaderPipelineDemoShader = Flare::GL::ShaderProgramBuilder()
-            .addVertexShader(std::move(vertexShaderSource))
-            .addFragmentShader(std::move(fragmentShaderSource))
-            .addTessellationControlShader(std::move(tessellationControlShaderSource))
-            .addTessellationEvaluationShader(std::move(tessellationEvaluationShaderSource))
-            .addGeometryShader(std::move(geometryShaderSource))
+            .setVertexShader(vertexShaderPath)
+            .setFragmentShader(fragmentShaderPath)
+            .setTessellationControlShader(tessellationControlShaderPath)
+            .setTessellationEvaluationShader(tessellationEvaluationShaderPath)
+            .setGeometryShader(geometryShaderPath)
             .build();
 
         shaderPipelineDemoShader->bind();

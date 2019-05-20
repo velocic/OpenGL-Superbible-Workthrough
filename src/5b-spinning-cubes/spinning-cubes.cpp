@@ -27,8 +27,8 @@ namespace Tutorial
         demoTextureSampler.samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
         spinningCubeShader = Flare::GL::ShaderProgramBuilder()
-            .addVertexShader(Utility::File::getFileContents(vertexShaderPath))
-            .addFragmentShader(Utility::File::getFileContents(fragmentShaderPath))
+            .setVertexShader(vertexShaderPath)
+            .setFragmentShader(fragmentShaderPath)
             .addTextureUnit(std::move(demoTextureSampler))
             .build();
 

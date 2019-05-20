@@ -8,31 +8,31 @@ namespace Flare
     namespace GL
     {
         ShaderProgram::ShaderProgram(
-            const std::vector<uint8_t> &vertexShaderSource,
-            const std::vector<uint8_t> &tessellationControlShaderSource,
-            const std::vector<uint8_t> &tessellationEvaluationShaderSource,
-            const std::vector<uint8_t> &geometryShaderSource,
-            const std::vector<uint8_t> &fragmentShaderSource
+            const ShaderSourceFile &vertexShaderSourceFile,
+            const ShaderSourceFile &tessellationControlShaderSourceFile,
+            const ShaderSourceFile &tessellationEvaluationShaderSourceFile,
+            const ShaderSourceFile &geometryShaderSourceFile,
+            const ShaderSourceFile &fragmentShaderSourceFile
         )
         {
-            if (vertexShaderSource.size() > 0) {
-                shaderStages.vertexShader = compileShaderProgramFromSource(vertexShaderSource, GL_VERTEX_SHADER);
+            if (vertexShaderSourceFile.sourceCode.size() > 0) {
+                shaderStages.vertexShader = compileShaderProgramFromSource(vertexShaderSourceFile, GL_VERTEX_SHADER);
             }
 
-            if (tessellationControlShaderSource.size() > 0) {
-                shaderStages.tessellationControlShader = compileShaderProgramFromSource(tessellationControlShaderSource, GL_TESS_CONTROL_SHADER);
+            if (tessellationControlShaderSourceFile.sourceCode.size() > 0) {
+                shaderStages.tessellationControlShader = compileShaderProgramFromSource(tessellationControlShaderSourceFile, GL_TESS_CONTROL_SHADER);
             }
 
-            if (tessellationEvaluationShaderSource.size() > 0) {
-                shaderStages.tessellationEvaluationShader = compileShaderProgramFromSource(tessellationEvaluationShaderSource, GL_TESS_EVALUATION_SHADER);
+            if (tessellationEvaluationShaderSourceFile.sourceCode.size() > 0) {
+                shaderStages.tessellationEvaluationShader = compileShaderProgramFromSource(tessellationEvaluationShaderSourceFile, GL_TESS_EVALUATION_SHADER);
             }
 
-            if (geometryShaderSource.size() > 0) {
-                shaderStages.geometryShader = compileShaderProgramFromSource(geometryShaderSource, GL_GEOMETRY_SHADER);
+            if (geometryShaderSourceFile.sourceCode.size() > 0) {
+                shaderStages.geometryShader = compileShaderProgramFromSource(geometryShaderSourceFile, GL_GEOMETRY_SHADER);
             }
 
-            if (fragmentShaderSource.size() > 0) {
-                shaderStages.fragmentShader = compileShaderProgramFromSource(fragmentShaderSource, GL_FRAGMENT_SHADER);
+            if (fragmentShaderSourceFile.sourceCode.size() > 0) {
+                shaderStages.fragmentShader = compileShaderProgramFromSource(fragmentShaderSourceFile, GL_FRAGMENT_SHADER);
             }
 
             shaderProgram = linkShaderProgram(shaderStages);
@@ -148,11 +148,11 @@ namespace Flare
             //TODO: unbind all textures/samplers?
         }
 
-        GLuint ShaderProgram::compileShaderProgramFromSource(const std::vector<uint8_t> &shaderSource, GLenum shaderType)
+        GLuint ShaderProgram::compileShaderProgramFromSource(const ShaderSourceFile &shaderSourceFile, GLenum shaderType)
         {
             GLuint shader = glCreateShader(shaderType);
-            const GLchar *glFormatShaderSource = reinterpret_cast<const char *>(shaderSource.data());
-            const GLint shaderSourceLength = shaderSource.size();
+            const GLchar *glFormatShaderSource = reinterpret_cast<const char *>(shaderSourceFile.sourceCode.data());
+            const GLint shaderSourceLength = shaderSourceFile.sourceCode.size();
             glShaderSource(shader, 1, &glFormatShaderSource, &shaderSourceLength);
             glCompileShader(shader);
 
@@ -160,10 +160,16 @@ namespace Flare
             glGetShaderiv(shader, GL_COMPILE_STATUS, &compilationSuccess);
 
             if (!compilationSuccess) {
-                GLchar infoLog[1024] = {0};
-                glGetShaderInfoLog(shader, sizeof(infoLog), nullptr, infoLog);
+                GLint infoLogLength = 0;
+                glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
 
-                for (int i = 0; i < 1024; ++i) {
+                std::vector<GLchar> infoLog;
+                infoLog.resize(infoLogLength);
+
+                glGetShaderInfoLog(shader, infoLogLength, nullptr, &infoLog[0]);
+
+                std::cout << "Shader compilation error(s) in " << shaderSourceFile.filePath << ":" << std::endl;
+                for (int i = 0; i < infoLogLength; ++i) {
                     std::cout << infoLog[i];
                 }
                 std::cout << std::endl;

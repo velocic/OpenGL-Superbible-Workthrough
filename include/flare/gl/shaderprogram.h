@@ -10,6 +10,7 @@
 
 #include <flare/gl/sampler.h>
 #include <flare/gl/texture.h>
+#include <flare/utility/file.h>
 
 namespace Flare
 {
@@ -22,6 +23,12 @@ namespace Flare
             GLuint tessellationEvaluationShader = 0;
             GLuint geometryShader = 0;
             GLuint fragmentShader = 0;
+        };
+
+        struct ShaderSourceFile
+        {
+            std::string filePath;
+            std::vector<uint8_t> sourceCode;
         };
 
         class ShaderProgram
@@ -64,7 +71,7 @@ namespace Flare
                 unsigned int totalAssignedTextureUnits = 0;
                 bool isValid = false;
 
-                GLuint compileShaderProgramFromSource(const std::vector<uint8_t> &shaderSource, GLenum shaderType);
+                GLuint compileShaderProgramFromSource(const ShaderSourceFile &shaderSourceFile, GLenum shaderType);
                 GLuint linkShaderProgram(const ShaderProgramStages& shaderStages);
                 
                 void bindTextureUnits();
@@ -77,11 +84,11 @@ namespace Flare
                 void setTextureUnitArrays(std::vector<std::pair<Sampler, unsigned int>> &&textureUnitArraySamplers);
             public:
                 ShaderProgram(
-                    const std::vector<uint8_t> &vertexShaderSource,
-                    const std::vector<uint8_t> &tessellationControlShaderSource,
-                    const std::vector<uint8_t> &tessellationEvaluationShaderSource,
-                    const std::vector<uint8_t> &geometryShaderSource,
-                    const std::vector<uint8_t> &fragmentShaderSource
+                    const ShaderSourceFile &vertexShaderSource,
+                    const ShaderSourceFile &tessellationControlShaderSource,
+                    const ShaderSourceFile &tessellationEvaluationShaderSource,
+                    const ShaderSourceFile &geometryShaderSource,
+                    const ShaderSourceFile &fragmentShaderSource
                 );
                 ShaderProgram(ShaderProgram &&other);
                 ShaderProgram &operator=(ShaderProgram &&other);
@@ -106,41 +113,52 @@ namespace Flare
         class ShaderProgramBuilder
         {
             private:
-                std::vector<uint8_t> vertexShaderSource;
-                std::vector<uint8_t> tessellationControlShaderSource;
-                std::vector<uint8_t> tessellationEvaluationShaderSource;
-                std::vector<uint8_t> geometryShaderSource;
-                std::vector<uint8_t> fragmentShaderSource;
+                ShaderSourceFile vertexShaderSource;
+                ShaderSourceFile tessellationControlShaderSource;
+                ShaderSourceFile tessellationEvaluationShaderSource;
+                ShaderSourceFile geometryShaderSource;
+                ShaderSourceFile fragmentShaderSource;
+
                 std::vector<Sampler> textureUnitSamplers;
                 std::vector<std::pair<Sampler, unsigned int>> textureUnitArraySamplers;
             public:
-                virtual ShaderProgramBuilder& addVertexShader(std::vector<uint8_t>&& vertexShaderSource)
+                virtual ShaderProgramBuilder& setVertexShader(const std::string &vertexShaderFilePath)
                 {
-                    this->vertexShaderSource = vertexShaderSource;
+                    vertexShaderSource.filePath = vertexShaderFilePath;
+                    vertexShaderSource.sourceCode = ::Utility::File::getFileContents(vertexShaderFilePath);
+
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& addTessellationControlShader(std::vector<uint8_t>&& tessellationControlShaderSource)
+                virtual ShaderProgramBuilder& setTessellationControlShader(const std::string &tessellationControlShaderFilePath)
                 {
-                    this->tessellationControlShaderSource = tessellationControlShaderSource;
+                    tessellationControlShaderSource.filePath = tessellationControlShaderFilePath;
+                    tessellationControlShaderSource.sourceCode = ::Utility::File::getFileContents(tessellationControlShaderFilePath);
+
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& addTessellationEvaluationShader(std::vector<uint8_t>&& tessellationEvaluationShaderSource)
+                virtual ShaderProgramBuilder& setTessellationEvaluationShader(const std::string &tessellationEvaluationShaderFilePath)
                 {
-                    this->tessellationEvaluationShaderSource = tessellationEvaluationShaderSource;
+                    tessellationEvaluationShaderSource.filePath = tessellationEvaluationShaderFilePath;
+                    tessellationEvaluationShaderSource.sourceCode = ::Utility::File::getFileContents(tessellationEvaluationShaderFilePath);
+
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& addGeometryShader(std::vector<uint8_t>&& geometryShaderSource)
+                virtual ShaderProgramBuilder& setGeometryShader(const std::string &geometryShaderFilePath)
                 {
-                    this->geometryShaderSource = geometryShaderSource;
+                    geometryShaderSource.filePath = geometryShaderFilePath;
+                    geometryShaderSource.sourceCode = ::Utility::File::getFileContents(geometryShaderFilePath);
+
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& addFragmentShader(std::vector<uint8_t>&& fragmentShaderSource)
+                virtual ShaderProgramBuilder& setFragmentShader(const std::string &fragmentShaderFilePath)
                 {
-                    this->fragmentShaderSource = fragmentShaderSource;
+                    fragmentShaderSource.filePath = fragmentShaderFilePath;
+                    fragmentShaderSource.sourceCode = ::Utility::File::getFileContents(fragmentShaderFilePath);
+
                     return *this;
                 }
 

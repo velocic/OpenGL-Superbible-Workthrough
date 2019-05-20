@@ -22,12 +22,9 @@ namespace Tutorial
             1080
         );
 
-        auto vertexShaderSource = Utility::File::getFileContents(vertexShaderPath);
-        auto fragmentShaderSource = Utility::File::getFileContents(fragmentShaderPath);
-
         plainTriangleShader = Flare::GL::ShaderProgramBuilder()
-            .addVertexShader(std::move(vertexShaderSource))
-            .addFragmentShader(std::move(fragmentShaderSource))
+            .setVertexShader(vertexShaderPath)
+            .setFragmentShader(fragmentShaderPath)
             .build();
 
         plainTriangleShader->bind();
