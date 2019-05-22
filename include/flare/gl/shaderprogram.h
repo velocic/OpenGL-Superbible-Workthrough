@@ -125,7 +125,7 @@ namespace Flare
                 virtual ShaderProgramBuilder& setVertexShader(const std::string &vertexShaderFilePath)
                 {
                     vertexShaderSource.filePath = vertexShaderFilePath;
-                    vertexShaderSource.sourceCode = ::Utility::File::getFileContents(vertexShaderFilePath);
+                    vertexShaderSource.sourceCode = ::Flare::File::getFileContents(vertexShaderFilePath);
 
                     return *this;
                 }
@@ -133,7 +133,7 @@ namespace Flare
                 virtual ShaderProgramBuilder& setTessellationControlShader(const std::string &tessellationControlShaderFilePath)
                 {
                     tessellationControlShaderSource.filePath = tessellationControlShaderFilePath;
-                    tessellationControlShaderSource.sourceCode = ::Utility::File::getFileContents(tessellationControlShaderFilePath);
+                    tessellationControlShaderSource.sourceCode = ::Flare::File::getFileContents(tessellationControlShaderFilePath);
 
                     return *this;
                 }
@@ -141,7 +141,7 @@ namespace Flare
                 virtual ShaderProgramBuilder& setTessellationEvaluationShader(const std::string &tessellationEvaluationShaderFilePath)
                 {
                     tessellationEvaluationShaderSource.filePath = tessellationEvaluationShaderFilePath;
-                    tessellationEvaluationShaderSource.sourceCode = ::Utility::File::getFileContents(tessellationEvaluationShaderFilePath);
+                    tessellationEvaluationShaderSource.sourceCode = ::Flare::File::getFileContents(tessellationEvaluationShaderFilePath);
 
                     return *this;
                 }
@@ -149,7 +149,7 @@ namespace Flare
                 virtual ShaderProgramBuilder& setGeometryShader(const std::string &geometryShaderFilePath)
                 {
                     geometryShaderSource.filePath = geometryShaderFilePath;
-                    geometryShaderSource.sourceCode = ::Utility::File::getFileContents(geometryShaderFilePath);
+                    geometryShaderSource.sourceCode = ::Flare::File::getFileContents(geometryShaderFilePath);
 
                     return *this;
                 }
@@ -157,7 +157,7 @@ namespace Flare
                 virtual ShaderProgramBuilder& setFragmentShader(const std::string &fragmentShaderFilePath)
                 {
                     fragmentShaderSource.filePath = fragmentShaderFilePath;
-                    fragmentShaderSource.sourceCode = ::Utility::File::getFileContents(fragmentShaderFilePath);
+                    fragmentShaderSource.sourceCode = ::Flare::File::getFileContents(fragmentShaderFilePath);
 
                     return *this;
                 }

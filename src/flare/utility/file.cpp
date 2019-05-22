@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-namespace Utility
+namespace Flare
 {
     namespace File
     {

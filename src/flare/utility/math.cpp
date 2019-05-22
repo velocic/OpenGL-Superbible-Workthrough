@@ -1,15 +1,15 @@
 #include <flare/utility/math.h>
 
-namespace Utility
+namespace Flare
 {
     namespace Math
     {
-        double degreesToRadians(double angle)
+        constexpr double degreesToRadians(double angle)
         {
             return (angle * PI) / 180;
         }
 
-        double radiansToDegrees(double angle)
+        constexpr double radiansToDegrees(double angle)
         {
             return angle * (180/PI);
         }

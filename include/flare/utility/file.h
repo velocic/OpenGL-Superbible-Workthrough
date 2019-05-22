@@ -4,13 +4,12 @@
 #include <string>
 #include <vector>
 
-namespace Utility
+namespace Flare
 {
     namespace File
     {
         std::vector<uint8_t> getFileContents(const std::string &filePath);
     }
 }
-
 
 #endif

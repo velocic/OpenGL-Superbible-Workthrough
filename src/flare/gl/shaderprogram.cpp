@@ -166,7 +166,7 @@ namespace Flare
                 std::vector<GLchar> infoLog;
                 infoLog.resize(infoLogLength);
 
-                glGetShaderInfoLog(shader, infoLogLength, nullptr, &infoLog[0]);
+                glGetShaderInfoLog(shader, infoLogLength, nullptr, infoLog.data());
 
                 std::cout << "Shader compilation error(s) in " << shaderSourceFile.filePath << ":" << std::endl;
                 for (int i = 0; i < infoLogLength; ++i) {
@@ -274,31 +274,42 @@ namespace Flare
 
             if (vertexShaderAttached) {
                 glDetachShader(program, shaderStages.vertexShader);
+                glDeleteShader(shaderStages.vertexShader);
             }
 
             if (tessellationControlShaderAttached) {
                 glDetachShader(program, shaderStages.tessellationControlShader);
+                glDeleteShader(shaderStages.tessellationControlShader);
             }
 
             if (tessellationEvaluationShaderAttached) {
                 glDetachShader(program, shaderStages.tessellationEvaluationShader);
+                glDeleteShader(shaderStages.tessellationEvaluationShader);
             }
 
             if (geometryShaderAttached) {
                 glDetachShader(program, shaderStages.geometryShader);
+                glDeleteShader(shaderStages.geometryShader);
             }
 
             if (fragmentShaderAttached) {
                 glDetachShader(program, shaderStages.fragmentShader);
+                glDeleteShader(shaderStages.fragmentShader);
             }
 
             GLint linkSuccess = 0;
             glGetProgramiv(program, GL_LINK_STATUS, &linkSuccess);
-            if (!linkSuccess) {
-                GLchar infoLog[1024] = {0};
-                glGetProgramInfoLog(program, sizeof(infoLog), nullptr, infoLog);
 
-                for (int i = 0; i < 1024; ++i) {
+            if (!linkSuccess) {
+                GLint infoLogLength = 0;
+                glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+                std::vector<GLchar> infoLog;
+                infoLog.resize(infoLogLength);
+
+                glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog.data());
+
+                for (int i = 0; i < infoLogLength; ++i) {
                     std::cout << infoLog[i];
                 }
                 std::cout << std::endl;

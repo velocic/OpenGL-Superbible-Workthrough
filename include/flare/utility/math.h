@@ -1,14 +1,14 @@
 #ifndef FLARE_UTILITY_MATH_H
 #define FLARE_UTILITY_MATH_H
 
-namespace Utility
+namespace Flare
 {
     namespace Math
     {
-        const double PI = 3.1415926535897;
+        constexpr double PI = 3.1415926535897;
 
-        double degreesToRadians(double angle);
-        double radiansToDegrees(double angle);
+        constexpr double degreesToRadians(double angle);
+        constexpr double radiansToDegrees(double angle);
     }
 }
 
