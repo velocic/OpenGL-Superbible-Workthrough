@@ -224,9 +224,9 @@ namespace Flare
             namedBufferStorage(size, data, flags);
         }
 
-
         MappedBufferRange::MappedBufferRange(const Buffer& sourceBuffer, GLintptr offset, GLsizeiptr length, void* mappedData)
         :
+            RenderSystem::MappedBufferRange(sourceBuffer, offset, length, mappedData),
             sourceBuffer(sourceBuffer),
             offset(offset),
             length(length),
@@ -238,24 +238,29 @@ namespace Flare
             valid = false;
         }
 
-        bool MappedBufferRange::hasReadAccess()
+        bool MappedBufferRange::hasReadAccess() const
         {
             return sourceBuffer.getUsageFlags().mapRead;
         }
 
-        bool MappedBufferRange::hasWriteAccess()
+        bool MappedBufferRange::hasWriteAccess() const
         {
             return sourceBuffer.getUsageFlags().mapWrite;
         }
 
-        bool MappedBufferRange::isPersistent()
+        bool MappedBufferRange::isPersistent() const
         {
             return sourceBuffer.getUsageFlags().mapPersistent;
         }
 
-        bool MappedBufferRange::isCoherent()
+        bool MappedBufferRange::isCoherent() const
         {
             return sourceBuffer.getUsageFlags().mapCoherent;
+        }
+
+        bool MappedBufferRange::isValid() const
+        {
+            return valid;
         }
     }
 }

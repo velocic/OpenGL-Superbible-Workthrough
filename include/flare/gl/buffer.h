@@ -75,7 +75,7 @@ namespace Flare
                 virtual void allocateBufferStorage(RenderSystem::RSsizei size, const void *data, RenderSystem::RSbitfield flags) override;
         };
 
-        class MappedBufferRange
+        class MappedBufferRange : public RenderSystem::MappedBufferRange
         {
             friend class Buffer;
             private:
@@ -88,17 +88,17 @@ namespace Flare
             public:
                 void* mappedData = nullptr;
 
-                ~MappedBufferRange();
+                virtual ~MappedBufferRange() override;
                 MappedBufferRange(MappedBufferRange&& other) = delete;
                 MappedBufferRange& operator=(MappedBufferRange&& other) = delete;
                 MappedBufferRange(const MappedBufferRange& other) = delete;
                 MappedBufferRange& operator=(const Buffer& other) = delete;
 
-                bool hasReadAccess();
-                bool hasWriteAccess();
-                bool isPersistent();
-                bool isCoherent();
-                bool isValid();
+                virtual bool hasReadAccess() const override;
+                virtual bool hasWriteAccess() const override;
+                virtual bool isPersistent() const override;
+                virtual bool isCoherent() const override;
+                virtual bool isValid() const override;
         };
     }
 }

@@ -47,11 +47,11 @@ namespace Flare
                 MappedBufferRange(const MappedBufferRange& other) = delete;
                 MappedBufferRange &operator=(const Buffer& other) = delete;
 
-                virtual bool hasReadAccess() = 0;
-                virtual bool hasWriteAccess() = 0;
-                virtual bool isPersistent() = 0;
-                virtual bool isCoherent() = 0;
-                virtual bool isValid() = 0;
+                virtual bool hasReadAccess() const = 0;
+                virtual bool hasWriteAccess() const = 0;
+                virtual bool isPersistent() const = 0;
+                virtual bool isCoherent() const = 0;
+                virtual bool isValid() const = 0;
         };
     }
 }
