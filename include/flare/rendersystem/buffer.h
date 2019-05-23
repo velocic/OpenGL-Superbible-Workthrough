@@ -14,7 +14,7 @@ namespace Flare
         {
             public:
                 Buffer(const VertexDataLayout& bufferContentDescription) {}
-                virtual ~Buffer() = 0;
+                virtual ~Buffer() {}
                 Buffer(Buffer&& other) {}
                 Buffer& operator=(Buffer&& other) { return *this; }
                 Buffer(const Buffer& other) = delete;
@@ -41,7 +41,7 @@ namespace Flare
             public:
                 void *mappedData = nullptr;
 
-                virtual ~MappedBufferRange();
+                virtual ~MappedBufferRange() {}
                 MappedBufferRange(MappedBufferRange&& other) = delete;
                 MappedBufferRange &operator=(MappedBufferRange&& other) = delete;
                 MappedBufferRange(const MappedBufferRange& other) = delete;

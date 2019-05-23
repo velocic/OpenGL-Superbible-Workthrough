@@ -60,11 +60,6 @@ namespace Flare
             return *this;
         }
 
-        void Buffer::bind(GLenum target)
-        {
-            glBindBuffer(target, glBuffer);
-        }
-
         void Buffer::clearNamedBufferSubData(GLenum internalFormat, GLintptr offset, GLsizeiptr size, GLenum format, GLenum type, const void* data)
         {
             if (isGPUStorageInitialized == false) {
@@ -90,14 +85,6 @@ namespace Flare
             }
 
             glCopyNamedBufferSubData(readBuffer.glBuffer, glBuffer, readOffset, writeOffset, size);
-        }
-
-        void Buffer::destroy()
-        {
-            glDeleteBuffers(1, &glBuffer);
-            isGPUStorageInitialized = false;
-            dataCapacityBytes = 0;
-            usageFlags = UsageFlags{};
         }
 
         MappedBufferRange* Buffer::mapNamedBufferRange(GLintptr offset, GLsizeiptr length)
@@ -166,6 +153,28 @@ namespace Flare
             };
         }
 
+        void Buffer::checkDynamicStorageFlagBeforeWrite()
+        {
+            if (usageFlags.dynamicStorage == false) {
+                throw std::domain_error("Attempting to write data to buffer " + std::to_string(static_cast<unsigned int>(glBuffer))
+                    + " which is not marked for dynamic storage."
+                );
+            }
+        }
+
+        void Buffer::bind(RenderSystem::RSenum target)
+        {
+            glBindBuffer(target, glBuffer);
+        }
+
+        void Buffer::destroy()
+        {
+            glDeleteBuffers(1, &glBuffer);
+            isGPUStorageInitialized = false;
+            dataCapacityBytes = 0;
+            usageFlags = UsageFlags{};
+        }
+
         void Buffer::unmap()
         {
             if (!isCurrentlyMapped) {
@@ -180,14 +189,41 @@ namespace Flare
             mappedBuffer->valid = false;
         }
 
-        void Buffer::checkDynamicStorageFlagBeforeWrite()
+        void Buffer::clearRange(RenderSystem::RSenum internalFormat, RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr size, RenderSystem::RSenum format, RenderSystem::RSenum type, const void *data)
         {
-            if (usageFlags.dynamicStorage == false) {
-                throw std::domain_error("Attempting to write data to buffer " + std::to_string(static_cast<unsigned int>(glBuffer))
-                    + " which is not marked for dynamic storage."
-                );
-            }
+            clearNamedBufferSubData(internalFormat, offset, size, format, type, data);
         }
+
+        void Buffer::copyRange(const RenderSystem::Buffer &readBuffer, RenderSystem::RSintptr readOffset, RenderSystem::RSintptr writeOffset, RenderSystem::RSsizeiptr size)
+        {
+            copyNamedBufferSubData(static_cast<const Buffer &>(readBuffer), readOffset, writeOffset, size);
+        }
+
+        const RenderSystem::VertexDataLayout &Buffer::getContentDescription() const
+        {
+            return bufferContentDescription;
+        }
+
+        RenderSystem::MappedBufferRange *Buffer::mapRange(RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr length)
+        {
+            return mapNamedBufferRange(offset, length);
+        }
+
+        void Buffer::bufferData(RenderSystem::RSsizei size, const void *data, RenderSystem::RSenum usage)
+        {
+            namedBufferData(size, data, usage);
+        }
+
+        void Buffer::bufferRange(RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr size, const void *data)
+        {
+            namedBufferSubData(offset, size, data);
+        }
+
+        void Buffer::allocateBufferStorage(RenderSystem::RSsizei size, const void *data, RenderSystem::RSbitfield flags)
+        {
+            namedBufferStorage(size, data, flags);
+        }
+
 
         MappedBufferRange::MappedBufferRange(const Buffer& sourceBuffer, GLintptr offset, GLsizeiptr length, void* mappedData)
         :
