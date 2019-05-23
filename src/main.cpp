@@ -6,7 +6,6 @@
 #include <5-data/data.h>
 #include <5b-spinning-cubes/spinning-cubes.h>
 #include <5c-array-textures/array-textures.h>
-#include <flare/gl/datalayout.h>
 
 #include <flare/gl/uniformblock.h>
 

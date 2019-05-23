@@ -95,7 +95,7 @@ namespace Tutorial
             -0.25f, 0.25f, -0.25f
         };
 
-        auto cubeMeshBufferLayout = Flare::GL::VertexDataLayoutBuilder()
+        auto cubeMeshBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
             .addAttribute("position", 3, GL_FLOAT, GL_FALSE, 0)
             .setStride(sizeof(GLfloat) * 3)
             .build();

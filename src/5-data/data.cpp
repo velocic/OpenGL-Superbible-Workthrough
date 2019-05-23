@@ -4,6 +4,7 @@
 #include <glm-0.9.9/gtc/matrix_transform.hpp>
 
 #include <iostream>
+#include <flare/rendersystem/datalayout.h>
 #include <flare/gl/uniformblock.h>
 
 namespace Tutorial
@@ -27,12 +28,12 @@ namespace Tutorial
         shaderPipelineDemoShader->bind();
 
         //Describe the contents of the vertex buffers
-        auto positionBufferLayout = Flare::GL::VertexDataLayoutBuilder()
+        auto positionBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
             .addAttribute("position", 4, GL_FLOAT, GL_FALSE, 0)
             .setStride(sizeof(glm::vec4))
             .build();
 
-        auto triangleColorBufferLayout = Flare::GL::VertexDataLayoutBuilder()
+        auto triangleColorBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
             .addAttribute("color", 4, GL_FLOAT, GL_FALSE, 0)
             .setStride(sizeof(glm::vec4))
             .build();

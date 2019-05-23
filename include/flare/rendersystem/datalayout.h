@@ -1,21 +1,23 @@
-#ifndef FLARE_GL_DATALAYOUT_H
-#define FLARE_GL_DATALAYOUT_H
+#ifndef FLARE_RENDERSYSTEM_DATALAYOUT_H
+#define FLARE_RENDERSYSTEM_DATALAYOUT_H
 
 #include <algorithm>
 #include <string>
 #include <vector>
 
+#include <flare/rendersystem/datatypes.h>
+
 namespace Flare
 {
-    namespace GL
+    namespace RenderSystem
     {
         struct VertexAttribute
         {
             std::string name;
-            GLint size = 0;
-            GLenum type;
-            GLboolean normalized = GL_FALSE;
-            GLuint relativeOffset = 0;
+            RSint size = 0;
+            RSenum type;
+            RSboolean normalized = GL_FALSE;
+            RSuint relativeOffset = 0;
         };
 
         struct VertexDataLayout
@@ -23,7 +25,7 @@ namespace Flare
             friend class VertexDataLayoutBuilder;
 
             private:
-                VertexDataLayout(GLsizei stride, GLintptr offset, std::vector<VertexAttribute> &&vertexAttributes)
+                VertexDataLayout(RSsizei stride, RSintptr offset, std::vector<VertexAttribute> &&vertexAttributes)
                 : stride(stride), offset(offset), vertexAttributes(vertexAttributes)
                 {
                 }
@@ -31,9 +33,9 @@ namespace Flare
             public:
                 //if stride is set to 0, glVertexArrayVertexBuffer() will autocalculate it
                 //based on the assigned vertex attributes
-                const GLsizei stride = 0;
+                const RSsizei stride = 0;
                 //always set to zero unless interleaving data blocks within a single buffer
-                const GLintptr offset = 0;
+                const RSintptr offset = 0;
                 const std::vector<VertexAttribute> vertexAttributes;
 
                 const VertexAttribute *getAttribute(const std::string &attributeName)
@@ -58,22 +60,22 @@ namespace Flare
         {
             private:
                 std::vector<VertexAttribute> vertexAttributes;
-                GLsizei stride = 0;
-                GLintptr offset = 0;
+                RSsizei stride = 0;
+                RSintptr offset = 0;
             public:
-                VertexDataLayoutBuilder &addAttribute(const std::string &attributeName, GLint size, GLenum type, GLboolean normalized, GLuint relativeOffset)
+                VertexDataLayoutBuilder &addAttribute(const std::string &attributeName, RSint size, RSenum type, RSboolean normalized, RSuint relativeOffset)
                 {
                     vertexAttributes.push_back(VertexAttribute{attributeName, size, type, normalized, relativeOffset});
                     return *this;
                 }
 
-                VertexDataLayoutBuilder &setStride(GLsizei stride)
+                VertexDataLayoutBuilder &setStride(RSsizei stride)
                 {
                     this->stride = stride;
                     return *this;
                 }
 
-                VertexDataLayoutBuilder &setOffset(GLintptr offset)
+                VertexDataLayoutBuilder &setOffset(RSintptr offset)
                 {
                     this->offset = offset;
                     return *this;

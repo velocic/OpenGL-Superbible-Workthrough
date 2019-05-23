@@ -11,7 +11,9 @@ namespace Flare
     {
 #ifdef RENDERSYSTEM_GL4
         using RSbitfield = GLbitfield;
+        using RSboolean = GLboolean;
         using RSenum = GLenum;
+        using RSint = GLint;
         using RSintptr = GLintptr;
         using RSsizei =  GLsizei;
         using RSsizeiptr = GLsizeiptr;

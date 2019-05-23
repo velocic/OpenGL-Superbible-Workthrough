@@ -7,7 +7,6 @@
 #include <GL/gl3w.h>
 #include <flare/gl/buffer.h>
 #include <flare/gl/shaderprogram.h>
-#include <flare/gl/datalayout.h>
 
 namespace Flare
 {

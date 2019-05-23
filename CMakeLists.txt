@@ -4,7 +4,9 @@ project(OpenGL-Superbible-Workthrough)
 
 set(SAMPLE_RUNNER_NAME sample-browser)
 
-add_compile_options(-std=c++17 -Wall -ggdb3)
+set(FLARE_RENDERSYSTEM_TYPE RENDERSYSTEM_GL4 CACHE EXTERNAL STRING)
+
+add_compile_options(-std=c++17 -Wall -ggdb3 -D${FLARE_RENDERSYSTEM_TYPE})
 set(PROJECT_SOURCE_DIR "${PROJECT_BINARY_DIR}/src")
 
 add_executable(

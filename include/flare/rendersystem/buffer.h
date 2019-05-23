@@ -2,20 +2,23 @@
 #define FLARE_RENDERSYSTEM_BUFFER_H
 
 #include <flare/rendersystem/datatypes.h>
+#include <flare/rendersystem/datalayout.h>
 
 namespace Flare
 {
     namespace RenderSystem
     {
+        class MappedBufferRange;
+
         class Buffer
         {
             public:
-                virtual Buffer(const VertexDataLayout& bufferContentDescription) = 0;
+                Buffer(const VertexDataLayout& bufferContentDescription) {}
                 virtual ~Buffer() = 0;
-                virtual Buffer(Buffer&& other) = 0;
-                virtual Buffer& operator=(Buffer&& other);
-                virtual Buffer(const Buffer& other) = delete;
-                virtual Buffer& operator=(const Buffer& other) = delete;
+                Buffer(Buffer&& other) {}
+                Buffer& operator=(Buffer&& other) { return *this; }
+                Buffer(const Buffer& other) = delete;
+                Buffer& operator=(const Buffer& other) = delete;
 
                 virtual void bind(RSenum target) = 0;
                 virtual void clearRange(RSenum internalFormat, RSintptr offset, RSsizeiptr size, RSenum format, RSenum type, const void *data) = 0;
@@ -33,23 +36,23 @@ namespace Flare
         class MappedBufferRange
         {
             protected:
-                virtual MappedBufferRange(const Buffer &sourceBuffer, RSintptr offset, RSsizeiptr length, void *mappedData) = 0;
+                MappedBufferRange(const Buffer &sourceBuffer, RSintptr offset, RSsizeiptr length, void *mappedData) {}
 
             public:
                 void *mappedData = nullptr;
 
                 virtual ~MappedBufferRange();
-                virtual MappedBufferRange(MappedBufferRange&& other) = delete;
-                virtual MappedBufferRange &operator=(MappedBufferRange&& other) = delete;
-                virtual MappedBufferRange(const MappedBufferRange& other) = delete;
-                virtual MappedBufferRange &operator=(const Buffer& other) = delete;
+                MappedBufferRange(MappedBufferRange&& other) = delete;
+                MappedBufferRange &operator=(MappedBufferRange&& other) = delete;
+                MappedBufferRange(const MappedBufferRange& other) = delete;
+                MappedBufferRange &operator=(const Buffer& other) = delete;
 
                 virtual bool hasReadAccess() = 0;
                 virtual bool hasWriteAccess() = 0;
                 virtual bool isPersistent() = 0;
                 virtual bool isCoherent() = 0;
                 virtual bool isValid() = 0;
-        }
+        };
     }
 }
 

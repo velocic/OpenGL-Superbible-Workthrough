@@ -7,8 +7,9 @@ namespace Flare
 {
     namespace GL
     {
-        Buffer::Buffer(const VertexDataLayout& bufferContentDescription)
+        Buffer::Buffer(const RenderSystem::VertexDataLayout& bufferContentDescription)
         :
+            RenderSystem::Buffer(bufferContentDescription),
             bufferContentDescription(bufferContentDescription)
         {
             glCreateBuffers(1, &glBuffer);
@@ -21,6 +22,7 @@ namespace Flare
 
         Buffer::Buffer(Buffer&& other)
         :
+            RenderSystem::Buffer(std::move(other)),
             bufferContentDescription(other.bufferContentDescription),
             usageFlags(std::move(other.usageFlags)),
             glBuffer(std::move(other.glBuffer)),
