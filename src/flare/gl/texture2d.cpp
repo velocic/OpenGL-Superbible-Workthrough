@@ -10,7 +10,6 @@ namespace Flare
         Texture2D::Texture2D(GLsizei numMipmapLevels, GLenum internalFormat, GLsizei textureWidth, GLsizei textureHeight)
         :
             Texture(numMipmapLevels, internalFormat, textureWidth),
-            RenderSystem::Texture2D(0, 0, 0, 0),
             textureHeight(textureHeight)
         {
             initialize();
@@ -24,7 +23,6 @@ namespace Flare
         Texture2D::Texture2D(Texture2D&& other)
         :
             Texture(std::move(other)),
-            RenderSystem::Texture2D(std::move(other)),
             textureHeight(other.textureHeight)
         {
             other.textureHeight = 0;
@@ -161,6 +159,26 @@ namespace Flare
         void Texture2D::bindAsWritableFromShader(RenderSystem::RSuint unit, RenderSystem::RSint level, RenderSystem::RSboolean layered, RenderSystem::RSint layer, RenderSystem::RSenum access, RenderSystem::RSenum format)
         {
             bindImageTexture(unit, level, layered, layer, access, format);
+        }
+
+        void Texture2D::bufferPixelData(RenderSystem::RSenum format, RenderSystem::RSenum type, const void *pixels, RenderSystem::RSboolean generateMipmaps)
+        {
+            textureSubImage2D(format, type, pixels, generateMipmaps);
+        }
+
+        void Texture2D::bufferPixelData(RenderSystem::RSint level, RenderSystem::RSint xOffset, RenderSystem::RSint yOffset, RenderSystem::RSsizei width, RenderSystem::RSsizei height, RenderSystem::RSenum format, RenderSystem::RSenum type, const void *pixels, RenderSystem::RSboolean generateMipmaps)
+        {
+            textureSubImage2D(level, xOffset, yOffset, width, height, format, type, pixels, generateMipmaps);
+        }
+
+        void Texture2D::clearPixelData(RenderSystem::RSenum format, RenderSystem::RSenum type, const void *data)
+        {
+            clearTexSubImage(format, type, data);
+        }
+
+        void Texture2D::clearPixelData(RenderSystem::RSint level, RenderSystem::RSint xOffset, RenderSystem::RSint yOffset, RenderSystem::RSsizei width, RenderSystem::RSsizei height, RenderSystem::RSenum format, RenderSystem::RSenum type, const void *data)
+        {
+            clearTexSubImage(level, xOffset, yOffset, width, height, format, type, data);
         }
     }
 }

@@ -8,7 +8,6 @@ namespace Flare
     {
         Texture::Texture(GLsizei numMipmapLevels, GLenum internalFormat, GLsizei textureWidth)
         :
-            RenderSystem::Texture(numMipmapLevels, internalFormat, textureWidth),
             numMipmapLevels(numMipmapLevels),
             internalFormat(internalFormat),
             textureWidth(textureWidth)
@@ -19,7 +18,6 @@ namespace Flare
 
         Texture::Texture(Texture&& other)
         :
-            RenderSystem::Texture(std::move(other)),
             numMipmapLevels(other.numMipmapLevels),
             internalFormat(other.internalFormat),
             textureWidth(other.textureWidth)
