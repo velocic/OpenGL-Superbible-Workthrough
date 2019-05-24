@@ -126,5 +126,10 @@ namespace Flare
                 format
             );
         }
+
+        void ArrayTexture2D::bindAsWritableFromShader(RenderSystem::RSuint unit, RenderSystem::RSint level, RenderSystem::RSboolean layered, RenderSystem::RSint layer, RenderSystem::RSenum access, RenderSystem::RSenum format)
+        {
+            bindImageTexture(unit, level, layered, layer, access, format);
+        }
     }
 }

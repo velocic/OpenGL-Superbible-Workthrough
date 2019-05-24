@@ -1,11 +1,14 @@
 #include <flare/gl/texture.h>
 
+#include <algorithm>
+
 namespace Flare
 {
     namespace GL
     {
         Texture::Texture(GLsizei numMipmapLevels, GLenum internalFormat, GLsizei textureWidth)
         :
+            RenderSystem::Texture(numMipmapLevels, internalFormat, textureWidth),
             numMipmapLevels(numMipmapLevels),
             internalFormat(internalFormat),
             textureWidth(textureWidth)
@@ -16,6 +19,7 @@ namespace Flare
 
         Texture::Texture(Texture&& other)
         :
+            RenderSystem::Texture(std::move(other)),
             numMipmapLevels(other.numMipmapLevels),
             internalFormat(other.internalFormat),
             textureWidth(other.textureWidth)
@@ -48,6 +52,16 @@ namespace Flare
         void Texture::textureParameteri(GLenum pname, GLint param)
         {
             glTextureParameteri(glTexture, pname, param);
+        }
+
+        void Texture::setParameter(RenderSystem::RSenum name, RenderSystem::RSfloat value)
+        {
+            textureParameterf(name, value);
+        }
+
+        void Texture::setParameter(RenderSystem::RSenum name, RenderSystem::RSint value)
+        {
+            textureParameteri(name, value);
         }
     }
 }

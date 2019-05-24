@@ -13,6 +13,7 @@ namespace Flare
         using RSbitfield = GLbitfield;
         using RSboolean = GLboolean;
         using RSenum = GLenum;
+        using RSfloat = GLfloat;
         using RSint = GLint;
         using RSintptr = GLintptr;
         using RSsizei =  GLsizei;

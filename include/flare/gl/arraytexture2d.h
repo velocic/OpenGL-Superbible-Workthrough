@@ -28,6 +28,8 @@ namespace Flare
                 virtual void destroy() override;
                 virtual void bind(GLuint textureUnitIndex) override;
                 virtual void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format) override;
+
+                virtual void bindAsWritableFromShader(RenderSystem::RSuint unit, RenderSystem::RSint level, RenderSystem::RSboolean layered, RenderSystem::RSint layer, RenderSystem::RSenum access, RenderSystem::RSenum format) override;
         };
     }
 }

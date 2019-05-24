@@ -3,11 +3,13 @@
 
 #include <GL/gl3w.h>
 
+#include <flare/rendersystem/texture.h>
+
 namespace Flare
 {
     namespace GL
     {
-        class Texture
+        class Texture : public RenderSystem::Texture
         {
             protected:
                 GLuint glTexture = 0;
@@ -24,6 +26,9 @@ namespace Flare
 
                 virtual void textureParameterf(GLenum pname, GLfloat param);
                 virtual void textureParameteri(GLenum pname, GLint param);
+
+                virtual void setParameter(RenderSystem::RSenum name, RenderSystem::RSfloat value) override;
+                virtual void setParameter(RenderSystem::RSenum name, RenderSystem::RSint value) override;
 
                 virtual void destroy() = 0;
                 virtual void initialize() = 0;

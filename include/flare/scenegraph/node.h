@@ -1,6 +1,8 @@
 #ifndef FLARE_SCENEGRAPH_NODE_H
 #define FLARE_SCENEGRAPH_NODE_H
 
+#include <flare/rendersystem/buffer.h>
+
 namespace Flare
 {
     namespace SceneGraph
@@ -44,7 +46,9 @@ namespace Flare
                 size_t addInstance();
                 void removeInstance(size_t index);
 
-                // void bufferWorldMatrices()
+                void bufferWorldMatrices(RenderSystem::Buffer &worldMatrixInstanceBuffer);
+
+                //TODO: buffer model data (mesh, uv, normals, etc)
         };
     }
 }
