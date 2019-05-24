@@ -10,6 +10,7 @@ namespace Flare
         Texture2D::Texture2D(GLsizei numMipmapLevels, GLenum internalFormat, GLsizei textureWidth, GLsizei textureHeight)
         :
             Texture(numMipmapLevels, internalFormat, textureWidth),
+            RenderSystem::Texture2D(0, 0, 0, 0),
             textureHeight(textureHeight)
         {
             initialize();
@@ -23,6 +24,7 @@ namespace Flare
         Texture2D::Texture2D(Texture2D&& other)
         :
             Texture(std::move(other)),
+            RenderSystem::Texture2D(std::move(other)),
             textureHeight(other.textureHeight)
         {
             other.textureHeight = 0;
