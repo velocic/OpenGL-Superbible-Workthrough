@@ -131,5 +131,15 @@ namespace Flare
         {
             bindImageTexture(unit, level, layered, layer, access, format);
         }
+
+        void ArrayTexture2D::bufferPixelData(RenderSystem::RSint level, RenderSystem::RSint xOffset, RenderSystem::RSint yOffset, RenderSystem::RSint zOffset, RenderSystem::RSsizei width, RenderSystem::RSsizei height, RenderSystem::RSenum format, RenderSystem::RSenum type, const void *pixels, RenderSystem::RSboolean generateMipmaps)
+        {
+            textureSubImage3D(level, xOffset, yOffset, zOffset, width, height, format, type, pixels, generateMipmaps);
+        }
+
+        void ArrayTexture2D::clearPixelData(RenderSystem::RSint level, RenderSystem::RSint xOffset, RenderSystem::RSint yOffset, RenderSystem::RSint zOffset, RenderSystem::RSsizei width, RenderSystem::RSsizei height, RenderSystem::RSenum format, RenderSystem::RSenum type, const void *data)
+        {
+            clearTexSubImage(level, xOffset, yOffset, zOffset, width, height, format, type, data);
+        }
     }
 }

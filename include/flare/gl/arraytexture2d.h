@@ -2,13 +2,15 @@
 #define FLARE_GL_ARRAYTEXTURE2D_H
 
 #include <GL/gl3w.h>
+
 #include <flare/gl/texture.h>
+#include <flare/rendersystem/arraytexture2d.h>
 
 namespace Flare
 {
     namespace GL
     {
-        class ArrayTexture2D : public Texture
+        class ArrayTexture2D : public Texture, public RenderSystem::ArrayTexture2D
         {
             protected:
                 GLsizei textureHeight = 0;
@@ -30,6 +32,9 @@ namespace Flare
                 virtual void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format) override;
 
                 virtual void bindAsWritableFromShader(RenderSystem::RSuint unit, RenderSystem::RSint level, RenderSystem::RSboolean layered, RenderSystem::RSint layer, RenderSystem::RSenum access, RenderSystem::RSenum format) override;
+
+                virtual void bufferPixelData(RenderSystem::RSint level, RenderSystem::RSint xOffset, RenderSystem::RSint yOffset, RenderSystem::RSint zOffset, RenderSystem::RSsizei width, RenderSystem::RSsizei height, RenderSystem::RSenum format, RenderSystem::RSenum type, const void *pixels, RenderSystem::RSboolean generateMipmaps) override;
+                virtual void clearPixelData(RenderSystem::RSint level, RenderSystem::RSint xOffset, RenderSystem::RSint yOffset, RenderSystem::RSint zOffset, RenderSystem::RSsizei width, RenderSystem::RSsizei height, RenderSystem::RSenum format, RenderSystem::RSenum type, const void *data) override;
         };
     }
 }
