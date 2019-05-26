@@ -28,9 +28,9 @@ namespace Flare
                 virtual void batchLoadTexture2D(const std::vector<TextureFile> &targets, std::function<void()> onLoadComplete) override;
                 virtual void batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, std::function<void()> onLoadComplete) override;
 
-                virtual void loadTexture1D(const TextureFile &file, std::function<void(Texture *)> onLoadComplete) override;
-                virtual void loadTexture2D(const TextureFile &file, std::function<void(Texture *)> onLoadComplete) override;
-                virtual void loadArrayTexture2D(const ArrayTextureFiles &files, std::function<void(Texture *)> onLoadComplete) override;
+                virtual void loadTexture1D(const TextureFile &file, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
+                virtual void loadTexture2D(const TextureFile &file, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
+                virtual void loadArrayTexture2D(const ArrayTextureFiles &files, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
 
                 virtual Texture *get(const std::string &alias) override;
                 virtual void remove(const std::string &alias) override;

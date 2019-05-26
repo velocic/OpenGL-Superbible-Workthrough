@@ -31,20 +31,25 @@ namespace Flare
         {
         }
 
-        void TextureManager::loadTexture1D(const TextureFile &file, std::function<void(Texture *)> onLoadComplete)
+        void TextureManager::loadTexture1D(const TextureFile &file, std::function<void(RenderSystem::Texture *)> onLoadComplete)
         {
         }
 
-        void TextureManager::loadTexture2D(const TextureFile &file, std::function<void(Texture *)> onLoadComplete)
+        void TextureManager::loadTexture2D(const TextureFile &file, std::function<void(RenderSystem::Texture *)> onLoadComplete)
         {
         }
 
-        void TextureManager::loadArrayTexture2D(const ArrayTextureFiles &files, std::function<void(Texture *)> onLoadComplete)
+        void TextureManager::loadArrayTexture2D(const ArrayTextureFiles &files, std::function<void(RenderSystem::Texture *)> onLoadComplete)
         {
         }
 
-        Texture *TextureManager::get(const std::string &alias) override;
-        void TextureManager::remove(const std::string &alias) override;
+        Texture *TextureManager::get(const std::string &alias)
+        {
+        }
+
+        void TextureManager::remove(const std::string &alias)
+        {
+        }
 
         void TextureManager::removeAll()
         {

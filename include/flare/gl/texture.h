@@ -30,10 +30,11 @@ namespace Flare
                 virtual void setParameter(RenderSystem::RSenum name, RenderSystem::RSfloat value) override;
                 virtual void setParameter(RenderSystem::RSenum name, RenderSystem::RSint value) override;
 
-                virtual void destroy() = 0;
-                virtual void initialize() = 0;
-                virtual void bind(GLuint textureUnitIndex) = 0;
+                virtual void destroy() override = 0;
+                virtual void initialize() override = 0;
+                virtual void bind(GLuint textureUnitIndex) override = 0;
                 virtual void bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format) = 0;
+                virtual void bindAsWritableFromShader(RenderSystem::RSuint unit, RenderSystem::RSint level, RenderSystem::RSboolean layered, RenderSystem::RSint layer, RenderSystem::RSenum access, RenderSystem::RSenum format) override = 0;
         };
     }
 }
