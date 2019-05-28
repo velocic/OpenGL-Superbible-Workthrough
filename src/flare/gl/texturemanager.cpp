@@ -3,6 +3,7 @@
 #include <lodepng/lodepng.h>
 
 #include <flare/gl/texture2d.h>
+#include <flare/gl/arraytexture2d.h>
 
 namespace Flare
 {
@@ -41,6 +42,11 @@ namespace Flare
 
         void TextureManager::batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete)
         {
+            for (const auto &target : targets) {
+                loadArrayTexture2D(target, initParams, [](auto loadedTexture){});
+            }
+
+            onLoadComplete();
         }
 
         void TextureManager::loadTexture1D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
@@ -73,7 +79,7 @@ namespace Flare
 
         void TextureManager::loadArrayTexture2D(const ArrayTextureFiles &files, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
         {
-            if (files.empty()) {
+            if (files.paths.empty()) {
                 return;
             }
 
@@ -81,19 +87,42 @@ namespace Flare
             auto height = 0u;
             auto decodedImage = std::vector<unsigned char>{};
 
-            //Need to load one file initially to determine the width/height of all layers
-            lodepng::decode(decodedImage, width, height, files[0].path);
+            auto newArrayTexture = std::unique_ptr<ArrayTexture2D>(nullptr);
 
-            auto newArrayTexture = std::make_unique<ArrayTexture2D>(
-                initParams.numMipmapLevels,
-                initParams.internalFormat,
-                width, //need to load first texture, assume all are same dimensions
-                height,
-                files.size()
-            );
+            auto loadArrayTextureLayer = [&](const auto &filePath, unsigned int arrayTextureIndex){
+                lodepng::decode(decodedImage, width, height, filePath);
 
-            for (unsigned int i = 1; i < files.size(); ++i) {
+                if (newArrayTexture == nullptr) {
+                    newArrayTexture = std::make_unique<ArrayTexture2D>(
+                        initParams.numMipmapLevels,
+                        initParams.internalFormat,
+                        width,
+                        height,
+                        files.paths.size()
+                    );
+                }
+
+                newArrayTexture->bufferPixelData(
+                    0, //mipMap level
+                    0, 0,//width, height
+                    arrayTextureIndex, //array texture index
+                    width,
+                    height,
+                    files.pixelDataFormat,
+                    GL_UNSIGNED_BYTE,
+                    decodedImage.data(),
+                    initParams.generateMipmaps
+                );
+            };
+
+            for (unsigned int i = 0; i < files.paths.size(); ++i) {
+                loadArrayTextureLayer(files.paths[i], i);
             }
+
+            auto callbackResult = newArrayTexture.get();
+            textures.insert_or_assign(stringHasher(files.alias), std::move(newArrayTexture));
+
+            onLoadComplete(callbackResult);
         }
 
         Texture *TextureManager::get(const std::string &alias)

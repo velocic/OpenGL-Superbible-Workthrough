@@ -34,6 +34,7 @@ namespace Flare
                     std::vector<std::string> paths;
                     std::string alias;
                     SupportedFileType type;
+                    RSenum pixelDataFormat;
                 };
 
                 virtual void batchLoadTexture1D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
