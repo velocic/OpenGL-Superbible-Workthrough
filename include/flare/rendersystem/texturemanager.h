@@ -17,10 +17,17 @@ namespace Flare
                     PNG
                 };
 
+                struct TextureInitParams {
+                    RSsizei numMipmapLevels;
+                    RSenum internalFormat;
+                    RSboolean generateMipmaps;
+                };
+
                 struct TextureFile {
                     std::string path;
                     std::string alias;
                     SupportedFileType type;
+                    RSenum pixelDataFormat;
                 };
 
                 struct ArrayTextureFiles {
@@ -29,13 +36,13 @@ namespace Flare
                     SupportedFileType type;
                 };
 
-                virtual void batchLoadTexture1D(const std::vector<TextureFile> &targets, std::function<void()> onLoadComplete) = 0;
-                virtual void batchLoadTexture2D(const std::vector<TextureFile> &targets, std::function<void()> onLoadComplete) = 0;
-                virtual void batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, std::function<void()> onLoadComplete) = 0;
+                virtual void batchLoadTexture1D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
+                virtual void batchLoadTexture2D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
+                virtual void batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
 
-                virtual void loadTexture1D(const TextureFile &file, std::function<void(Texture *)> onLoadComplete) = 0;
-                virtual void loadTexture2D(const TextureFile &file, std::function<void(Texture *)> onLoadComplete) = 0;
-                virtual void loadArrayTexture2D(const ArrayTextureFiles &files, std::function<void(Texture *)> onLoadComplete) = 0;
+                virtual void loadTexture1D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(Texture *)> onLoadComplete) = 0;
+                virtual void loadTexture2D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(Texture *)> onLoadComplete) = 0;
+                virtual void loadArrayTexture2D(const ArrayTextureFiles &files, const TextureInitParams &initParams, std::function<void(Texture *)> onLoadComplete) = 0;
 
                 //TODO: support loading in-memory textures (for making runtime-generated textures available)
 

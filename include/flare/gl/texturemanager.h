@@ -15,7 +15,7 @@ namespace Flare
         {
             private:
                 std::unordered_map<size_t, std::unique_ptr<Texture>> textures;
-
+                std::hash<std::string> stringHasher;
             public:
                 TextureManager() {}
                 ~TextureManager();
@@ -24,13 +24,13 @@ namespace Flare
                 TextureManager(const TextureManager &other) = delete;
                 TextureManager &operator=(const TextureManager &other) = delete;
 
-                virtual void batchLoadTexture1D(const std::vector<TextureFile> &targets, std::function<void()> onLoadComplete) override;
-                virtual void batchLoadTexture2D(const std::vector<TextureFile> &targets, std::function<void()> onLoadComplete) override;
-                virtual void batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, std::function<void()> onLoadComplete) override;
+                virtual void batchLoadTexture1D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) override;
+                virtual void batchLoadTexture2D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) override;
+                virtual void batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) override;
 
-                virtual void loadTexture1D(const TextureFile &file, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
-                virtual void loadTexture2D(const TextureFile &file, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
-                virtual void loadArrayTexture2D(const ArrayTextureFiles &files, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
+                virtual void loadTexture1D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
+                virtual void loadTexture2D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
+                virtual void loadArrayTexture2D(const ArrayTextureFiles &files, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
 
                 virtual Texture *get(const std::string &alias) override;
                 virtual void remove(const std::string &alias) override;
