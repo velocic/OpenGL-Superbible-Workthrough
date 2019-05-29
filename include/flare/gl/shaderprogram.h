@@ -9,7 +9,7 @@
 #include <GL/gl3w.h>
 
 #include <flare/gl/sampler.h>
-#include <flare/gl/texture.h>
+#include <flare/rendersystem/texture.h>
 #include <flare/utility/file.h>
 
 namespace Flare
@@ -37,7 +37,7 @@ namespace Flare
 
             private:
                 struct TextureUnit {
-                    TextureUnit(Sampler &&sampler, std::shared_ptr<Texture> texture, unsigned int index);
+                    TextureUnit(Sampler &&sampler, RenderSystem::Texture *texture, unsigned int index);
                     ~TextureUnit();
                     TextureUnit(TextureUnit &&other);
                     TextureUnit &operator=(TextureUnit &&other);
@@ -45,12 +45,12 @@ namespace Flare
                     TextureUnit &operator=(const TextureUnit &other) = delete;
 
                     Sampler sampler;
-                    std::shared_ptr<Texture> texture;
+                    RenderSystem::Texture *texture;
                     unsigned int index = 0;
                 };
 
                 struct TextureUnitArray {
-                    TextureUnitArray(Sampler &&sampler, std::vector<std::shared_ptr<Texture>> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive);
+                    TextureUnitArray(Sampler &&sampler, std::vector<RenderSystem::Texture *> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive);
                     ~TextureUnitArray();
                     TextureUnitArray(TextureUnitArray &&other);
                     TextureUnitArray &operator=(TextureUnitArray &&other);
@@ -58,7 +58,7 @@ namespace Flare
                     TextureUnitArray &operator=(const TextureUnitArray &other) = delete;
 
                     Sampler sampler;
-                    std::vector<std::shared_ptr<Texture>> textures;
+                    std::vector<RenderSystem::Texture *> textures;
                     unsigned int firstIndexInclusive = 0;
                     unsigned int lastIndexExclusive = 0;
                 };
@@ -103,9 +103,9 @@ namespace Flare
                 GLint getAttribute(const std::string &attributeName) const;
                 GLint getUniformAttribute(const std::string &uniformName);
                 inline bool isShaderProgramValid() const {return isValid;}
-                bool setTexture(const std::string &textureUnitName, std::shared_ptr<Texture> texture);
-                bool setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, std::shared_ptr<Texture> texture);
-                bool setTextureArray(const std::string &textureUnitArrayName, std::vector<std::shared_ptr<Texture>> textures);
+                bool setTexture(const std::string &textureUnitName, RenderSystem::Texture *texture);
+                bool setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture);
+                bool setTextureArray(const std::string &textureUnitArrayName, std::vector<RenderSystem::Texture *> textures);
 
                 void unbind();
         };

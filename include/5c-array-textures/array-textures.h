@@ -11,6 +11,7 @@
 #include <flare/gl/buffer.h>
 #include <flare/gl/vertexarray.h>
 #include <flare/gl/shaderprogram.h>
+#include <flare/gl/texturemanager.h>
 #include <flare/ui/renderwindow.h>
 
 namespace Tutorial
@@ -39,9 +40,105 @@ namespace Tutorial
             std::unique_ptr<Flare::GL::VertexArray> basicVAO = nullptr;
             std::unique_ptr<Flare::GL::ShaderProgram> dropletShader = nullptr;
             std::unique_ptr<Flare::GL::Buffer> dropletIndexBuffer = nullptr;
+            std::unique_ptr<Flare::RenderSystem::TextureManager> textureManager = std::make_unique<Flare::GL::TextureManager>();
             decltype(Flare::GL::buildStd140AlignedUniformBlockBuffer(Flare::GL::GLSLArrayType<DropletInstanceData, 256>{})) dropletUniformBufferObject;
 
-            const std::array<std::string, 10> dropletFiles{
+            const std::string vertexShaderPath = "../src/5c-array-textures/shaders/vertex.glsl";
+            const std::string fragmentShaderPath = "../src/5c-array-textures/shaders/fragment.glsl";
+            unsigned int elapsedTime = 0;
+
+            //Stupid duplication of filenames just to prove we can mass-initialize layers on an ArrayTexture
+            const std::vector<std::string> dropletFiles{
+                "../src/5c-array-textures/textures/test1.png",
+                "../src/5c-array-textures/textures/test2.png",
+                "../src/5c-array-textures/textures/test3.png",
+                "../src/5c-array-textures/textures/test4.png",
+                "../src/5c-array-textures/textures/test5.png",
+                "../src/5c-array-textures/textures/test6.png",
+                "../src/5c-array-textures/textures/test7.png",
+                "../src/5c-array-textures/textures/test8.png",
+                "../src/5c-array-textures/textures/test9.png",
+                "../src/5c-array-textures/textures/test10.png",
+                "../src/5c-array-textures/textures/test1.png",
+                "../src/5c-array-textures/textures/test2.png",
+                "../src/5c-array-textures/textures/test3.png",
+                "../src/5c-array-textures/textures/test4.png",
+                "../src/5c-array-textures/textures/test5.png",
+                "../src/5c-array-textures/textures/test6.png",
+                "../src/5c-array-textures/textures/test7.png",
+                "../src/5c-array-textures/textures/test8.png",
+                "../src/5c-array-textures/textures/test9.png",
+                "../src/5c-array-textures/textures/test10.png",
+                "../src/5c-array-textures/textures/test1.png",
+                "../src/5c-array-textures/textures/test2.png",
+                "../src/5c-array-textures/textures/test3.png",
+                "../src/5c-array-textures/textures/test4.png",
+                "../src/5c-array-textures/textures/test5.png",
+                "../src/5c-array-textures/textures/test6.png",
+                "../src/5c-array-textures/textures/test7.png",
+                "../src/5c-array-textures/textures/test8.png",
+                "../src/5c-array-textures/textures/test9.png",
+                "../src/5c-array-textures/textures/test10.png",
+                "../src/5c-array-textures/textures/test1.png",
+                "../src/5c-array-textures/textures/test2.png",
+                "../src/5c-array-textures/textures/test3.png",
+                "../src/5c-array-textures/textures/test4.png",
+                "../src/5c-array-textures/textures/test5.png",
+                "../src/5c-array-textures/textures/test6.png",
+                "../src/5c-array-textures/textures/test7.png",
+                "../src/5c-array-textures/textures/test8.png",
+                "../src/5c-array-textures/textures/test9.png",
+                "../src/5c-array-textures/textures/test10.png",
+                "../src/5c-array-textures/textures/test1.png",
+                "../src/5c-array-textures/textures/test2.png",
+                "../src/5c-array-textures/textures/test3.png",
+                "../src/5c-array-textures/textures/test4.png",
+                "../src/5c-array-textures/textures/test5.png",
+                "../src/5c-array-textures/textures/test6.png",
+                "../src/5c-array-textures/textures/test7.png",
+                "../src/5c-array-textures/textures/test8.png",
+                "../src/5c-array-textures/textures/test9.png",
+                "../src/5c-array-textures/textures/test10.png",
+                "../src/5c-array-textures/textures/test1.png",
+                "../src/5c-array-textures/textures/test2.png",
+                "../src/5c-array-textures/textures/test3.png",
+                "../src/5c-array-textures/textures/test4.png",
+                "../src/5c-array-textures/textures/test5.png",
+                "../src/5c-array-textures/textures/test6.png",
+                "../src/5c-array-textures/textures/test7.png",
+                "../src/5c-array-textures/textures/test8.png",
+                "../src/5c-array-textures/textures/test9.png",
+                "../src/5c-array-textures/textures/test10.png",
+                "../src/5c-array-textures/textures/test1.png",
+                "../src/5c-array-textures/textures/test2.png",
+                "../src/5c-array-textures/textures/test3.png",
+                "../src/5c-array-textures/textures/test4.png",
+                "../src/5c-array-textures/textures/test5.png",
+                "../src/5c-array-textures/textures/test6.png",
+                "../src/5c-array-textures/textures/test7.png",
+                "../src/5c-array-textures/textures/test8.png",
+                "../src/5c-array-textures/textures/test9.png",
+                "../src/5c-array-textures/textures/test10.png",
+                "../src/5c-array-textures/textures/test1.png",
+                "../src/5c-array-textures/textures/test2.png",
+                "../src/5c-array-textures/textures/test3.png",
+                "../src/5c-array-textures/textures/test4.png",
+                "../src/5c-array-textures/textures/test5.png",
+                "../src/5c-array-textures/textures/test6.png",
+                "../src/5c-array-textures/textures/test7.png",
+                "../src/5c-array-textures/textures/test8.png",
+                "../src/5c-array-textures/textures/test9.png",
+                "../src/5c-array-textures/textures/test10.png",
+                "../src/5c-array-textures/textures/test1.png",
+                "../src/5c-array-textures/textures/test2.png",
+                "../src/5c-array-textures/textures/test3.png",
+                "../src/5c-array-textures/textures/test4.png",
+                "../src/5c-array-textures/textures/test5.png",
+                "../src/5c-array-textures/textures/test6.png",
+                "../src/5c-array-textures/textures/test7.png",
+                "../src/5c-array-textures/textures/test8.png",
+                "../src/5c-array-textures/textures/test9.png",
+                "../src/5c-array-textures/textures/test10.png",
                 "../src/5c-array-textures/textures/test1.png",
                 "../src/5c-array-textures/textures/test2.png",
                 "../src/5c-array-textures/textures/test3.png",
@@ -53,10 +150,6 @@ namespace Tutorial
                 "../src/5c-array-textures/textures/test9.png",
                 "../src/5c-array-textures/textures/test10.png"
             };
-
-            const std::string vertexShaderPath = "../src/5c-array-textures/shaders/vertex.glsl";
-            const std::string fragmentShaderPath = "../src/5c-array-textures/shaders/fragment.glsl";
-            unsigned int elapsedTime = 0;
 
             void initializeRandomizedDropletInstanceParams();
 

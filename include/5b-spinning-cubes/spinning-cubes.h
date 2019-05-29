@@ -8,6 +8,7 @@
 #include <flare/gl/buffer.h>
 #include <flare/gl/vertexarray.h>
 #include <flare/gl/shaderprogram.h>
+#include <flare/gl/texturemanager.h>
 #include <flare/ui/renderwindow.h>
 
 namespace Tutorial
@@ -19,6 +20,7 @@ namespace Tutorial
             std::unique_ptr<Flare::GL::Buffer> cubeMeshBuffer = nullptr;
             std::unique_ptr<Flare::GL::VertexArray> cubeMeshVAO = nullptr;
             std::unique_ptr<Flare::GL::ShaderProgram> spinningCubeShader = nullptr;
+            std::unique_ptr<Flare::RenderSystem::TextureManager> textureManager = std::make_unique<Flare::GL::TextureManager>();
             const std::string vertexShaderPath{"../src/5b-spinning-cubes/shaders/vertex.glsl"};
             const std::string fragmentShaderPath{"../src/5b-spinning-cubes/shaders/fragment.glsl"};
             std::array<GLfloat, 108> cubeVertexPositions;

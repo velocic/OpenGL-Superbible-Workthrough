@@ -54,30 +54,22 @@ namespace Tutorial
             .addTextureUnit(std::move(arrayTextureSampler))
             .build();
 
-        auto numTextureLayers = 100u;
-        auto arrayTexture = std::make_shared<Flare::GL::ArrayTexture2D>(8, GL_RGBA8, 256, 256, numTextureLayers);
-
-        {
-            auto imageData = std::array<LoadedDropletImageData, 10>();
-            for (unsigned int i = 0; i < dropletFiles.size(); ++i) {
-                lodepng::decode(imageData[i].rawImageData, imageData[i].imageWidth, imageData[i].imageHeight, dropletFiles[i]);
+        textureManager->loadArrayTexture2D(
+            Flare::RenderSystem::TextureManager::ArrayTextureFiles{
+                dropletFiles,
+                "testDropletImages",
+                Flare::RenderSystem::TextureManager::SupportedFileType::PNG,
+                GL_RGBA8
+            },
+            Flare::RenderSystem::TextureManager::TextureInitParams{
+                8,
+                GL_RGBA,
+                true
+            },
+            [&](auto loadedArrayTexture){
+                dropletShader->setTexture("tex_droplets", loadedArrayTexture);
             }
-
-            for (unsigned int i = 0; i < numTextureLayers; ++i) {
-                arrayTexture->textureSubImage3D(
-                    0,
-                    0, 0,
-                    i,
-                    256, 256,
-                    GL_RGBA,
-                    GL_UNSIGNED_BYTE,
-                    &(imageData[i % 10].rawImageData[0]),
-                    true
-                );
-            }
-        }
-
-        dropletShader->setTexture("tex_droplets", arrayTexture);
+        );
 
         basicVAO = std::make_unique<Flare::GL::VertexArray>(
             *(dropletShader.get()),

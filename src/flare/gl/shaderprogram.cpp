@@ -224,7 +224,7 @@ namespace Flare
                     samplerName,
                     TextureUnitArray(
                         std::move(samplerArrayEntry.first),
-                        std::vector<std::shared_ptr<Texture>>(numArrayElements),
+                        std::vector<RenderSystem::Texture *>(numArrayElements),
                         totalAssignedTextureUnits,
                         totalAssignedTextureUnits + numArrayElements
                     )
@@ -320,7 +320,7 @@ namespace Flare
             return program;
         }
 
-        bool ShaderProgram::setTexture(const std::string &textureUnitName, std::shared_ptr<Texture> texture)
+        bool ShaderProgram::setTexture(const std::string &textureUnitName, RenderSystem::Texture *texture)
         {
             auto mapIterator = textureUnits.find(textureUnitName);
 
@@ -333,7 +333,7 @@ namespace Flare
             return true;
         }
 
-        bool ShaderProgram::setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, std::shared_ptr<Texture> texture)
+        bool ShaderProgram::setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture)
         {
             auto mapIterator = textureUnitArrays.find(textureUnitArrayName);
 
@@ -346,7 +346,7 @@ namespace Flare
             return true;
         }
 
-        bool ShaderProgram::setTextureArray(const std::string &textureUnitArrayName, std::vector<std::shared_ptr<Texture>> textures)
+        bool ShaderProgram::setTextureArray(const std::string &textureUnitArrayName, std::vector<RenderSystem::Texture *> textures)
         {
             auto mapIterator = textureUnitArrays.find(textureUnitArrayName);
 
@@ -365,7 +365,7 @@ namespace Flare
             return true;
         }
 
-        ShaderProgram::TextureUnit::TextureUnit(Sampler &&sampler, std::shared_ptr<Texture> texture, unsigned int index)
+        ShaderProgram::TextureUnit::TextureUnit(Sampler &&sampler, RenderSystem::Texture *texture, unsigned int index)
         :
             sampler(std::move(sampler)), texture(texture), index(index)
         {}
@@ -390,7 +390,7 @@ namespace Flare
             return *this;
         }
 
-        ShaderProgram::TextureUnitArray::TextureUnitArray(Sampler &&sampler, std::vector<std::shared_ptr<Texture>> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive)
+        ShaderProgram::TextureUnitArray::TextureUnitArray(Sampler &&sampler, std::vector<RenderSystem::Texture *> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive)
         :
             sampler(std::move(sampler)), textures(std::move(textures)), firstIndexInclusive(firstIndexInclusive), lastIndexExclusive(lastIndexExclusive)
         {}

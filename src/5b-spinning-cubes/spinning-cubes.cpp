@@ -32,16 +32,22 @@ namespace Tutorial
             .addTextureUnit(std::move(demoTextureSampler))
             .build();
 
-        {
-            std::vector<unsigned char> decodedPNG;
-            unsigned int imageWidth;
-            unsigned int imageHeight;
-
-            lodepng::decode(decodedPNG, imageWidth, imageHeight, "../src/5b-spinning-cubes/textures/brick.png");
-            auto demoTexture = std::make_shared<Flare::GL::Texture2D>(1, GL_RGBA8, imageWidth, imageHeight);
-            demoTexture->textureSubImage2D(GL_RGBA, GL_UNSIGNED_BYTE, &decodedPNG[0], false);
-            spinningCubeShader->setTexture("demoTexture", demoTexture);
-        }
+        textureManager->loadTexture2D(
+            Flare::RenderSystem::TextureManager::TextureFile{
+                "../src/5b-spinning-cubes/textures/brick.png",
+                "brick",
+                Flare::RenderSystem::TextureManager::SupportedFileType::PNG,
+                GL_RGBA8
+            },
+            Flare::RenderSystem::TextureManager::TextureInitParams{
+                1,
+                GL_RGBA,
+                false
+            },
+            [&](auto loadedTexture){
+                spinningCubeShader->setTexture("demoTexture", loadedTexture);
+            }
+        );
 
         spinningCubeShader->bind();
 
