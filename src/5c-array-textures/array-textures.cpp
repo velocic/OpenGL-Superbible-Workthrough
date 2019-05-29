@@ -59,11 +59,11 @@ namespace Tutorial
                 dropletFiles,
                 "testDropletImages",
                 Flare::RenderSystem::TextureManager::SupportedFileType::PNG,
-                GL_RGBA8
+                GL_RGBA
             },
             Flare::RenderSystem::TextureManager::TextureInitParams{
                 8,
-                GL_RGBA,
+                GL_RGBA8,
                 true
             },
             [&](auto loadedArrayTexture){

@@ -37,11 +37,11 @@ namespace Tutorial
                 "../src/5b-spinning-cubes/textures/brick.png",
                 "brick",
                 Flare::RenderSystem::TextureManager::SupportedFileType::PNG,
-                GL_RGBA8
+                GL_RGBA
             },
             Flare::RenderSystem::TextureManager::TextureInitParams{
                 1,
-                GL_RGBA,
+                GL_RGBA8,
                 false
             },
             [&](auto loadedTexture){
