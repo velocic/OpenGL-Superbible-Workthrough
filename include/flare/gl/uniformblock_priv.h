@@ -24,7 +24,7 @@ namespace Flare
             }
 
             template<size_t TotalBlockSize = 0, typename Current, typename... Remaining>
-            constexpr size_t calculateUniformBlockSize(Current current, Remaining... remaining)
+            constexpr size_t calculateUniformBlockSize(Current, Remaining... remaining)
             {
                 if constexpr (TotalBlockSize % Current::alignment == 0) {
                     constexpr auto currentSize = Current::size + TotalBlockSize;
@@ -55,7 +55,7 @@ namespace Flare
             }
 
             template<size_t CurrentElementIndex = 0, typename Current, typename... Remaining>
-            constexpr auto calculateUniformBlockAlignedElements(Current current, Remaining... remaining)
+            constexpr auto calculateUniformBlockAlignedElements(Current, Remaining... remaining)
             {
                 if constexpr (CurrentElementIndex % Current::alignment == 0) {
                     constexpr auto nextElementCandidateIndex = CurrentElementIndex + Current::size;
@@ -70,7 +70,7 @@ namespace Flare
             }
 
             template<typename GLSLType>
-            constexpr auto buildEmptyUniformBlockElementPointerTuple(GLSLType last)
+            constexpr auto buildEmptyUniformBlockElementPointerTuple(GLSLType)
             {
                 return std::tuple<typename GLSLType::type*>();
             }

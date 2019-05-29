@@ -139,7 +139,7 @@ namespace Flare
             glBindTextureUnit(textureUnitIndex, glTexture);
         }
 
-        void Texture2D::bindImageTexture(GLuint unit, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format)
+        void Texture2D::bindImageTexture(GLuint unit, GLint level, [[maybe_unused]] GLboolean layered, [[maybe_unused]] GLint layer, GLenum access, GLenum format)
         {
             if (glTexture == 0) {
                 throw std::runtime_error("Attempting to bind an OpenGL image texture that's uninitialized");

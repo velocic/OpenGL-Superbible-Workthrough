@@ -34,7 +34,7 @@ namespace Flare
         void TextureManager::batchLoadTexture2D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete)
         {
             for (const auto &target : targets) {
-                loadTexture2D(target, initParams,[](auto loadedTexture){});
+                loadTexture2D(target, initParams,[](auto){});
             }
 
             onLoadComplete();
@@ -43,7 +43,7 @@ namespace Flare
         void TextureManager::batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete)
         {
             for (const auto &target : targets) {
-                loadArrayTexture2D(target, initParams, [](auto loadedTexture){});
+                loadArrayTexture2D(target, initParams, [](auto){});
             }
 
             onLoadComplete();
@@ -87,7 +87,7 @@ namespace Flare
             auto height = 0u;
             auto decodedImage = std::vector<unsigned char>{};
 
-            auto newArrayTexture = std::unique_ptr<ArrayTexture2D>(nullptr);
+            auto newArrayTexture = std::unique_ptr<ArrayTexture2D>{};
 
             auto loadArrayTextureLayer = [&](const auto &filePath, unsigned int arrayTextureIndex){
                 lodepng::decode(decodedImage, width, height, filePath);

@@ -9,7 +9,6 @@ namespace Flare
     {
         Buffer::Buffer(const RenderSystem::VertexDataLayout& bufferContentDescription)
         :
-            RenderSystem::Buffer(bufferContentDescription),
             bufferContentDescription(bufferContentDescription)
         {
             glCreateBuffers(1, &glBuffer);
@@ -22,7 +21,6 @@ namespace Flare
 
         Buffer::Buffer(Buffer&& other)
         :
-            RenderSystem::Buffer(std::move(other)),
             bufferContentDescription(other.bufferContentDescription),
             usageFlags(std::move(other.usageFlags)),
             glBuffer(std::move(other.glBuffer)),
@@ -226,7 +224,6 @@ namespace Flare
 
         MappedBufferRange::MappedBufferRange(const Buffer& sourceBuffer, GLintptr offset, GLsizeiptr length, void* mappedData)
         :
-            RenderSystem::MappedBufferRange(sourceBuffer, offset, length, mappedData),
             sourceBuffer(sourceBuffer),
             offset(offset),
             length(length),

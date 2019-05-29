@@ -13,13 +13,6 @@ namespace Flare
         class Buffer
         {
             public:
-                Buffer(const VertexDataLayout& bufferContentDescription) {}
-                virtual ~Buffer() {}
-                Buffer(Buffer&& other) {}
-                Buffer& operator=(Buffer&& other) { return *this; }
-                Buffer(const Buffer& other) = delete;
-                Buffer& operator=(const Buffer& other) = delete;
-
                 virtual void bind(RSenum target) = 0;
                 virtual void clearRange(RSenum internalFormat, RSintptr offset, RSsizeiptr size, RSenum format, RSenum type, const void *data) = 0;
                 virtual void copyRange(const Buffer &readBuffer, RSintptr readOffset, RSintptr writeOffset, RSsizeiptr size) = 0;
@@ -35,17 +28,8 @@ namespace Flare
 
         class MappedBufferRange
         {
-            protected:
-                MappedBufferRange(const Buffer &sourceBuffer, RSintptr offset, RSsizeiptr length, void *mappedData) {}
-
             public:
                 void *mappedData = nullptr;
-
-                virtual ~MappedBufferRange() {}
-                MappedBufferRange(MappedBufferRange&& other) = delete;
-                MappedBufferRange &operator=(MappedBufferRange&& other) = delete;
-                MappedBufferRange(const MappedBufferRange& other) = delete;
-                MappedBufferRange &operator=(const Buffer& other) = delete;
 
                 virtual bool hasReadAccess() const = 0;
                 virtual bool hasWriteAccess() const = 0;

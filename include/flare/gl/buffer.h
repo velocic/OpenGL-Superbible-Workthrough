@@ -38,7 +38,7 @@ namespace Flare
                 void checkDynamicStorageFlagBeforeWrite();
             public:
                 Buffer(const RenderSystem::VertexDataLayout& bufferContentDescription);
-                virtual ~Buffer() override;
+                virtual ~Buffer();
                 Buffer(Buffer&& other);
                 Buffer& operator=(Buffer&& other);
                 Buffer(const Buffer& other) = delete;
@@ -88,7 +88,7 @@ namespace Flare
             public:
                 void* mappedData = nullptr;
 
-                virtual ~MappedBufferRange() override;
+                virtual ~MappedBufferRange();
                 MappedBufferRange(MappedBufferRange&& other) = delete;
                 MappedBufferRange& operator=(MappedBufferRange&& other) = delete;
                 MappedBufferRange(const MappedBufferRange& other) = delete;

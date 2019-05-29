@@ -9,7 +9,7 @@
 
 #include <flare/gl/uniformblock.h>
 
-int main(int argc, char* argv[])
+int main()
 {
     unsigned int numFramesToRender = 10 * 60;
     auto targetFrameTimeMillis = 16.6;

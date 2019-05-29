@@ -81,8 +81,7 @@ namespace Tutorial
 
         basicVAO = std::make_unique<Flare::GL::VertexArray>(
             *(dropletShader.get()),
-            std::vector<std::reference_wrapper<const Flare::GL::Buffer>>{
-            }
+            std::vector<std::reference_wrapper<const Flare::GL::Buffer>>{}
         );
         basicVAO->bind();
         dropletShader->bind();
