@@ -86,10 +86,10 @@ namespace Flare
             auto width = 0u;
             auto height = 0u;
             auto decodedImage = std::vector<unsigned char>{};
-
             auto newArrayTexture = std::unique_ptr<ArrayTexture2D>{};
 
             auto loadArrayTextureLayer = [&](const auto &filePath, unsigned int arrayTextureIndex){
+                decodedImage.clear();
                 lodepng::decode(decodedImage, width, height, filePath);
 
                 if (newArrayTexture == nullptr) {
