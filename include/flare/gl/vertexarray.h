@@ -7,12 +7,13 @@
 #include <GL/gl3w.h>
 #include <flare/gl/buffer.h>
 #include <flare/gl/shaderprogram.h>
+#include <flare/rendersystem/vertexarray.h>
 
 namespace Flare
 {
     namespace GL
     {
-        class VertexArray
+        class VertexArray : public RenderSystem::VertexArray
         {
             private:
                 std::reference_wrapper<const ShaderProgram> shaderProgram;
@@ -32,9 +33,9 @@ namespace Flare
                 VertexArray &operator=(const VertexArray &other) = delete;
                 ~VertexArray();
 
-                void bind();
-                void destroy();
-                void unbind();
+                virtual void bind() override;
+                virtual void destroy() override;
+                virtual void unbind() override;
         };
     }
 }
