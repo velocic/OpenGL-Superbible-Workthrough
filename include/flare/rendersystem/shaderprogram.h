@@ -22,6 +22,19 @@ namespace Flare
                 virtual bool setTextureArray(const std::string &textureUnitArrayName, std::vector<RenderSystem::Texture *> textures) = 0;
                 virtual void unbind() = 0;
         };
+
+        class ShaderProgramBuilder
+        {
+            public:
+                virtual ShaderProgramBuilder& setVertexShader(const std::string &vertexShaderFilePath) = 0;
+                virtual ShaderProgramBuilder& setTessellationControlShader(const std::string &tessellationControlShaderFilePath) = 0;
+                virtual ShaderProgramBuilder& setTessellationEvaluationShader(const std::string &tessellationEvaluationShaderFilePath) = 0;
+                virtual ShaderProgramBuilder& setGeometryShader(const std::string &geometryShaderFilePath) = 0;
+                virtual ShaderProgramBuilder& setFragmentShader(const std::string &fragmentShaderFilePath) = 0;
+                virtual ShaderProgramBuilder& addTextureUnit(Sampler &&sampler) = 0;
+                virtual ShaderProgramBuilder& addTextureUnitArray(Sampler &&sampler, unsigned int numTextureUnits) = 0;
+                virtual std::unique_ptr<ShaderProgram> build() = 0;
+        };
     }
 }
 

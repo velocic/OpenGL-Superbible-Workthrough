@@ -110,7 +110,7 @@ namespace Flare
                 virtual void unbind() override;
         };
 
-        class ShaderProgramBuilder
+        class ShaderProgramBuilder : public RenderSystem::ShaderProgramBuilder
         {
             private:
                 ShaderSourceFile vertexShaderSource;
@@ -122,7 +122,7 @@ namespace Flare
                 std::vector<Sampler> textureUnitSamplers;
                 std::vector<std::pair<Sampler, unsigned int>> textureUnitArraySamplers;
             public:
-                virtual ShaderProgramBuilder& setVertexShader(const std::string &vertexShaderFilePath)
+                virtual ShaderProgramBuilder& setVertexShader(const std::string &vertexShaderFilePath) override
                 {
                     vertexShaderSource.filePath = vertexShaderFilePath;
                     vertexShaderSource.sourceCode = ::Flare::File::getFileContents(vertexShaderFilePath);
@@ -130,7 +130,7 @@ namespace Flare
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& setTessellationControlShader(const std::string &tessellationControlShaderFilePath)
+                virtual ShaderProgramBuilder& setTessellationControlShader(const std::string &tessellationControlShaderFilePath) override
                 {
                     tessellationControlShaderSource.filePath = tessellationControlShaderFilePath;
                     tessellationControlShaderSource.sourceCode = ::Flare::File::getFileContents(tessellationControlShaderFilePath);
@@ -138,7 +138,7 @@ namespace Flare
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& setTessellationEvaluationShader(const std::string &tessellationEvaluationShaderFilePath)
+                virtual ShaderProgramBuilder& setTessellationEvaluationShader(const std::string &tessellationEvaluationShaderFilePath) override
                 {
                     tessellationEvaluationShaderSource.filePath = tessellationEvaluationShaderFilePath;
                     tessellationEvaluationShaderSource.sourceCode = ::Flare::File::getFileContents(tessellationEvaluationShaderFilePath);
@@ -146,7 +146,7 @@ namespace Flare
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& setGeometryShader(const std::string &geometryShaderFilePath)
+                virtual ShaderProgramBuilder& setGeometryShader(const std::string &geometryShaderFilePath) override
                 {
                     geometryShaderSource.filePath = geometryShaderFilePath;
                     geometryShaderSource.sourceCode = ::Flare::File::getFileContents(geometryShaderFilePath);
@@ -154,7 +154,7 @@ namespace Flare
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& setFragmentShader(const std::string &fragmentShaderFilePath)
+                virtual ShaderProgramBuilder& setFragmentShader(const std::string &fragmentShaderFilePath) override
                 {
                     fragmentShaderSource.filePath = fragmentShaderFilePath;
                     fragmentShaderSource.sourceCode = ::Flare::File::getFileContents(fragmentShaderFilePath);
@@ -162,19 +162,19 @@ namespace Flare
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& addTextureUnit(Sampler &&sampler)
+                virtual ShaderProgramBuilder& addTextureUnit(Sampler &&sampler) override
                 {
                     this->textureUnitSamplers.emplace_back(std::move(sampler));
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& addTextureUnitArray(Sampler &&sampler, unsigned int numTextureUnits)
+                virtual ShaderProgramBuilder& addTextureUnitArray(Sampler &&sampler, unsigned int numTextureUnits) override
                 {
                     this->textureUnitArraySamplers.emplace_back(std::move(sampler), numTextureUnits);
                     return *this;
                 }
 
-                virtual std::unique_ptr<ShaderProgram> build()
+                virtual std::unique_ptr<ShaderProgram> build() override
                 {
                     auto shader = std::make_unique<Flare::GL::ShaderProgram>(
                         vertexShaderSource,
