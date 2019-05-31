@@ -4,6 +4,7 @@
 #include <string>
 
 #include <flare/rendersystem/datatypes.h>
+#include <flare/rendersystem/sampler.h>
 
 namespace Flare
 {

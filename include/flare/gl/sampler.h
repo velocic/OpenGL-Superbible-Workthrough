@@ -6,11 +6,13 @@
 
 #include <GL/gl3w.h>
 
+#include <flare/rendersystem/sampler.h>
+
 namespace Flare
 {
     namespace GL
     {
-        class Sampler
+        class Sampler : public RenderSystem::Sampler
         {
             private:
                 GLuint glSampler = 0;
@@ -23,12 +25,12 @@ namespace Flare
                 Sampler(const Sampler& other) = delete;
                 Sampler& operator=(const Sampler& other) = delete;
 
-                std::string_view getName();
-                void samplerParameteri(GLenum pname, GLint param);
-                void samplerParameterf(GLenum pname, GLfloat param);
-                void initialize();
-                void destroy();
-                void bind(GLuint unit);
+                virtual std::string_view getName() override;
+                virtual void samplerParameteri(GLenum pname, GLint param) override;
+                virtual void samplerParameterf(GLenum pname, GLfloat param) override;
+                virtual void initialize() override;
+                virtual void destroy() override;
+                virtual void bind(GLuint unit) override;
         };
     }
 }
