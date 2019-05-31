@@ -10,6 +10,7 @@
 
 #include <flare/gl/sampler.h>
 #include <flare/rendersystem/texture.h>
+#include <flare/rendersystem/shaderprogram.h>
 #include <flare/utility/file.h>
 
 namespace Flare
@@ -31,7 +32,7 @@ namespace Flare
             std::vector<uint8_t> sourceCode;
         };
 
-        class ShaderProgram
+        class ShaderProgram : public RenderSystem::ShaderProgram
         {
             friend class ShaderProgramBuilder;
 
@@ -96,18 +97,17 @@ namespace Flare
                 ShaderProgram &operator=(const ShaderProgram &other) = delete;
 
                 //Delete shaders, linked program
-                ~ShaderProgram();
+                virtual ~ShaderProgram();
 
-                bool addUniformAttribute(const std::string &uniformName);
-                void bind();
-                GLint getAttribute(const std::string &attributeName) const;
-                GLint getUniformAttribute(const std::string &uniformName);
-                inline bool isShaderProgramValid() const {return isValid;}
-                bool setTexture(const std::string &textureUnitName, RenderSystem::Texture *texture);
-                bool setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture);
-                bool setTextureArray(const std::string &textureUnitArrayName, std::vector<RenderSystem::Texture *> textures);
-
-                void unbind();
+                virtual bool addUniformAttribute(const std::string &uniformName) override;
+                virtual void bind() override;
+                virtual GLint getAttribute(const std::string &attributeName) const override;
+                virtual GLint getUniformAttribute(const std::string &uniformName) override;
+                virtual inline bool isShaderProgramValid() const override {return isValid;}
+                virtual bool setTexture(const std::string &textureUnitName, RenderSystem::Texture *texture) override;
+                virtual bool setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture) override;
+                virtual bool setTextureArray(const std::string &textureUnitArrayName, std::vector<RenderSystem::Texture *> textures) override;
+                virtual void unbind() override;
         };
 
         class ShaderProgramBuilder
