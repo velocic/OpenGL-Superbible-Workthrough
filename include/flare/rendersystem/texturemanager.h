@@ -47,7 +47,7 @@ namespace Flare
 
                 //TODO: support loading in-memory textures (for making runtime-generated textures available)
 
-                virtual Texture *get(const std::string &alias) = 0;
+                virtual Texture *get(const std::string &alias) const = 0;
                 virtual void remove(const std::string &alias) = 0;
                 virtual void removeAll() = 0;
         };

@@ -32,7 +32,7 @@ namespace Flare
                 virtual void loadTexture2D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
                 virtual void loadArrayTexture2D(const ArrayTextureFiles &files, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
 
-                virtual Texture *get(const std::string &alias) override;
+                virtual RenderSystem::Texture *get(const std::string &alias) const override;
                 virtual void remove(const std::string &alias) override;
                 virtual void removeAll() override;
         };

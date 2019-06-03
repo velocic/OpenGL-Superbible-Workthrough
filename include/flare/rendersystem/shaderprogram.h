@@ -32,8 +32,8 @@ namespace Flare
                 virtual ShaderProgramBuilder& setTessellationEvaluationShader(const std::string &tessellationEvaluationShaderFilePath) = 0;
                 virtual ShaderProgramBuilder& setGeometryShader(const std::string &geometryShaderFilePath) = 0;
                 virtual ShaderProgramBuilder& setFragmentShader(const std::string &fragmentShaderFilePath) = 0;
-                virtual ShaderProgramBuilder& addTextureUnit(Sampler &&sampler) = 0;
-                virtual ShaderProgramBuilder& addTextureUnitArray(Sampler &&sampler, unsigned int numTextureUnits) = 0;
+                virtual ShaderProgramBuilder& addTextureUnit(Sampler *sampler) = 0;
+                virtual ShaderProgramBuilder& addTextureUnitArray(Sampler *sampler, unsigned int numTextureUnits) = 0;
                 virtual std::unique_ptr<ShaderProgram> build() = 0;
         };
     }

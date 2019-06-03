@@ -185,7 +185,7 @@ namespace Flare
             for (auto &textureUnitKVPair : textureUnits) {
                 auto &textureUnit = textureUnitKVPair.second;
                 textureUnit.texture->bind(textureUnit.index);
-                textureUnit.sampler.bind(textureUnit.index);
+                textureUnit.sampler->bind(textureUnit.index);
             }
 
             for (auto &textureUnitArrayKVPair : textureUnitArrays) {
@@ -195,12 +195,12 @@ namespace Flare
                 for (auto &texture : textureUnitArray.textures) {
                     auto textureUnitIndex = textureUnitArray.firstIndexInclusive + currentTextureOffset;
                     texture->bind(textureUnitIndex);
-                    textureUnitArray.sampler.bind(textureUnitIndex);
+                    textureUnitArray.sampler->bind(textureUnitIndex);
                 }
             }
         }
 
-        void ShaderProgram::setTextureUnits(std::vector<Sampler> &&textureUnitSamplers)
+        void ShaderProgram::setTextureUnits(const std::vector<RenderSystem::Sampler *> &textureUnitSamplers)
         {
             for (auto &&sampler : textureUnitSamplers) {
                 auto samplerName = std::string(sampler.getName());
@@ -211,19 +211,19 @@ namespace Flare
                 );
             }
 
-            textureUnitSamplers = std::vector<Sampler>{};
+            textureUnitSamplers = std::vector<RenderSystem::Sampler *>{};
         }
 
-        void ShaderProgram::setTextureUnitArrays(std::vector<std::pair<Sampler, unsigned int>> &&textureUnitArraySamplers)
+        void ShaderProgram::setTextureUnitArrays(const std::vector<std::pair<RenderSystem::Sampler *, unsigned int>> &textureUnitArraySamplers)
         {
-            for (auto &&samplerArrayEntry : textureUnitArraySamplers) {
+            for (const auto &samplerArrayEntry : textureUnitArraySamplers) {
                 const auto &numArrayElements = samplerArrayEntry.second;
-                auto samplerName = std::string(samplerArrayEntry.first.getName());
+                auto samplerName = std::string(samplerArrayEntry.first->getName());
 
                 textureUnitArrays.insert_or_assign(
                     samplerName,
                     TextureUnitArray(
-                        std::move(samplerArrayEntry.first),
+                        samplerArrayEntry.first,
                         std::vector<RenderSystem::Texture *>(numArrayElements),
                         totalAssignedTextureUnits,
                         totalAssignedTextureUnits + numArrayElements
@@ -233,7 +233,7 @@ namespace Flare
                 totalAssignedTextureUnits += numArrayElements;
             }
 
-            textureUnitArraySamplers = std::vector<std::pair<Sampler, unsigned int>>{};
+            textureUnitArraySamplers = std::vector<std::pair<RenderSystem::Sampler *, unsigned int>>{};
         }
 
         GLuint ShaderProgram::linkShaderProgram(const ShaderProgramStages& shaderStages)
@@ -365,9 +365,9 @@ namespace Flare
             return true;
         }
 
-        ShaderProgram::TextureUnit::TextureUnit(Sampler &&sampler, RenderSystem::Texture *texture, unsigned int index)
+        ShaderProgram::TextureUnit::TextureUnit(RenderSystem::Sampler *sampler, RenderSystem::Texture *texture, unsigned int index)
         :
-            sampler(std::move(sampler)), texture(texture), index(index)
+            sampler(sampler), texture(texture), index(index)
         {}
 
         ShaderProgram::TextureUnit::~TextureUnit() {}
@@ -390,9 +390,9 @@ namespace Flare
             return *this;
         }
 
-        ShaderProgram::TextureUnitArray::TextureUnitArray(Sampler &&sampler, std::vector<RenderSystem::Texture *> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive)
+        ShaderProgram::TextureUnitArray::TextureUnitArray(RenderSystem::Sampler *sampler, std::vector<RenderSystem::Texture *> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive)
         :
-            sampler(std::move(sampler)), textures(std::move(textures)), firstIndexInclusive(firstIndexInclusive), lastIndexExclusive(lastIndexExclusive)
+            sampler(sampler), textures(std::move(textures)), firstIndexInclusive(firstIndexInclusive), lastIndexExclusive(lastIndexExclusive)
         {}
 
         ShaderProgram::TextureUnitArray::~TextureUnitArray() {}

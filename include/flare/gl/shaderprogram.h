@@ -38,27 +38,27 @@ namespace Flare
 
             private:
                 struct TextureUnit {
-                    TextureUnit(RenderSystem::Sampler &&sampler, RenderSystem::Texture *texture, unsigned int index);
+                    TextureUnit(RenderSystem::Sampler *sampler, RenderSystem::Texture *texture, unsigned int index);
                     ~TextureUnit();
                     TextureUnit(TextureUnit &&other);
                     TextureUnit &operator=(TextureUnit &&other);
                     TextureUnit(const TextureUnit& other) = delete;
                     TextureUnit &operator=(const TextureUnit &other) = delete;
 
-                    RenderSystem::Sampler sampler;
+                    RenderSystem::Sampler *sampler;
                     RenderSystem::Texture *texture;
                     unsigned int index = 0;
                 };
 
                 struct TextureUnitArray {
-                    TextureUnitArray(RenderSystem::Sampler &&sampler, std::vector<RenderSystem::Texture *> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive);
+                    TextureUnitArray(RenderSystem::Sampler *sampler, std::vector<RenderSystem::Texture *> &&textures, unsigned int firstIndexInclusive, unsigned int lastIndexExclusive);
                     ~TextureUnitArray();
                     TextureUnitArray(TextureUnitArray &&other);
                     TextureUnitArray &operator=(TextureUnitArray &&other);
                     TextureUnitArray(const TextureUnitArray& other) = delete;
                     TextureUnitArray &operator=(const TextureUnitArray &other) = delete;
 
-                    RenderSystem::Sampler sampler;
+                    RenderSystem::Sampler *sampler;
                     std::vector<RenderSystem::Texture *> textures;
                     unsigned int firstIndexInclusive = 0;
                     unsigned int lastIndexExclusive = 0;
@@ -78,11 +78,11 @@ namespace Flare
                 void bindTextureUnits();
 
                 //Creates one texture unit index paired with one sampler
-                void setTextureUnits(std::vector<RenderSystem::Sampler> &&textureUnitSamplers);
+                void setTextureUnits(const std::vector<RenderSystem::Sampler *> &textureUnitSamplers);
 
                 //Creates a range of texture init indices all sharing a single sampler, which will bind to an array
                 //of texture samplers in glsl
-                void setTextureUnitArrays(std::vector<std::pair<RenderSystem::Sampler, unsigned int>> &&textureUnitArraySamplers);
+                void setTextureUnitArrays(const std::vector<std::pair<RenderSystem::Sampler *, unsigned int>> &textureUnitArraySamplers);
             public:
                 ShaderProgram(
                     const ShaderSourceFile &vertexShaderSource,
@@ -119,8 +119,8 @@ namespace Flare
                 ShaderSourceFile geometryShaderSource;
                 ShaderSourceFile fragmentShaderSource;
 
-                std::vector<RenderSystem::Sampler> textureUnitSamplers;
-                std::vector<std::pair<RenderSystem::Sampler, unsigned int>> textureUnitArraySamplers;
+                std::vector<RenderSystem::Sampler *> textureUnitSamplers;
+                std::vector<std::pair<RenderSystem::Sampler *, unsigned int>> textureUnitArraySamplers;
             public:
                 virtual ShaderProgramBuilder& setVertexShader(const std::string &vertexShaderFilePath) override
                 {
@@ -162,19 +162,19 @@ namespace Flare
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& addTextureUnit(RenderSystem::Sampler &&sampler) override
+                virtual ShaderProgramBuilder& addTextureUnit(RenderSystem::Sampler *sampler) override
                 {
-                    this->textureUnitSamplers.emplace_back(std::move(sampler));
+                    this->textureUnitSamplers.push_back(sampler);
                     return *this;
                 }
 
-                virtual ShaderProgramBuilder& addTextureUnitArray(RenderSystem::Sampler &&sampler, unsigned int numTextureUnits) override
+                virtual ShaderProgramBuilder& addTextureUnitArray(RenderSystem::Sampler *sampler, unsigned int numTextureUnits) override
                 {
-                    this->textureUnitArraySamplers.emplace_back(std::move(sampler), numTextureUnits);
+                    this->textureUnitArraySamplers.emplace_back(sampler, numTextureUnits);
                     return *this;
                 }
 
-                virtual std::unique_ptr<ShaderProgram> build() override
+                virtual std::unique_ptr<RenderSystem::ShaderProgram> build() override
                 {
                     auto shader = std::make_unique<Flare::GL::ShaderProgram>(
                         vertexShaderSource,
@@ -184,8 +184,8 @@ namespace Flare
                         fragmentShaderSource
                     );
 
-                    shader->setTextureUnits(std::move(textureUnitSamplers));
-                    shader->setTextureUnitArrays(std::move(textureUnitArraySamplers));
+                    shader->setTextureUnits(textureUnitSamplers);
+                    shader->setTextureUnitArrays(textureUnitArraySamplers);
 
                     return shader;
                 }
