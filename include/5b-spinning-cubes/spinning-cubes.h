@@ -17,9 +17,10 @@ namespace Tutorial
     {
         private:
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
-            std::unique_ptr<Flare::GL::Buffer> cubeMeshBuffer = nullptr;
-            std::unique_ptr<Flare::GL::VertexArray> cubeMeshVAO = nullptr;
-            std::unique_ptr<Flare::GL::ShaderProgram> spinningCubeShader = nullptr;
+            std::unique_ptr<Flare::RenderSystem::Buffer> cubeMeshBuffer = nullptr;
+            std::unique_ptr<Flare::RenderSystem::VertexArray> cubeMeshVAO = nullptr;
+            std::unique_ptr<Flare::RenderSystem::ShaderProgram> spinningCubeShader = nullptr;
+            std::unique_ptr<Flare::RenderSystem::Sampler> demoTextureSampler = nullptr;
             std::unique_ptr<Flare::RenderSystem::TextureManager> textureManager = std::make_unique<Flare::GL::TextureManager>();
             const std::string vertexShaderPath{"../src/5b-spinning-cubes/shaders/vertex.glsl"};
             const std::string fragmentShaderPath{"../src/5b-spinning-cubes/shaders/fragment.glsl"};

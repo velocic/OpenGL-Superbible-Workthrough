@@ -15,7 +15,7 @@ namespace Tutorial
     {
         private:
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
-            std::unique_ptr<Flare::GL::ShaderProgram> plainTriangleShader = nullptr;
+            std::unique_ptr<Flare::RenderSystem::ShaderProgram> plainTriangleShader = nullptr;
             const std::string vertexShaderPath;
             const std::string fragmentShaderPath;
             GLuint VAO = 0;

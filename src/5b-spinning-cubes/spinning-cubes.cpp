@@ -20,16 +20,16 @@ namespace Tutorial
             720
         );
 
-        auto demoTextureSampler = Flare::GL::Sampler("demoTexture");
-        demoTextureSampler.samplerParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        demoTextureSampler.samplerParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        demoTextureSampler.samplerParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-        demoTextureSampler.samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+        auto demoTextureSampler = std::make_unique<Flare::GL::Sampler>("demoTexture");
+        demoTextureSampler->samplerParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        demoTextureSampler->samplerParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        demoTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        demoTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
         spinningCubeShader = Flare::GL::ShaderProgramBuilder()
             .setVertexShader(vertexShaderPath)
             .setFragmentShader(fragmentShaderPath)
-            .addTextureUnit(std::move(demoTextureSampler))
+            .addTextureUnit(demoTextureSampler.get())
             .build();
 
         textureManager->loadTexture2D(
@@ -111,7 +111,7 @@ namespace Tutorial
 
         cubeMeshBuffer = std::make_unique<Flare::GL::Buffer>(cubeMeshBufferLayout);
 
-        auto bufferRefsForCubeMeshVAO = std::vector<std::reference_wrapper<const Flare::GL::Buffer>>{
+        auto bufferRefsForCubeMeshVAO = std::vector<std::reference_wrapper<const Flare::RenderSystem::Buffer>>{
             *(cubeMeshBuffer.get())
         };
 
@@ -120,7 +120,7 @@ namespace Tutorial
             bufferRefsForCubeMeshVAO
         );
 
-        cubeMeshBuffer->namedBufferStorage(cubeVertexPositions.max_size() * sizeof(GLfloat), cubeVertexPositions.data(), 0);
+        cubeMeshBuffer->allocateBufferStorage(cubeVertexPositions.max_size() * sizeof(GLfloat), cubeVertexPositions.data(), 0);
     }
 
     void SpinningCubes::render(unsigned int deltaTime)

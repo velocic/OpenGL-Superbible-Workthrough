@@ -202,16 +202,14 @@ namespace Flare
 
         void ShaderProgram::setTextureUnits(const std::vector<RenderSystem::Sampler *> &textureUnitSamplers)
         {
-            for (auto &&sampler : textureUnitSamplers) {
-                auto samplerName = std::string(sampler.getName());
+            for (const auto &sampler : textureUnitSamplers) {
+                auto samplerName = std::string(sampler->getName());
 
                 textureUnits.insert_or_assign(
                     samplerName,
-                    TextureUnit(std::move(sampler), nullptr, totalAssignedTextureUnits++)
+                    TextureUnit(sampler, nullptr, totalAssignedTextureUnits++)
                 );
             }
-
-            textureUnitSamplers = std::vector<RenderSystem::Sampler *>{};
         }
 
         void ShaderProgram::setTextureUnitArrays(const std::vector<std::pair<RenderSystem::Sampler *, unsigned int>> &textureUnitArraySamplers)
@@ -232,8 +230,6 @@ namespace Flare
 
                 totalAssignedTextureUnits += numArrayElements;
             }
-
-            textureUnitArraySamplers = std::vector<std::pair<RenderSystem::Sampler *, unsigned int>>{};
         }
 
         GLuint ShaderProgram::linkShaderProgram(const ShaderProgramStages& shaderStages)

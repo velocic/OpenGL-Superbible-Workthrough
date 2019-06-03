@@ -42,16 +42,16 @@ namespace Tutorial
             720
         );
 
-        auto arrayTextureSampler = Flare::GL::Sampler("tex_droplets");
-        arrayTextureSampler.samplerParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        arrayTextureSampler.samplerParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        arrayTextureSampler.samplerParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-        arrayTextureSampler.samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+        auto arrayTextureSampler = std::make_unique<Flare::GL::Sampler>("tex_droplets");
+        arrayTextureSampler->samplerParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        arrayTextureSampler->samplerParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        arrayTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        arrayTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
         dropletShader = Flare::GL::ShaderProgramBuilder()
             .setVertexShader(vertexShaderPath)
             .setFragmentShader(fragmentShaderPath)
-            .addTextureUnit(std::move(arrayTextureSampler))
+            .addTextureUnit(arrayTextureSampler.get())
             .build();
 
         textureManager->loadArrayTexture2D(
@@ -73,7 +73,7 @@ namespace Tutorial
 
         basicVAO = std::make_unique<Flare::GL::VertexArray>(
             *(dropletShader.get()),
-            std::vector<std::reference_wrapper<const Flare::GL::Buffer>>{}
+            std::vector<std::reference_wrapper<const Flare::RenderSystem::Buffer>>{}
         );
         basicVAO->bind();
         dropletShader->bind();

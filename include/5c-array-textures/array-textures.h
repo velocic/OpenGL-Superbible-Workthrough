@@ -10,6 +10,7 @@
 #include <flare/application.h>
 #include <flare/gl/buffer.h>
 #include <flare/gl/vertexarray.h>
+#include <flare/gl/sampler.h>
 #include <flare/gl/shaderprogram.h>
 #include <flare/gl/texturemanager.h>
 #include <flare/ui/renderwindow.h>
@@ -38,8 +39,9 @@ namespace Tutorial
 
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
             std::unique_ptr<Flare::GL::VertexArray> basicVAO = nullptr;
-            std::unique_ptr<Flare::GL::ShaderProgram> dropletShader = nullptr;
+            std::unique_ptr<Flare::RenderSystem::ShaderProgram> dropletShader = nullptr;
             std::unique_ptr<Flare::GL::Buffer> dropletIndexBuffer = nullptr;
+            std::unique_ptr<Flare::RenderSystem::Sampler> arrayTextureSampler = nullptr;
             std::unique_ptr<Flare::RenderSystem::TextureManager> textureManager = std::make_unique<Flare::GL::TextureManager>();
             decltype(Flare::GL::buildStd140AlignedUniformBlockBuffer(Flare::GL::GLSLArrayType<DropletInstanceData, 256>{})) dropletUniformBufferObject;
 

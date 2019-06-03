@@ -125,7 +125,7 @@ namespace Flare
             onLoadComplete(callbackResult);
         }
 
-        Texture *TextureManager::get(const std::string &alias) const
+        RenderSystem::Texture *TextureManager::get(const std::string &alias) const
         {
             auto result = textures.find(stringHasher(alias));
 

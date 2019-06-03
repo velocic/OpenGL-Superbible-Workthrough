@@ -1,10 +1,12 @@
 #ifndef FLARE_RENDERSYSTEM_SHADERPROGRAM_H
 #define FLARE_RENDERSYSTEM_SHADERPROGRAM_H
 
+#include <memory>
 #include <string>
 
 #include <flare/rendersystem/datatypes.h>
 #include <flare/rendersystem/sampler.h>
+#include <flare/rendersystem/texture.h>
 
 namespace Flare
 {

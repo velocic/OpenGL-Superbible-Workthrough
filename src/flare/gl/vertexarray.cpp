@@ -4,7 +4,7 @@ namespace Flare
 {
     namespace GL
     {
-        VertexArray::VertexArray(const ShaderProgram& shaderProgram,  const std::vector<std::reference_wrapper<const Buffer>> &linkedBuffers)
+        VertexArray::VertexArray(const RenderSystem::ShaderProgram& shaderProgram,  const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers)
         :
             shaderProgram(shaderProgram),
             linkedBuffers(linkedBuffers)
@@ -45,11 +45,11 @@ namespace Flare
             glBindVertexArray(VAO);
         }
 
-        void VertexArray::bindAttributesToBuffers(GLuint VAO, const ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const Buffer>> &linkedBuffers)
+        void VertexArray::bindAttributesToBuffers(GLuint VAO, const RenderSystem::ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers)
         {
             for (size_t bufferBindingIndex = 0; bufferBindingIndex < linkedBuffers.size(); ++bufferBindingIndex) {
                 const auto &buffer = linkedBuffers[bufferBindingIndex].get();
-                const auto &bufferLayout = buffer.getBufferContentDescription();
+                const auto &bufferLayout = buffer.getContentDescription();
                 glVertexArrayVertexBuffer(VAO, bufferBindingIndex, buffer.getName(), bufferLayout.offset, bufferLayout.stride);
 
                 for (const auto &vertexAttribute : bufferLayout.vertexAttributes) {

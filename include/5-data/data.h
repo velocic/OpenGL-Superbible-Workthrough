@@ -16,8 +16,8 @@ namespace Tutorial
     {
         private:
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
-            std::unique_ptr<Flare::GL::ShaderProgram> shaderPipelineDemoShader = nullptr;
-            std::unique_ptr<Flare::GL::VertexArray> shaderPipelineDemoShaderVAO = nullptr;
+            std::unique_ptr<Flare::RenderSystem::ShaderProgram> shaderPipelineDemoShader = nullptr;
+            std::unique_ptr<Flare::RenderSystem::VertexArray> shaderPipelineDemoShaderVAO = nullptr;
             std::unique_ptr<Flare::GL::Buffer> vertexPositionBuffer = nullptr;
             std::unique_ptr<Flare::GL::Buffer> vertexOffsetBuffer = nullptr;
             std::unique_ptr<Flare::GL::Buffer> triangleColorBuffer = nullptr;

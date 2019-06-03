@@ -14,7 +14,7 @@ namespace Tutorial
     {
         private:
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
-            std::unique_ptr<Flare::GL::ShaderProgram> shaderPipelineDemoShader = nullptr;
+            std::unique_ptr<Flare::RenderSystem::ShaderProgram> shaderPipelineDemoShader = nullptr;
             const std::string vertexShaderPath{"../src/3-gpu-shader-pipeline/shaders/vertex.vsh"};
             const std::string fragmentShaderPath{"../src/3-gpu-shader-pipeline/shaders/fragment.fsh"};
             const std::string tessellationControlShaderPath{"../src/3-gpu-shader-pipeline/shaders/tessellation-control.glsl"};
