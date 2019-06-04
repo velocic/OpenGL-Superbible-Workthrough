@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <string>
+#include <unordered_map>
 
 #include <GL/gl3w.h>
 #include <flare/rendersystem/buffer.h>
@@ -16,15 +17,11 @@ namespace Flare
         class VertexArray : public RenderSystem::VertexArray
         {
             private:
-                std::reference_wrapper<const RenderSystem::ShaderProgram> shaderProgram;
-                std::vector<std::reference_wrapper<const RenderSystem::Buffer>> linkedBuffers;
+                const RenderSystem::ShaderProgram &shaderProgram;
+                std::unordered_map<size_t, RenderSystem::RSuint> linkedBufferBindingIndices;
                 GLuint VAO = 0;
 
-                void bindAttributesToBuffers(GLuint VAO, const RenderSystem::ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers);
-                //TODO: connecting this VAO to different buffers with the same layout is easy for OpenGL. All that needs to be done is
-                //to call glVertexArrayAttribBinding for each attribute, but referencing the new buffers instead. Should add a function
-                //for this, but it requires the idea of a const set of buffers permanently linked to this instance to be expanded to be
-                //more flexible
+                void configureAttributesFromInitialBuffers(GLuint VAO, const RenderSystem::ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers);
             public:
                 VertexArray(const RenderSystem::ShaderProgram &shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers);
                 VertexArray(VertexArray &&other);
@@ -35,6 +32,7 @@ namespace Flare
 
                 virtual void bind() override;
                 virtual void destroy() override;
+                virtual void linkBuffers(const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers) override;
                 virtual void unbind() override;
         };
     }

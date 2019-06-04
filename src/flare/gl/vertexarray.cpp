@@ -6,30 +6,27 @@ namespace Flare
     {
         VertexArray::VertexArray(const RenderSystem::ShaderProgram& shaderProgram,  const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers)
         :
-            shaderProgram(shaderProgram),
-            linkedBuffers(linkedBuffers)
+            shaderProgram(shaderProgram)
         {
             glCreateVertexArrays(1, &VAO);
-            bindAttributesToBuffers(VAO, shaderProgram, linkedBuffers);
+            configureAttributesFromInitialBuffers(VAO, shaderProgram, linkedBuffers);
         }
 
         VertexArray::VertexArray(VertexArray &&other)
         :
             shaderProgram(other.shaderProgram),
-            linkedBuffers(other.linkedBuffers),
+            linkedBufferBindingIndices(std::move(other.linkedBufferBindingIndices)),
             VAO(other.VAO)
         {
-            other.linkedBuffers.clear();
             other.VAO = 0;
         }
 
         VertexArray &VertexArray::operator=(VertexArray &&other)
         {
-            shaderProgram = std::move(other.shaderProgram);
-            linkedBuffers = std::move(other.linkedBuffers);
+            shaderProgram = other.shaderProgram;
+            linkedBufferBindingIndices = std::move(other.linkedBufferBindingIndices);
             VAO = other.VAO;
 
-            other.linkedBuffers.clear();
             other.VAO = 0;
 
             return *this;
@@ -45,11 +42,14 @@ namespace Flare
             glBindVertexArray(VAO);
         }
 
-        void VertexArray::bindAttributesToBuffers(GLuint VAO, const RenderSystem::ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers)
+        void VertexArray::configureAttributesFromInitialBuffers(GLuint VAO, const RenderSystem::ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers)
         {
             for (size_t bufferBindingIndex = 0; bufferBindingIndex < linkedBuffers.size(); ++bufferBindingIndex) {
                 const auto &buffer = linkedBuffers[bufferBindingIndex].get();
                 const auto &bufferLayout = buffer.getContentDescription();
+
+                linkedBufferBindingIndices[buffer.getName()] = bufferBindingIndex;
+
                 glVertexArrayVertexBuffer(VAO, bufferBindingIndex, buffer.getId(), bufferLayout.offset, bufferLayout.stride);
 
                 for (const auto &vertexAttribute : bufferLayout.vertexAttributes) {
@@ -73,7 +73,33 @@ namespace Flare
         void VertexArray::destroy()
         {
             glDeleteVertexArrays(1, &VAO);
-            linkedBuffers.clear();
+        }
+
+        void VertexArray::linkBuffers(const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers)
+        {
+            if (linkedBuffers.size() != linkedBufferBindingIndices.size()) {
+                throw std::runtime_error("Attempting to link an incorrect number of buffers to a vertex array. Expected "
+                    + std::to_string(linkedBufferBindingIndices.size()) + " and received " + std::to_string(linkedBuffers.size())
+                );
+            }
+
+            for (const auto &bufferRef : linkedBuffers) {
+                const auto &buffer = bufferRef.get();
+                const auto &bufferLayout = buffer.getContentDescription();
+
+                auto bindingIndexIterator = linkedBufferBindingIndices.find(buffer.getName());
+
+                if (bindingIndexIterator == linkedBufferBindingIndices.end()) {
+                    throw std::runtime_error("Attempting to link an incompatible buffer to a vertex array.");
+                }
+
+                glVertexArrrayVertexBuffer(VAO, bindingIndexIterator->second, buffer.getId(), bufferLayout.offset, bufferLayout.stride);
+
+                for (const auto &vertexAttribute : bufferLayout.vertexAttributes) {
+                    auto attributeIndex = shaderProgram.getAttribute(vertexAttribute.name);
+                    glVertexArrayAttribBinding(VAO, attributeIndex, bindingIndexIterator->second);
+                }
+            }
         }
 
         void VertexArray::unbind()
