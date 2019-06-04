@@ -67,8 +67,8 @@ namespace Flare
                 ShaderProgramStages shaderStages;
                 GLuint shaderProgram = 0;
                 std::unordered_map<std::string, GLint> uniformAttributes;
-                std::unordered_map<std::string, TextureUnit> textureUnits;
-                std::unordered_map<std::string, TextureUnitArray> textureUnitArrays;
+                std::unordered_map<size_t, TextureUnit> textureUnits;
+                std::unordered_map<size_t, TextureUnitArray> textureUnitArrays;
                 unsigned int totalAssignedTextureUnits = 0;
                 bool isValid = false;
 
@@ -104,9 +104,12 @@ namespace Flare
                 virtual GLint getAttribute(const std::string &attributeName) const override;
                 virtual GLint getUniformAttribute(const std::string &uniformName) override;
                 virtual inline bool isShaderProgramValid() const override {return isValid;}
+                virtual bool setTexture(size_t textureUnitName, RenderSystem::Texture *texture) override;
+                virtual bool setTextureArrayElement(size_t textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture) override;
+                virtual bool setTextureArray(size_t textureUnitArrayName, const std::vector<RenderSystem::Texture *> &textures) override;
                 virtual bool setTexture(const std::string &textureUnitName, RenderSystem::Texture *texture) override;
                 virtual bool setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture) override;
-                virtual bool setTextureArray(const std::string &textureUnitArrayName, std::vector<RenderSystem::Texture *> textures) override;
+                virtual bool setTextureArray(const std::string &textureUnitArrayName, const std::vector<RenderSystem::Texture *> &textures) override;
                 virtual void unbind() override;
         };
 

@@ -55,8 +55,8 @@ namespace Flare
             other.shaderProgram = 0;
             other.isValid = false;
             other.uniformAttributes = std::unordered_map<std::string, GLint>{};
-            other.textureUnits = std::unordered_map<std::string, TextureUnit>{};
-            other.textureUnitArrays = std::unordered_map<std::string, TextureUnitArray>{};
+            other.textureUnits = std::unordered_map<size_t, TextureUnit>{};
+            other.textureUnitArrays = std::unordered_map<size_t, TextureUnitArray>{};
         }
 
         ShaderProgram &ShaderProgram::operator=(ShaderProgram &&other)
@@ -72,8 +72,8 @@ namespace Flare
             other.shaderProgram = 0;
             other.isValid = false;
             other.uniformAttributes = std::unordered_map<std::string, GLint>{};
-            other.textureUnits = std::unordered_map<std::string, TextureUnit>{};
-            other.textureUnitArrays = std::unordered_map<std::string, TextureUnitArray>{};
+            other.textureUnits = std::unordered_map<size_t, TextureUnit>{};
+            other.textureUnitArrays = std::unordered_map<size_t, TextureUnitArray>{};
 
             return *this;
         }
@@ -203,7 +203,7 @@ namespace Flare
         void ShaderProgram::setTextureUnits(const std::vector<RenderSystem::Sampler *> &textureUnitSamplers)
         {
             for (const auto &sampler : textureUnitSamplers) {
-                auto samplerName = std::string(sampler->getName());
+                auto samplerName = sampler->getName();
 
                 textureUnits.insert_or_assign(
                     samplerName,
@@ -216,7 +216,7 @@ namespace Flare
         {
             for (const auto &samplerArrayEntry : textureUnitArraySamplers) {
                 const auto &numArrayElements = samplerArrayEntry.second;
-                auto samplerName = std::string(samplerArrayEntry.first->getName());
+                auto samplerName = samplerArrayEntry.first->getName();
 
                 textureUnitArrays.insert_or_assign(
                     samplerName,
@@ -316,7 +316,7 @@ namespace Flare
             return program;
         }
 
-        bool ShaderProgram::setTexture(const std::string &textureUnitName, RenderSystem::Texture *texture)
+        bool ShaderProgram::setTexture(size_t textureUnitName, RenderSystem::Texture *texture)
         {
             auto mapIterator = textureUnits.find(textureUnitName);
 
@@ -329,7 +329,7 @@ namespace Flare
             return true;
         }
 
-        bool ShaderProgram::setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture)
+        bool ShaderProgram::setTextureArrayElement(size_t textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture)
         {
             auto mapIterator = textureUnitArrays.find(textureUnitArrayName);
 
@@ -342,7 +342,7 @@ namespace Flare
             return true;
         }
 
-        bool ShaderProgram::setTextureArray(const std::string &textureUnitArrayName, std::vector<RenderSystem::Texture *> textures)
+        bool ShaderProgram::setTextureArray(size_t textureUnitArrayName, const std::vector<RenderSystem::Texture *> &textures)
         {
             auto mapIterator = textureUnitArrays.find(textureUnitArrayName);
 
@@ -359,6 +359,21 @@ namespace Flare
             }
 
             return true;
+        }
+
+        bool ShaderProgram::setTexture(const std::string &textureUnitName, RenderSystem::Texture *texture)
+        {
+            return setTexture(std::hash<std::string>{}(textureUnitName), texture);
+        }
+
+        bool ShaderProgram::setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture)
+        {
+            return setTextureArrayElement(std::hash<std::string>{}(textureUnitArrayName), index, texture);
+        }
+
+        bool ShaderProgram::setTextureArray(const std::string &textureUnitArrayName, const std::vector<RenderSystem::Texture *> &textures)
+        {
+            return setTextureArray(std::hash<std::string>{}(textureUnitArrayName), textures);
         }
 
         ShaderProgram::TextureUnit::TextureUnit(RenderSystem::Sampler *sampler, RenderSystem::Texture *texture, unsigned int index)

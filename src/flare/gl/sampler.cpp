@@ -6,7 +6,7 @@ namespace Flare
 {
     namespace GL
     {
-        Sampler::Sampler(std::string_view name)
+        Sampler::Sampler(const std::string &name)
         :
             name(name)
         {
@@ -36,9 +36,9 @@ namespace Flare
             return *this;
         }
 
-        std::string_view Sampler::getName()
+        size_t Sampler::getName()
         {
-            return name;
+            return stringHasher(name);
         }
 
         void Sampler::samplerParameteri(GLenum pName, GLint param)

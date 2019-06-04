@@ -67,7 +67,7 @@ namespace Tutorial
                 true
             },
             [&](auto loadedArrayTexture){
-                dropletShader->setTexture("tex_droplets", loadedArrayTexture);
+                dropletShader->setTexture(arrayTextureSampler->getName(), loadedArrayTexture);
             }
         );
 

@@ -10,7 +10,7 @@ namespace Flare
         class Sampler
         {
             public:
-                virtual std::string_view getName() = 0;
+                virtual size_t getName() = 0;
                 virtual void samplerParameteri(RSenum pname, RSint param) = 0;
                 virtual void samplerParameterf(RSenum pname, RSfloat param) = 0;
                 virtual void initialize() = 0;
