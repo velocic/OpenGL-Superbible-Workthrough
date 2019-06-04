@@ -6,6 +6,7 @@
 
 #include <glm-0.9.9/glm.hpp>
 
+#include <flare/rendersystem/shaderprogram.h>
 #include <flare/rendersystem/texture.h>
 #include <flare/utility/datatypes.h>
 
@@ -24,12 +25,14 @@ namespace Flare
                 RenderSystem::Buffer EBO;
 
             public:
-                Mesh(std::vector<DataTypes::Vertex> vertices, std::vector<unsigned int> indices, std::vector<RenderSystem::Texture *> textures);
+                Mesh(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices, const std::vector<RenderSystem::Texture *> &textures);
                 ~Mesh();
                 Mesh(Mesh &&other);
                 Mesh &operator=(Mesh &&other);
                 Mesh(const Mesh &other) = delete;
                 Mesh &operator=(const Mesh &other) = delete;
+
+                void render(RenderSystem::Shader *shader);
         };
     }
 }
