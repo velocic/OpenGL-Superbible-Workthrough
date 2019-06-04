@@ -18,7 +18,8 @@ namespace Flare
                 virtual void copyRange(const Buffer &readBuffer, RSintptr readOffset, RSintptr writeOffset, RSsizeiptr size) = 0;
                 virtual void destroy() = 0;
                 virtual const VertexDataLayout &getContentDescription() const = 0;
-                virtual RSuint getName() const = 0;
+                virtual RSuint getId() const = 0;
+                virtual size_t getName() const = 0;
                 virtual MappedBufferRange *mapRange(RSintptr offset, RSsizeiptr length) = 0;
                 virtual void bufferData(RSsizei size, const void *data, RSenum usage) = 0;
                 virtual void bufferRange(RSintptr offset, RSsizeiptr size, const void *data) = 0;

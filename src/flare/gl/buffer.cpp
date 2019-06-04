@@ -1,5 +1,4 @@
 #include <stdexcept>
-#include <string>
 
 #include <flare/gl/buffer.h>
 
@@ -7,8 +6,9 @@ namespace Flare
 {
     namespace GL
     {
-        Buffer::Buffer(const RenderSystem::VertexDataLayout& bufferContentDescription)
+        Buffer::Buffer(const std::string &name, const RenderSystem::VertexDataLayout& bufferContentDescription)
         :
+            name(name),
             bufferContentDescription(bufferContentDescription)
         {
             glCreateBuffers(1, &glBuffer);
@@ -21,6 +21,7 @@ namespace Flare
 
         Buffer::Buffer(Buffer&& other)
         :
+            name(std::move(other.name)),
             bufferContentDescription(other.bufferContentDescription),
             usageFlags(std::move(other.usageFlags)),
             glBuffer(std::move(other.glBuffer)),
@@ -40,6 +41,7 @@ namespace Flare
 
         Buffer& Buffer::operator=(Buffer&& other)
         {
+            name = std::move(other.name);
             glBuffer = std::move(other.glBuffer);
             dataCapacityBytes = std::move(other.dataCapacityBytes);
             isGPUStorageInitialized = std::move(other.isGPUStorageInitialized);

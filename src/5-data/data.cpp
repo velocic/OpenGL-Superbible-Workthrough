@@ -39,8 +39,8 @@ namespace Tutorial
             .build();
 
         //Create the actual buffers
-        vertexPositionBuffer = std::make_unique<Flare::GL::Buffer>(positionBufferLayout);
-        triangleColorBuffer = std::make_unique<Flare::GL::Buffer>(triangleColorBufferLayout);
+        vertexPositionBuffer = std::make_unique<Flare::GL::Buffer>("positionBuffer", positionBufferLayout);
+        triangleColorBuffer = std::make_unique<Flare::GL::Buffer>("triangleColorBuffer", triangleColorBufferLayout);
 
         shaderPipelineDemoShader->addUniformAttribute("mvpMatrix");
 

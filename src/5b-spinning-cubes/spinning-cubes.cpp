@@ -109,7 +109,7 @@ namespace Tutorial
         spinningCubeShader->addUniformAttribute("mv_matrix");
         spinningCubeShader->addUniformAttribute("proj_matrix");
 
-        cubeMeshBuffer = std::make_unique<Flare::GL::Buffer>(cubeMeshBufferLayout);
+        cubeMeshBuffer = std::make_unique<Flare::GL::Buffer>("cubeMeshBuffer", cubeMeshBufferLayout);
 
         auto bufferRefsForCubeMeshVAO = std::vector<std::reference_wrapper<const Flare::RenderSystem::Buffer>>{
             *(cubeMeshBuffer.get())

@@ -50,7 +50,7 @@ namespace Flare
             for (size_t bufferBindingIndex = 0; bufferBindingIndex < linkedBuffers.size(); ++bufferBindingIndex) {
                 const auto &buffer = linkedBuffers[bufferBindingIndex].get();
                 const auto &bufferLayout = buffer.getContentDescription();
-                glVertexArrayVertexBuffer(VAO, bufferBindingIndex, buffer.getName(), bufferLayout.offset, bufferLayout.stride);
+                glVertexArrayVertexBuffer(VAO, bufferBindingIndex, buffer.getId(), bufferLayout.offset, bufferLayout.stride);
 
                 for (const auto &vertexAttribute : bufferLayout.vertexAttributes) {
                     auto attributeIndex = shaderProgram.getAttribute(vertexAttribute.name);

@@ -1,6 +1,7 @@
 #ifndef FLARE_GL_BUFFER_H
 #define FLARE_GL_BUFFER_H
 
+#include <string>
 #include <memory>
 
 #include <GL/gl3w.h>
@@ -27,6 +28,7 @@ namespace Flare
                     bool clientStorage = false;
                 };
 
+                std::string name;
                 RenderSystem::VertexDataLayout bufferContentDescription;
                 UsageFlags usageFlags;
                 GLuint glBuffer = 0;
@@ -37,7 +39,7 @@ namespace Flare
 
                 void checkDynamicStorageFlagBeforeWrite();
             public:
-                Buffer(const RenderSystem::VertexDataLayout& bufferContentDescription);
+                Buffer(const std::string &name, const RenderSystem::VertexDataLayout& bufferContentDescription);
                 virtual ~Buffer();
                 Buffer(Buffer&& other);
                 Buffer& operator=(Buffer&& other);
@@ -68,7 +70,8 @@ namespace Flare
                 virtual void clearRange(RenderSystem::RSenum internalFormat, RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr size, RenderSystem::RSenum format, RenderSystem::RSenum type, const void *data) override;
                 virtual void copyRange(const RenderSystem::Buffer &readBuffer, RenderSystem::RSintptr readOffset, RenderSystem::RSintptr writeOffset, RenderSystem::RSsizeiptr size) override ;
                 virtual const RenderSystem::VertexDataLayout &getContentDescription() const override;
-                virtual RenderSystem::RSuint getName() const override {return glBuffer;};
+                virtual RenderSystem::RSuint getId() const override { return glBuffer; };
+                virtual size_t getName() const override { return std::hash<std::string>{}(name); };
                 virtual RenderSystem::MappedBufferRange *mapRange(RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr length) override;
                 virtual void bufferData(RenderSystem::RSsizei size, const void *data, RenderSystem::RSenum usage) override;
                 virtual void bufferRange(RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr size, const void *data) override;
