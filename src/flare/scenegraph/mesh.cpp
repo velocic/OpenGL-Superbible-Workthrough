@@ -19,7 +19,7 @@ namespace Flare
 
         Mesh::~Mesh()
         {
-            destroyBuffers();
+            destroy();
         }
 
         Mesh::Mesh(Mesh &&other)
@@ -39,31 +39,54 @@ namespace Flare
             return *this;
         }
 
+        void Mesh::clearBuffers()
+        {
+            VBO = nullptr;
+            EBO = nullptr;
+        }
+
         void Mesh::populateBuffers()
         {
             auto vertexBufferLayout = RenderSystem::VertexDataLayoutBuilder()
-                .addAttribute("position", sizeof(glm::vec3), GL_FLOAT, GL_FALSE, 0)
-                .addAttribute("normal", sizeof(glm::vec3), GL_FLOAT, GL_FALSE, sizeof(glm::vec3))
-                .addAttribute("uvCoords", sizeof(glm::vec2), GL_FLOAT, GL_FALSE, sizeof(glm::vec3) * 2)
+                .addAttribute("position", sizeof(glm::vec3), RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, 0)
+                .addAttribute("normal", sizeof(glm::vec3), RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(glm::vec3))
+                .addAttribute("uvCoords", sizeof(glm::vec2), RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(glm::vec3) * 2)
                 .setStride(sizeof(DataTypes::Vertex))
                 .build();
 
-            // auto elementBufferLayout = RenderSystem::VertexDataLayoutBuilder()
-            //     .addAttribute("element", sizeof(unsigned int), GL_FLOAT, GL_FALSE, 0)
-            //     .setStride()
+            auto elementBufferLayout = RenderSystem::VertexDataLayoutBuilder()
+                .addAttribute("element", sizeof(unsigned int), RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, 0)
+                .setStride(sizeof(unsigned int))
+                .build();
 
-            //TODO: rendersystem-agnostic way of doing this?
-            // VBO = std::make_unique<Flare::GL::Buffer>("vertexBuffer", vertexBufferLayout);
             VBO = RenderSystem::createBuffer("vertexBuffer", vertexBufferLayout);
+            VBO->allocateBufferStorage(
+                vertices.size() * sizeof(DataTypes::Vertex),
+                vertices.data(),
+                0
+            );
 
+            EBO = RenderSystem::createBuffer("elementBuffer", elementBufferLayout);
+            EBO->allocateBufferStorage(
+                indices.size() * sizeof(unsigned int),
+                indices.data(),
+                0
+            );
         }
 
-        void Mesh::destroyBuffers()
+        void Mesh::destroy()
         {
+            VAO = nullptr;
+            clearBuffers();
+
+            std::vector<DataTypes::Vertex>().swap(vertices);
+            std::vector<unsigned int>().swap(indices);
+            std::vector<RenderSystem::Texture *>().swap(textures);
         }
 
         void Mesh::render(RenderSystem::ShaderProgram *shader)
         {
+            //TODO: bind textures to the appropriate texture units
         }
     }
 }

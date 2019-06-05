@@ -19,6 +19,19 @@ namespace Flare
         using RSsizei =  GLsizei;
         using RSsizeiptr = GLsizeiptr;
         using RSuint = GLuint;
+
+        //Common flag values
+        constexpr auto RS_FLOAT = GL_FLOAT;
+        constexpr auto RS_FALSE = GL_FALSE;
+        constexpr auto RS_TRUE = GL_TRUE;
+
+        //Buffer usage flags
+        constexpr auto RS_DYNAMIC_STORAGE_BIT = GL_DYNAMIC_STORAGE_BIT;
+        constexpr auto RS_MAP_READ_BIT = GL_MAP_READ_BIT;
+        constexpr auto RS_MAP_WRITE_BIT = GL_MAP_WRITE_BIT;
+        constexpr auto RS_MAP_PERSISTENT_BIT = GL_MAP_PERSISTENT_BIT;
+        constexpr auto RS_MAP_COHERENT_BIT = GL_MAP_COHERENT_BIT;
+        constexpr auto RS_CLIENT_STORAGE_BIT = GL_CLIENT_STORAGE_BIT;
 #endif
     }
 }

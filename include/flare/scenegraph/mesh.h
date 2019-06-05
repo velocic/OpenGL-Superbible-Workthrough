@@ -26,8 +26,6 @@ namespace Flare
                 std::unique_ptr<RenderSystem::VertexArray> VAO;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
-
-                void populateBuffers();
             public:
                 Mesh(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices, const std::vector<RenderSystem::Texture *> &textures);
                 ~Mesh();
@@ -36,7 +34,9 @@ namespace Flare
                 Mesh(const Mesh &other) = delete;
                 Mesh &operator=(const Mesh &other) = delete;
 
-                void destroyBuffers();
+                void clearBuffers();
+                void populateBuffers();
+                void destroy();
                 void render(RenderSystem::ShaderProgram *shader);
         };
     }
