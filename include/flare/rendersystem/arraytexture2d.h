@@ -8,6 +8,7 @@ namespace Flare
         class ArrayTexture2D
         {
             public:
+                virtual ~ArrayTexture2D() {}
                 virtual void bufferPixelData(RSint level, RSint xOffset, RSint yOffset, RSint zOffset, RSsizei width, RSsizei height, RSenum format, RSenum type, const void *pixels, RSboolean generateMipmaps) = 0;
                 virtual void clearPixelData(RSint level, RSint xOffset, RSint yOffset, RSint zOffset, RSsizei width, RSsizei height, RSenum format, RSenum type, const void *data) = 0;
         };

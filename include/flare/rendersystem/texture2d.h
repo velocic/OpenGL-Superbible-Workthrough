@@ -10,6 +10,8 @@ namespace Flare
         class Texture2D
         {
             public:
+                virtual ~Texture2D() {}
+
                 virtual void bufferPixelData(RSenum format, RSenum type, const void *pixels, RSboolean generateMipmaps) = 0;
                 virtual void bufferPixelData(RSint level, RSint xOffset, RSint yOffset, RSsizei width, RSsizei height, RSenum format, RSenum type, const void *pixels, RSboolean generateMipmaps) = 0;
                 virtual void clearPixelData(RSenum format, RSenum type, const void *data) = 0;

@@ -28,7 +28,7 @@ namespace Flare
                 VertexArray &operator=(VertexArray &&other);
                 VertexArray(const VertexArray &other) = delete;
                 VertexArray &operator=(const VertexArray &other) = delete;
-                ~VertexArray();
+                virtual ~VertexArray();
 
                 virtual void bind() override;
                 virtual void destroy() override;

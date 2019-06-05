@@ -13,6 +13,8 @@ namespace Flare
         class Buffer
         {
             public:
+                virtual ~Buffer() {}
+
                 virtual void bind(RSenum target) = 0;
                 virtual void clearRange(RSenum internalFormat, RSintptr offset, RSsizeiptr size, RSenum format, RSenum type, const void *data) = 0;
                 virtual void copyRange(const Buffer &readBuffer, RSintptr readOffset, RSintptr writeOffset, RSsizeiptr size) = 0;
@@ -31,6 +33,8 @@ namespace Flare
         {
             public:
                 void *mappedData = nullptr;
+
+                virtual ~MappedBufferRange() {}
 
                 virtual bool hasReadAccess() const = 0;
                 virtual bool hasWriteAccess() const = 0;

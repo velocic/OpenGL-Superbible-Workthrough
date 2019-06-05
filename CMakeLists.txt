@@ -24,6 +24,9 @@ add_executable(
     src/flare/gl/texture2d.cpp
     src/flare/gl/arraytexture2d.cpp
     src/flare/gl/sampler.cpp
+    src/flare/rendersystem/factory.cpp
+    src/flare/rendersystem/samplermanager.cpp
+    src/flare/scenegraph/mesh.cpp
     src/flare/ui/renderwindow.cpp
     src/flare/utility/file.cpp
     src/flare/utility/math.cpp

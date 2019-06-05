@@ -15,6 +15,8 @@ namespace Flare
         class ShaderProgram
         {
             public:
+                virtual ~ShaderProgram() {}
+
                 virtual bool addUniformAttribute(const std::string &uniformName) = 0;
                 virtual void bind() = 0;
                 virtual RSint getAttribute(const std::string &attributeName) const = 0;

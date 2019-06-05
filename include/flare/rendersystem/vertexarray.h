@@ -10,6 +10,8 @@ namespace Flare
         class VertexArray
         {
             public:
+                virtual ~VertexArray() {}
+
                 virtual void bind() = 0;
                 virtual void destroy() = 0;
                 virtual void linkBuffers(const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers) = 0;

@@ -10,6 +10,8 @@ namespace Flare
         class Texture
         {
             public:
+                virtual ~Texture() {}
+
                 virtual void setParameter(RSenum name, RSfloat value) = 0;
                 virtual void setParameter(RSenum name, RSint value) = 0;
 
