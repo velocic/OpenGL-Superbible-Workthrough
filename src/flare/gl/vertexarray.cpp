@@ -4,12 +4,12 @@ namespace Flare
 {
     namespace GL
     {
-        VertexArray::VertexArray(const RenderSystem::ShaderProgram& shaderProgram,  const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers)
+        VertexArray::VertexArray(const RenderSystem::ShaderProgram *shaderProgram,  const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers)
         :
             shaderProgram(shaderProgram)
         {
             glCreateVertexArrays(1, &VAO);
-            configureAttributesFromInitialBuffers(VAO, shaderProgram, linkedBuffers);
+            configureAttributesFromInitialBuffers(VAO, *shaderProgram, linkedBuffers);
         }
 
         VertexArray::VertexArray(VertexArray &&other)
@@ -18,6 +18,7 @@ namespace Flare
             linkedBufferBindingIndices(std::move(other.linkedBufferBindingIndices)),
             VAO(other.VAO)
         {
+            other.shaderProgram = nullptr;
             other.VAO = 0;
         }
 
@@ -27,6 +28,7 @@ namespace Flare
             linkedBufferBindingIndices = std::move(other.linkedBufferBindingIndices);
             VAO = other.VAO;
 
+            other.shaderProgram = nullptr;
             other.VAO = 0;
 
             return *this;
@@ -93,10 +95,10 @@ namespace Flare
                     throw std::runtime_error("Attempting to link an incompatible buffer to a vertex array.");
                 }
 
-                glVertexArrrayVertexBuffer(VAO, bindingIndexIterator->second, buffer.getId(), bufferLayout.offset, bufferLayout.stride);
+                glVertexArrayVertexBuffer(VAO, bindingIndexIterator->second, buffer.getId(), bufferLayout.offset, bufferLayout.stride);
 
                 for (const auto &vertexAttribute : bufferLayout.vertexAttributes) {
-                    auto attributeIndex = shaderProgram.getAttribute(vertexAttribute.name);
+                    auto attributeIndex = shaderProgram->getAttribute(vertexAttribute.name);
                     glVertexArrayAttribBinding(VAO, attributeIndex, bindingIndexIterator->second);
                 }
             }

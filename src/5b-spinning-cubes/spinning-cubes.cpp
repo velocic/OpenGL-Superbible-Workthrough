@@ -116,7 +116,7 @@ namespace Tutorial
         };
 
         cubeMeshVAO = std::make_unique<Flare::GL::VertexArray>(
-            *(spinningCubeShader.get()),
+            spinningCubeShader.get(),
             bufferRefsForCubeMeshVAO
         );
 

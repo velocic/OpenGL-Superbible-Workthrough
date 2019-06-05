@@ -52,7 +52,7 @@ namespace Tutorial
 
         //Link the shader attributes to the buffers
         shaderPipelineDemoShaderVAO = std::make_unique<Flare::GL::VertexArray>(
-            *(shaderPipelineDemoShader.get()),
+            shaderPipelineDemoShader.get(),
             VAOBuffers
         );
 

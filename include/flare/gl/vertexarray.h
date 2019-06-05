@@ -17,13 +17,13 @@ namespace Flare
         class VertexArray : public RenderSystem::VertexArray
         {
             private:
-                const RenderSystem::ShaderProgram &shaderProgram;
+                const RenderSystem::ShaderProgram *shaderProgram;
                 std::unordered_map<size_t, RenderSystem::RSuint> linkedBufferBindingIndices;
                 GLuint VAO = 0;
 
                 void configureAttributesFromInitialBuffers(GLuint VAO, const RenderSystem::ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers);
             public:
-                VertexArray(const RenderSystem::ShaderProgram &shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers);
+                VertexArray(const RenderSystem::ShaderProgram *shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers);
                 VertexArray(VertexArray &&other);
                 VertexArray &operator=(VertexArray &&other);
                 VertexArray(const VertexArray &other) = delete;
