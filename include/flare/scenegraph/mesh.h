@@ -20,22 +20,22 @@ namespace Flare
         class Mesh
         {
             private:
-                std::vector<DataTypes::Vertex> vertices;
-                std::vector<unsigned int> indices;
-                std::vector<RenderSystem::Texture *> textures;
+                using TextureUnitBinding = std::pair<std::string, RenderSystem::Texture *>;
+
+                std::vector<TextureUnitBinding> textures;
                 std::unique_ptr<RenderSystem::VertexArray> VAO;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
+
+                void populateBuffers(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices);
             public:
-                Mesh(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices, const std::vector<RenderSystem::Texture *> &textures);
+                Mesh(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices, const std::vector<TextureUnitBinding> &textures);
                 ~Mesh();
                 Mesh(Mesh &&other);
                 Mesh &operator=(Mesh &&other);
                 Mesh(const Mesh &other) = delete;
                 Mesh &operator=(const Mesh &other) = delete;
 
-                void clearBuffers();
-                void populateBuffers();
                 void destroy();
                 void render(RenderSystem::ShaderProgram *shader);
         };

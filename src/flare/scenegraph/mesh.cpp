@@ -8,13 +8,11 @@ namespace Flare
     namespace SceneGraph
     {
         //TODO:move rather than copy?
-        Mesh::Mesh(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices, const std::vector<RenderSystem::Texture *> &textures)
+        Mesh::Mesh(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices, const std::vector<TextureUnitBinding> &textures)
         :
-            vertices(vertices),
-            indices(indices),
             textures(textures)
         {
-            populateBuffers();
+            populateBuffers(vertices, indices);
         }
 
         Mesh::~Mesh()
@@ -24,28 +22,18 @@ namespace Flare
 
         Mesh::Mesh(Mesh &&other)
         :
-            vertices(std::move(other.vertices)),
-            indices(std::move(other.indices)),
             textures(std::move(other.textures))
         {
         }
 
         Mesh &Mesh::operator=(Mesh &&other)
         {
-            vertices = std::move(other.vertices);
-            indices = std::move(other.indices);
             textures = std::move(other.textures);
 
             return *this;
         }
 
-        void Mesh::clearBuffers()
-        {
-            VBO = nullptr;
-            EBO = nullptr;
-        }
-
-        void Mesh::populateBuffers()
+        void Mesh::populateBuffers(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices)
         {
             auto vertexBufferLayout = RenderSystem::VertexDataLayoutBuilder()
                 .addAttribute("position", sizeof(glm::vec3), RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, 0)
@@ -77,16 +65,17 @@ namespace Flare
         void Mesh::destroy()
         {
             VAO = nullptr;
-            clearBuffers();
+            VBO = nullptr;
+            EBO = nullptr;
 
-            std::vector<DataTypes::Vertex>().swap(vertices);
-            std::vector<unsigned int>().swap(indices);
-            std::vector<RenderSystem::Texture *>().swap(textures);
+            std::vector<TextureUnitBinding>().swap(textures);
         }
 
         void Mesh::render(RenderSystem::ShaderProgram *shader)
         {
-            //TODO: bind textures to the appropriate texture units
+            for (const auto &textureUnitBinding : textures) {
+                shader->setTexture(textureUnitBinding.first, textureUnitBinding.second);
+            }
         }
     }
 }
