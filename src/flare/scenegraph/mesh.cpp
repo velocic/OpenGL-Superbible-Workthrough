@@ -71,7 +71,7 @@ namespace Flare
             std::vector<TextureUnitBinding>().swap(textures);
         }
 
-        void Mesh::render(RenderSystem::ShaderProgram *shader)
+        void Mesh::attachTexturesToShader(RenderSystem::ShaderProgram *shader)
         {
             for (const auto &textureUnitBinding : textures) {
                 shader->setTexture(textureUnitBinding.first, textureUnitBinding.second);
