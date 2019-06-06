@@ -37,7 +37,7 @@ namespace Flare
                 Mesh &operator=(const Mesh &other) = delete;
 
                 void destroy();
-                void attachTexturesToShader(RenderSystem::ShaderProgram *shader);
+                void bind(RenderSystem::ShaderProgram *shader);
         };
     }
 }
