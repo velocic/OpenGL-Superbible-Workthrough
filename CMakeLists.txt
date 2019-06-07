@@ -27,6 +27,7 @@ add_executable(
     src/flare/rendersystem/factory.cpp
     src/flare/rendersystem/samplermanager.cpp
     src/flare/scenegraph/mesh.cpp
+    src/flare/scenegraph/model.cpp
     src/flare/ui/renderwindow.cpp
     src/flare/utility/file.cpp
     src/flare/utility/math.cpp
@@ -40,6 +41,7 @@ target_link_libraries(
     SDL2
     GL
     dl
+    assimp
 )
 
 target_include_directories(
