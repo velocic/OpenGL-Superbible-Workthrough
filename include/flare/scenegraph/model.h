@@ -24,7 +24,7 @@ namespace Flare
 
                 void loadModel(const std::string &filePath);
                 void processNode(aiNode *node, const aiScene *scene);
-                Mesh *processMesh(aiMesh *mesh, const aiScene *scene);
+                std::unique_ptr<Mesh> processMesh(aiMesh *mesh, const aiScene *scene);
                 std::vector<std::pair<std::string, RenderSystem::Texture *>> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &typeName);
             public:
                 Model(const std::string &filePath);

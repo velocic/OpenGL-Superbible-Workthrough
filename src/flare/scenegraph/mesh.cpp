@@ -7,12 +7,14 @@ namespace Flare
 {
     namespace SceneGraph
     {
-        //TODO:move rather than copy?
-        Mesh::Mesh(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices, const std::vector<TextureUnitBinding> &textures)
+        Mesh::Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<TextureUnitBinding> &&textures)
         :
             textures(textures)
         {
-            populateBuffers(vertices, indices);
+            populateBuffers(
+                std::move(vertices),
+                std::move(indices)
+            );
         }
 
         Mesh::~Mesh()
@@ -33,7 +35,7 @@ namespace Flare
             return *this;
         }
 
-        void Mesh::populateBuffers(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices)
+        void Mesh::populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices)
         {
             auto vertexBufferLayout = RenderSystem::VertexDataLayoutBuilder()
                 .addAttribute("position", sizeof(glm::vec3), RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, 0)

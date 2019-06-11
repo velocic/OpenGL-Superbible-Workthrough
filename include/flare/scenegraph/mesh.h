@@ -27,9 +27,9 @@ namespace Flare
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
 
-                void populateBuffers(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices);
+                void populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
             public:
-                Mesh(const std::vector<DataTypes::Vertex> &vertices, const std::vector<unsigned int> &indices, const std::vector<TextureUnitBinding> &textures);
+                Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<TextureUnitBinding> &&textures);
                 ~Mesh();
                 Mesh(Mesh &&other);
                 Mesh &operator=(Mesh &&other);
