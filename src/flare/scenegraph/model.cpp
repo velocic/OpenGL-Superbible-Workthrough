@@ -100,6 +100,12 @@ namespace Flare
 
             //process material
             if (mesh->mMaterialIndex >= 0) {
+                auto material = scene->mMaterials[mesh->mMaterialIndex];
+
+                auto diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+                auto specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+
+                //TODO: insert textures somewhere
             }
 
             //construct mesh (register with mesh manager?
@@ -112,7 +118,14 @@ namespace Flare
 
         std::vector<std::pair<std::string, RenderSystem::Texture *>> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &typeName)
         {
-            return std::vector<std::pair<std::string, RenderSystem::Texture *>>{};
+            auto loadedTextures = std::vector<std::pair<std::string, RenderSystem::Texture *>>{};
+
+            for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
+                aiString textureName;
+                mat->GetTexture(type, i, &textureName);
+
+                //TODO: rest of assimp texture loading
+            }
         }
 
         void Model::render(RenderSystem::ShaderProgram *shader, size_t instanceCount)
