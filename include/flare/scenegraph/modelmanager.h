@@ -22,14 +22,13 @@ namespace Flare
                 std::unordered_map<size_t, std::unique_ptr<Model>> models;
                 std::hash<std::string> stringHasher;
 
-                void loadModel(const std::string &filePath);
                 void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, std::vector<std::unique_ptr<Mesh>> &meshes);
                 std::unique_ptr<Mesh> processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory);
-                std::vector<std::pair<std::string, RenderSystem::Texture *>> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &typeName);
+                std::vector<std::pair<std::string, RenderSystem::Texture *>> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &typeName, const std::string &modelDirectory);
             public:
                 struct ModelFile
                 {
-                    std::string filePath;
+                    std::string path;
                     std::string alias;
                 };
 

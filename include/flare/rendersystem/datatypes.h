@@ -32,6 +32,10 @@ namespace Flare
         constexpr auto RS_MAP_PERSISTENT_BIT = GL_MAP_PERSISTENT_BIT;
         constexpr auto RS_MAP_COHERENT_BIT = GL_MAP_COHERENT_BIT;
         constexpr auto RS_CLIENT_STORAGE_BIT = GL_CLIENT_STORAGE_BIT;
+
+        //Texture data format enums
+        constexpr auto RS_RGBA = GL_RGBA;
+        constexpr auto RS_RGBA8 = GL_RGBA8;
 #endif
     }
 }

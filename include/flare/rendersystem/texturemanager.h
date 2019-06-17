@@ -13,6 +13,8 @@ namespace Flare
         class TextureManager
         {
             public:
+                static constexpr RSsizei DEFAULT_NUM_MIPMAP_LEVELS = 4;
+
                 enum class SupportedFileType {
                     PNG
                 };
