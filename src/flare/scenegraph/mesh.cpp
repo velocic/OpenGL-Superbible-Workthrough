@@ -75,12 +75,12 @@ namespace Flare
 
         void Mesh::bind(RenderSystem::ShaderProgram *shader)
         {
-            shader->bind();
-            VAO->bind();
-
             for (const auto &textureUnitBinding : textures) {
                 shader->setTexture(textureUnitBinding.first, textureUnitBinding.second);
             }
+
+            shader->bind();
+            VAO->bind();
         }
     }
 }

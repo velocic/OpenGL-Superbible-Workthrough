@@ -68,6 +68,10 @@ namespace Flare
                     );
                     glEnableVertexArrayAttrib(VAO, attributeIndex);
                     glEnableVertexAttribArray(bufferBindingIndex);
+
+                    if (vertexAttribute.attribDivisor != 0) {
+                        glVertexAttribDivisor(attributeIndex, vertexAttribute.attribDivisor);
+                    }
                 }
             }
         }

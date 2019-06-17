@@ -18,6 +18,7 @@ namespace Flare
             RSenum type;
             RSboolean normalized = GL_FALSE;
             RSuint relativeOffset = 0;
+            RSuint attribDivisor = 0;
         };
 
         struct VertexDataLayout
@@ -65,7 +66,13 @@ namespace Flare
             public:
                 VertexDataLayoutBuilder &addAttribute(const std::string &attributeName, RSint size, RSenum type, RSboolean normalized, RSuint relativeOffset)
                 {
-                    vertexAttributes.push_back(VertexAttribute{attributeName, size, type, normalized, relativeOffset});
+                    vertexAttributes.push_back(VertexAttribute{attributeName, size, type, normalized, relativeOffset, 0});
+                    return *this;
+                }
+
+                VertexDataLayoutBuilder &addAttribute(const std::string &attributeName, RSint size, RSenum type, RSboolean normalized, RSuint relativeOffset, RSuint attribDivisor)
+                {
+                    vertexAttributes.push_back(VertexAttribute{attributeName, size, type, normalized, relativeOffset, attribDivisor});
                     return *this;
                 }
 
