@@ -9,7 +9,8 @@ namespace Flare
     {
         Mesh::Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<TextureUnitBinding> &&textures)
         :
-            textures(textures)
+            textures(textures),
+            elementCount(indices.size())
         {
             populateBuffers(
                 std::move(vertices),
@@ -24,13 +25,18 @@ namespace Flare
 
         Mesh::Mesh(Mesh &&other)
         :
-            textures(std::move(other.textures))
+            textures(std::move(other.textures)),
+            elementCount(other.elementCount)
         {
+            other.elementCount = 0;
         }
 
         Mesh &Mesh::operator=(Mesh &&other)
         {
             textures = std::move(other.textures);
+            elementCount = other.elementCount;
+
+            other.elementCount = 0;
 
             return *this;
         }
@@ -81,6 +87,20 @@ namespace Flare
 
             shader->bind();
             VAO->bind();
+            EBO->bind(GL_ELEMENT_ARRAY_BUFFER);
+        }
+
+        void Mesh::render(size_t instanceCount)
+        {
+            //TODO: abstract the GL call here into a platform-independent mechanism of
+            //some kind
+            glDrawElementsInstanced(
+                GL_TRIANGLES,
+                elementCount,
+                GL_UNSIGNED_INT,
+                0, //offset into buffer containing elements (this buffer is elements only, so no offset necessary)
+                instanceCount //size of MVP matrix buffer, handed down from SceneNode -> Model -> Mesh
+            );
         }
     }
 }

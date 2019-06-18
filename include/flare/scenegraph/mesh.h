@@ -26,6 +26,7 @@ namespace Flare
                 std::unique_ptr<RenderSystem::VertexArray> VAO;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
+                size_t elementCount = 0;
 
                 void populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
             public:
@@ -38,6 +39,7 @@ namespace Flare
 
                 void destroy();
                 void bind(RenderSystem::ShaderProgram *shader);
+                void render(size_t instanceCount);
         };
     }
 }
