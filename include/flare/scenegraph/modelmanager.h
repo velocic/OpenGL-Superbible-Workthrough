@@ -10,6 +10,7 @@
 #include <assimp/postprocess.h>
 
 #include <flare/scenegraph/model.h>
+#include <flare/rendersystem/texturemanager.h>
 
 namespace Flare
 {
@@ -24,7 +25,7 @@ namespace Flare
 
                 void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, std::vector<std::unique_ptr<Mesh>> &meshes);
                 std::unique_ptr<Mesh> processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory);
-                std::vector<std::pair<std::string, RenderSystem::Texture *>> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &typeName, const std::string &modelDirectory);
+                std::vector<std::pair<std::string, RenderSystem::Texture *>> loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &modelDirectory);
             public:
                 struct ModelFile
                 {

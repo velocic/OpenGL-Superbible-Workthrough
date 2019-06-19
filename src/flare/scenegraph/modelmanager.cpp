@@ -58,13 +58,13 @@ namespace Flare
             for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
                 auto mesh = scene->mMeshes[node->mMeshes[i]];
                 meshes.push_back(
-                    processMesh(mesh, scene)
+                    processMesh(mesh, scene, modelDirectory)
                 );
             }
 
             //Process all nodes of this node's children
             for (unsigned int i = 0; i < node->mNumChildren; ++i) {
-                processNode(node->mChildren[i], scene);
+                processNode(node->mChildren[i], scene, modelDirectory, meshes);
             }
         }
 
@@ -104,22 +104,20 @@ namespace Flare
                 vertex.uvCoords.y = sourceUVs.y;
             }
 
-            //process indices
-            for (const auto &face : mesh->mFaces) {
-                for (const auto &index : face.mIndices) {
-                    indices.push_back(index);
+            for (unsigned int currentFace = 0; currentFace < mesh->mNumFaces; ++currentFace) {
+                const auto &face = mesh->mFaces[currentFace];
+                for (unsigned int index = 0; index < face.mNumIndices; ++index) {
+                    indices.push_back(face.mIndices[index]);
                 }
             }
 
             //process material
-            if (mesh->mMaterialIndex >= 0) {
-                auto material = scene->mMaterials[mesh->mMaterialIndex];
+            auto material = scene->mMaterials[mesh->mMaterialIndex];
 
-                textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
-                auto specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+            textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, modelDirectory);
+            auto specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, modelDirectory);
 
-                textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-            }
+            textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
             return std::make_unique<Mesh>(
                 std::move(vertices),
@@ -128,7 +126,7 @@ namespace Flare
             );
         }
 
-        std::vector<std::pair<std::string, RenderSystem::Texture *>> ModelManager::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &typeName, const std::string &modelDirectory)
+        std::vector<std::pair<std::string, RenderSystem::Texture *>> ModelManager::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &modelDirectory)
         {
             auto textureCount = mat->GetTextureCount(type);
             auto loadedTextures = std::vector<std::pair<std::string, RenderSystem::Texture *>>{};
@@ -139,7 +137,7 @@ namespace Flare
                 mat->GetTexture(type, i, &textureName);
 
                 //Textures loaded from models will use their full path as their alias, to avoid collisions
-                auto textureFullPath = modelDirectory + std::to_string(textureName.C_Str());
+                auto textureFullPath = modelDirectory + std::string{textureName.C_Str()};
                 auto loadedTexture = textureManager.get(textureFullPath);
 
                 if (loadedTexture != nullptr) {
@@ -151,12 +149,12 @@ namespace Flare
                     textureFullPath,
                     textureFullPath, //texture's alias name
                     RenderSystem::TextureManager::SupportedFileType::PNG, //TODO: proper detection of file type
-                    RS_RGBA //TODO: support for other color channel layouts
+                    RenderSystem::RS_RGBA //TODO: support for other color channel layouts
                 };
 
                 auto initParams = RenderSystem::TextureManager::TextureInitParams{
                     RenderSystem::TextureManager::DEFAULT_NUM_MIPMAP_LEVELS,
-                    RS_RGBA8, //TODO: support for other color channel layouts
+                    RenderSystem::RS_RGBA8, //TODO: support for other color channel layouts
                     true //auto-generate mipmaps according to number of mip-levels specified
                 };
 
