@@ -4,6 +4,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include <GL/gl3w.h>
 #include <flare/rendersystem/buffer.h>
@@ -21,9 +22,9 @@ namespace Flare
                 std::unordered_map<size_t, RenderSystem::RSuint> linkedBufferBindingIndices;
                 GLuint VAO = 0;
 
-                void configureAttributesFromInitialBuffers(GLuint VAO, const RenderSystem::ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers);
+                void configureVertexAttributes(GLuint VAO, const RenderSystem::ShaderProgram& shaderProgram, const std::vector<RenderSystem::VertexBufferVertexDataLayout> &requiredBufferLayouts);
             public:
-                VertexArray(const RenderSystem::ShaderProgram *shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers);
+                VertexArray(const RenderSystem::ShaderProgram *shaderProgram, const std::vector<RenderSystem::VertexBufferVertexDataLayout> &requiredBufferLayouts);
                 VertexArray(VertexArray &&other);
                 VertexArray &operator=(VertexArray &&other);
                 VertexArray(const VertexArray &other) = delete;

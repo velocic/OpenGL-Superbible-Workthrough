@@ -4,12 +4,12 @@ namespace Flare
 {
     namespace GL
     {
-        VertexArray::VertexArray(const RenderSystem::ShaderProgram *shaderProgram,  const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers)
+        VertexArray::VertexArray(const RenderSystem::ShaderProgram *shaderProgram, const std::vector<RenderSystem::VertexBufferVertexDataLayout> &requiredBufferLayouts)
         :
             shaderProgram(shaderProgram)
         {
             glCreateVertexArrays(1, &VAO);
-            configureAttributesFromInitialBuffers(VAO, *shaderProgram, linkedBuffers);
+            configureVertexAttributes(VAO, *shaderProgram, requiredBufferLayouts);
         }
 
         VertexArray::VertexArray(VertexArray &&other)
@@ -44,17 +44,14 @@ namespace Flare
             glBindVertexArray(VAO);
         }
 
-        void VertexArray::configureAttributesFromInitialBuffers(GLuint VAO, const RenderSystem::ShaderProgram& shaderProgram, const std::vector<std::reference_wrapper<const RenderSystem::Buffer>> &linkedBuffers)
+        void VertexArray::configureVertexAttributes(GLuint VAO, const RenderSystem::ShaderProgram& shaderProgram, const std::vector<RenderSystem::VertexBufferVertexDataLayout> &requiredBufferLayouts)
         {
-            for (size_t bufferBindingIndex = 0; bufferBindingIndex < linkedBuffers.size(); ++bufferBindingIndex) {
-                const auto &buffer = linkedBuffers[bufferBindingIndex].get();
-                const auto &bufferLayout = buffer.getContentDescription();
+            for (size_t bufferBindingIndex = 0; bufferBindingIndex < requiredBufferLayouts.size(); ++bufferBindingIndex) {
+                const auto &bufferLayout = requiredBufferLayouts[bufferBindingIndex];
+                auto hashedBufferName = std::hash<std::string>{}(bufferLayout.bufferName);
+                linkedBufferBindingIndices[hashedBufferName] = bufferBindingIndex;
 
-                linkedBufferBindingIndices[buffer.getName()] = bufferBindingIndex;
-
-                glVertexArrayVertexBuffer(VAO, bufferBindingIndex, buffer.getId(), bufferLayout.offset, bufferLayout.stride);
-
-                for (const auto &vertexAttribute : bufferLayout.vertexAttributes) {
+                for (const auto &vertexAttribute : bufferLayout.bufferContentDescription.vertexAttributes) {
                     auto attributeIndex = shaderProgram.getAttribute(vertexAttribute.name);
 
                     glVertexArrayAttribBinding(VAO, attributeIndex, bufferBindingIndex);

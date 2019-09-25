@@ -98,6 +98,12 @@ namespace Flare
                     return result;
                 }
         };
+
+        struct VertexBufferVertexDataLayout
+        {
+            std::string bufferName;
+            VertexDataLayout bufferContentDescription;
+        };
     }
 }
 
