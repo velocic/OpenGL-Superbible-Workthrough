@@ -33,7 +33,7 @@ namespace Flare
         void ModelManager::load(const ModelFile &file, std::function<void(Model *)> onLoadComplete)
         {
             auto importer = Assimp::Importer{}; 
-            const auto scene = importer.ReadFile(file.path, aiProcess_Triangulate | aiProcess_FlipUVs);
+            const auto scene = importer.ReadFile(file.path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 
             if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
                 throw std::runtime_error(importer.GetErrorString());

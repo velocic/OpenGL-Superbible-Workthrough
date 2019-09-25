@@ -29,8 +29,8 @@ namespace Flare
             public:
                 struct ModelFile
                 {
-                    std::string path;
                     std::string alias;
+                    std::string path;
                 };
 
                 ModelManager(RenderSystem::TextureManager &textureManager);

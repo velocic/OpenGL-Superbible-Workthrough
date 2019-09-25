@@ -16,12 +16,14 @@ namespace Tutorial
     {
         private:
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
-            std::unique_ptr<Flare::RenderSystem::ShaderProgram> basicUnlitMeshDisplayShader = nullptr;
+            std::unique_ptr<Flare::RenderSystem::ShaderProgram> basicUntexturedUnlitMeshDisplayShader = nullptr;
             std::unique_ptr<Flare::RenderSystem::Sampler> diffuseTextureSampler = nullptr;
             std::unique_ptr<Flare::RenderSystem::Sampler> specularTextureSampler = nullptr;
             std::unique_ptr<Flare::RenderSystem::TextureManager> textureManager = nullptr;
             std::unique_ptr<Flare::SceneGraph::ModelManager> modelManager = nullptr;
             std::unique_ptr<Flare::RenderSystem::Buffer> mvpMatrixBuffer = nullptr;
+            const std::string vertexShaderPath{"../src/6a-model-file-loading/shaders/vertex.glsl"};
+            const std::string fragmentShaderPath{"../src/6a-model-file-loading/shaders/fragment.glsl"};
         public:
             virtual void initialize() override;
             virtual void render(unsigned int deltaTime) override;
