@@ -44,14 +44,14 @@ namespace Flare
         void Mesh::populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices)
         {
             auto vertexBufferLayout = RenderSystem::VertexDataLayoutBuilder()
-                .addAttribute("position", sizeof(glm::vec3), RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, 0)
-                .addAttribute("normal", sizeof(glm::vec3), RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(glm::vec3))
-                .addAttribute("uvCoords", sizeof(glm::vec2), RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(glm::vec3) * 2)
+                .addAttribute("position", 3, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, 0)
+                .addAttribute("normal", 3, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(glm::vec3))
+                .addAttribute("uvCoord", 2, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(glm::vec3) * 2)
                 .setStride(sizeof(DataTypes::Vertex))
                 .build();
 
             auto elementBufferLayout = RenderSystem::VertexDataLayoutBuilder()
-                .addAttribute("element", sizeof(unsigned int), RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, 0)
+                .addAttribute("element", 1, RenderSystem::RS_UNSIGNED_INT, RenderSystem::RS_FALSE, 0)
                 .setStride(sizeof(unsigned int))
                 .build();
 
@@ -85,7 +85,7 @@ namespace Flare
             }
 
             shaderData.vertexArray->linkBuffers(
-                std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*VBO, *EBO}
+                std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*VBO}
             );
             shaderData.shader->bind();
             shaderData.vertexArray->bind();

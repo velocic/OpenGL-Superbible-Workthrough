@@ -1,6 +1,8 @@
 #version 460 core
 
-in vec4 position;
+in vec3 position;
+in vec3 normal;
+in vec2 uvCoord;
 
 out VS_OUT
 {
@@ -14,6 +16,9 @@ uniform mat4 proj_matrix;
 
 void main(void)
 {
-    gl_Position = proj_matrix * mv_matrix * position;
-    vs_out.color = position * 2.0 + vec4(0.5, 0.5, 0.5, 0.0);
+    gl_Position = proj_matrix * mv_matrix * vec4(position, 0);
+    vs_out.color = vec4(position, 0) * 2.0 + vec4(0.5, 0.5, 0.5, 0.0);
+
+    //prevent fields from optimizing out
+    vs_out.color = vs_out.color + vec4(normal, 0) + vec4(uvCoord, 0, 0) - vec4(normal, 0) - vec4(uvCoord, 0, 0);
 }

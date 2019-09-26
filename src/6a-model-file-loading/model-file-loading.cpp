@@ -36,15 +36,10 @@ namespace Tutorial
         specularTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
         auto vertexBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
-            .addAttribute("position", sizeof(glm::vec3), Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
-            .addAttribute("normal", sizeof(glm::vec3), Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec3))
-            .addAttribute("uvCoords", sizeof(glm::vec2), Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec3) * 2)
+            .addAttribute("position", 3, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
+            .addAttribute("normal", 3, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec3))
+            .addAttribute("uvCoord", 2, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec3) * 2)
             .setStride(sizeof(Flare::DataTypes::Vertex))
-            .build();
-
-        auto elementBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
-            .addAttribute("element", sizeof(unsigned int), Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
-            .setStride(sizeof(unsigned int))
             .build();
 
         auto basicUntexturedUnlitMeshDisplayShader = Flare::GL::ShaderProgramBuilder()
@@ -57,8 +52,7 @@ namespace Tutorial
         auto untexturedUnlitMeshDisplayVAO = Flare::RenderSystem::createVertexArray(
             basicUntexturedUnlitMeshDisplayShader.get(),
             std::vector<Flare::RenderSystem::VertexBufferVertexDataLayout>{
-                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout},
-                Flare::RenderSystem::VertexBufferVertexDataLayout{"elementBuffer", elementBufferLayout}
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout}
             }
         );
 

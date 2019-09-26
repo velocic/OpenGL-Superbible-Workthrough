@@ -22,6 +22,7 @@ namespace Flare
 
         //Common flag values
         constexpr auto RS_FLOAT = GL_FLOAT;
+        constexpr auto RS_UNSIGNED_INT = GL_UNSIGNED_INT;
         constexpr auto RS_FALSE = GL_FALSE;
         constexpr auto RS_TRUE = GL_TRUE;
 

@@ -54,6 +54,11 @@ namespace Flare
                 for (const auto &vertexAttribute : bufferLayout.bufferContentDescription.vertexAttributes) {
                     auto attributeIndex = shaderProgram.getAttribute(vertexAttribute.name);
 
+                    if (attributeIndex == -1) {
+                        throw std::runtime_error("Failed to configure vertex attributes. Attribute '" + vertexAttribute.name
+                            + "' does not exist in the associated shader program.");
+                    }
+
                     glVertexArrayAttribBinding(VAO, attributeIndex, bufferBindingIndex);
                     glVertexArrayAttribFormat(
                         VAO,
@@ -100,6 +105,12 @@ namespace Flare
 
                 for (const auto &vertexAttribute : bufferLayout.vertexAttributes) {
                     auto attributeIndex = shaderProgram->getAttribute(vertexAttribute.name);
+
+                    if (attributeIndex == -1) {
+                        throw std::runtime_error("Attempting to link an incompatible buffer to a vertex array. Attribute '" + vertexAttribute.name
+                            + "' does not exist in the associated shader program.");
+                    }
+
                     glVertexArrayAttribBinding(VAO, attributeIndex, bindingIndexIterator->second);
                 }
             }
