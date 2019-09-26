@@ -42,7 +42,7 @@ namespace Tutorial
 
         modelManager->load(
             Flare::SceneGraph::ModelManager::ModelFile{"stanford-bunny", "../src/6a-model-file-loading/models/stanford-bunny/stanford-bunny.obj"},
-            [&](auto model){
+            [&](auto){
                 std::cout << "stanford bunny model loaded" << std::endl;
             }
         );
@@ -53,8 +53,8 @@ namespace Tutorial
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
 
-        auto bunnyModel = modelManager->get("stanford-bunny");
-        bunnyModel->render(basicUntexturedUnlitMeshDisplayShader.get(), 1);
+        // auto bunnyModel = modelManager->get("stanford-bunny");
+        // bunnyModel->render(basicUntexturedUnlitMeshDisplayShader.get(), 1);
 
         renderWindow->swapWindow();
     }

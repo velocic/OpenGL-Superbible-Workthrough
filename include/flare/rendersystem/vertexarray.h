@@ -3,6 +3,8 @@
 
 #include <functional>
 
+#include <flare/rendersystem/buffer.h>
+
 namespace Flare
 {
     namespace RenderSystem

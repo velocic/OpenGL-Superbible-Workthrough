@@ -27,6 +27,7 @@ add_executable(
     src/flare/gl/sampler.cpp
     src/flare/rendersystem/factory.cpp
     src/flare/rendersystem/samplermanager.cpp
+    src/flare/rendersystem/shadermanager.cpp
     src/flare/scenegraph/modelmanager.cpp
     src/flare/scenegraph/mesh.cpp
     src/flare/scenegraph/model.cpp

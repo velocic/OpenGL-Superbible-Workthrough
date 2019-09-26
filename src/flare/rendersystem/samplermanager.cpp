@@ -33,7 +33,7 @@ namespace Flare
             return nullptr;
         }
 
-        void SamplerManager::insert(std::unique_ptr<RenderSystem::Sampler> sampler, const std::string &alias)
+        void SamplerManager::insert(std::unique_ptr<RenderSystem::Sampler> &&sampler, const std::string &alias)
         {
             samplers.insert_or_assign(stringHasher(alias), std::move(sampler));
         }

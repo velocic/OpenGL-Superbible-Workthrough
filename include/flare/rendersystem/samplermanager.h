@@ -24,7 +24,7 @@ namespace Flare
                 SamplerManager &operator=(const SamplerManager &other) = delete;
 
                 RenderSystem::Sampler *get(const std::string &alias) const;
-                void insert(std::unique_ptr<RenderSystem::Sampler> sampler, const std::string &alias);
+                void insert(std::unique_ptr<RenderSystem::Sampler> &&sampler, const std::string &alias);
                 void remove(const std::string &alias);
                 void removeAll();
         };
