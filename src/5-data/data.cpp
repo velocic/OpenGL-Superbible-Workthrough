@@ -45,15 +45,20 @@ namespace Tutorial
         shaderPipelineDemoShader->addUniformAttribute("mvpMatrix");
 
         //Test out a VAO that sources inputs from multiple tightly-packed buffers
-        auto VAOBuffers = std::vector<std::reference_wrapper<const Flare::RenderSystem::Buffer>>{
-            *(vertexPositionBuffer.get()),
-            *(triangleColorBuffer.get())
+        auto VAOBufferLayouts = std::vector<Flare::RenderSystem::VertexBufferVertexDataLayout>{
+            Flare::RenderSystem::VertexBufferVertexDataLayout{"positionBuffer", positionBufferLayout},
+            Flare::RenderSystem::VertexBufferVertexDataLayout{"triangleColorBuffer", triangleColorBufferLayout}
         };
 
-        //Link the shader attributes to the buffers
         shaderPipelineDemoShaderVAO = std::make_unique<Flare::GL::VertexArray>(
             shaderPipelineDemoShader.get(),
-            VAOBuffers
+            VAOBufferLayouts
+        );
+        shaderPipelineDemoShaderVAO->linkBuffers(
+            std::vector<std::reference_wrapper<const Flare::RenderSystem::Buffer>>{
+                *vertexPositionBuffer.get(),
+                *triangleColorBuffer.get()
+            }
         );
 
         glm::vec4 vertices[] = {

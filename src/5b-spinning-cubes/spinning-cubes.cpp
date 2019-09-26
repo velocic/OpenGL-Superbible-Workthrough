@@ -111,14 +111,15 @@ namespace Tutorial
 
         cubeMeshBuffer = std::make_unique<Flare::GL::Buffer>("cubeMeshBuffer", cubeMeshBufferLayout);
 
-        auto bufferRefsForCubeMeshVAO = std::vector<std::reference_wrapper<const Flare::RenderSystem::Buffer>>{
-            *(cubeMeshBuffer.get())
+        auto bufferLayoutsForCubeMeshVAO = std::vector<Flare::RenderSystem::VertexBufferVertexDataLayout>{
+            Flare::RenderSystem::VertexBufferVertexDataLayout{"cubeMeshBuffer", cubeMeshBufferLayout}
         };
 
         cubeMeshVAO = std::make_unique<Flare::GL::VertexArray>(
             spinningCubeShader.get(),
-            bufferRefsForCubeMeshVAO
+            bufferLayoutsForCubeMeshVAO
         );
+        cubeMeshVAO->linkBuffers(std::vector<std::reference_wrapper<const Flare::RenderSystem::Buffer>>{*cubeMeshBuffer.get()});
 
         cubeMeshBuffer->allocateBufferStorage(cubeVertexPositions.max_size() * sizeof(GLfloat), cubeVertexPositions.data(), 0);
     }
