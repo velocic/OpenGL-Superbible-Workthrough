@@ -6,6 +6,7 @@
 #include <flare/gl/sampler.h>
 #include <flare/gl/shaderprogram.h>
 #include <flare/scenegraph/modelmanager.h>
+#include <flare/rendersystem/factory.h>
 
 namespace Tutorial
 {
@@ -19,6 +20,7 @@ namespace Tutorial
 
         textureManager = std::make_unique<Flare::GL::TextureManager>();
         modelManager = std::make_unique<Flare::SceneGraph::ModelManager>(*textureManager.get());
+        shaderManager = std::make_unique<Flare::RenderSystem::ShaderManager>();
 
         diffuseTextureSampler = std::make_unique<Flare::GL::Sampler>("diffuse_texture");
         specularTextureSampler = std::make_unique<Flare::GL::Sampler>("specular_texture");
@@ -33,12 +35,38 @@ namespace Tutorial
         specularTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
         specularTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
-        basicUntexturedUnlitMeshDisplayShader = Flare::GL::ShaderProgramBuilder()
+        auto vertexBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+            .addAttribute("position", sizeof(glm::vec3), Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
+            .addAttribute("normal", sizeof(glm::vec3), Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec3))
+            .addAttribute("uvCoords", sizeof(glm::vec2), Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec3) * 2)
+            .setStride(sizeof(Flare::DataTypes::Vertex))
+            .build();
+
+        auto elementBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+            .addAttribute("element", sizeof(unsigned int), Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
+            .setStride(sizeof(unsigned int))
+            .build();
+
+        auto basicUntexturedUnlitMeshDisplayShader = Flare::GL::ShaderProgramBuilder()
             .setVertexShader(vertexShaderPath)
             .setFragmentShader(fragmentShaderPath)
             .build();
         basicUntexturedUnlitMeshDisplayShader->addUniformAttribute("mv_matrix");
         basicUntexturedUnlitMeshDisplayShader->addUniformAttribute("proj_matrix");
+
+        auto untexturedUnlitMeshDisplayVAO = Flare::RenderSystem::createVertexArray(
+            basicUntexturedUnlitMeshDisplayShader.get(),
+            std::vector<Flare::RenderSystem::VertexBufferVertexDataLayout>{
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout},
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"elementBuffer", elementBufferLayout}
+            }
+        );
+
+        shaderManager->insert(
+            std::move(basicUntexturedUnlitMeshDisplayShader),
+            std::move(untexturedUnlitMeshDisplayVAO),
+            "untexturedUnlitMeshDisplay"
+        );
 
         modelManager->load(
             Flare::SceneGraph::ModelManager::ModelFile{"stanford-bunny", "../src/6a-model-file-loading/models/stanford-bunny/stanford-bunny.obj"},
@@ -53,8 +81,8 @@ namespace Tutorial
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
 
-        // auto bunnyModel = modelManager->get("stanford-bunny");
-        // bunnyModel->render(basicUntexturedUnlitMeshDisplayShader.get(), 1);
+        auto bunnyModel = modelManager->get("stanford-bunny");
+        bunnyModel->render(shaderManager->get("untexturedUnlitMeshDisplay"), 1);
 
         renderWindow->swapWindow();
     }

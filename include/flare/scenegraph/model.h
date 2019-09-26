@@ -10,6 +10,7 @@
 #include <assimp/postprocess.h>
 
 #include <flare/rendersystem/texture.h>
+#include <flare/rendersystem/shadermanager.h>
 #include <flare/scenegraph/mesh.h>
 
 namespace Flare
@@ -28,7 +29,7 @@ namespace Flare
                 Model(const Model &other) = delete;
                 Model &operator=(const Model &other) = delete;
 
-                void render(RenderSystem::ShaderProgram *shader, size_t instanceCount);
+                void render(RenderSystem::ShaderData shaderData, size_t instanceCount);
         };
     }
 }

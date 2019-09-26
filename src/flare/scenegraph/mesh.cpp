@@ -72,21 +72,23 @@ namespace Flare
 
         void Mesh::destroy()
         {
-            VAO = nullptr;
             VBO = nullptr;
             EBO = nullptr;
 
             std::vector<TextureUnitBinding>().swap(textures);
         }
 
-        void Mesh::bind(RenderSystem::ShaderProgram *shader)
+        void Mesh::bind(RenderSystem::ShaderData shaderData)
         {
             for (const auto &textureUnitBinding : textures) {
-                shader->setTexture(textureUnitBinding.first, textureUnitBinding.second);
+                shaderData.shader->setTexture(textureUnitBinding.first, textureUnitBinding.second);
             }
 
-            shader->bind();
-            VAO->bind();
+            shaderData.vertexArray->linkBuffers(
+                std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*VBO, *EBO}
+            );
+            shaderData.shader->bind();
+            shaderData.vertexArray->bind();
             EBO->bind(GL_ELEMENT_ARRAY_BUFFER);
         }
 

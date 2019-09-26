@@ -8,8 +8,7 @@
 #include <glm-0.9.9/glm.hpp>
 
 #include <flare/rendersystem/buffer.h>
-#include <flare/rendersystem/vertexarray.h>
-#include <flare/rendersystem/shaderprogram.h>
+#include <flare/rendersystem/shadermanager.h>
 #include <flare/rendersystem/texture.h>
 #include <flare/utility/datatypes.h>
 
@@ -23,7 +22,6 @@ namespace Flare
                 using TextureUnitBinding = std::pair<std::string, RenderSystem::Texture *>;
 
                 std::vector<TextureUnitBinding> textures;
-                std::unique_ptr<RenderSystem::VertexArray> VAO;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
                 size_t elementCount = 0;
@@ -38,7 +36,7 @@ namespace Flare
                 Mesh &operator=(const Mesh &other) = delete;
 
                 void destroy();
-                void bind(RenderSystem::ShaderProgram *shader);
+                void bind(RenderSystem::ShaderData shaderData);
                 void render(size_t instanceCount);
         };
     }
