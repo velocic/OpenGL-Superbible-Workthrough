@@ -7,6 +7,7 @@
 #include <flare/rendersystem/datatypes.h>
 #include <flare/rendersystem/sampler.h>
 #include <flare/rendersystem/texture.h>
+#include <flare/rendersystem/wrappers.h>
 
 namespace Flare
 {
@@ -38,20 +39,20 @@ namespace Flare
                     static_assert((std::is_arithmetic<Ts>::value && ...),"setUniform called with invalid type");
 
                     if constexpr ((std::is_same<Ts, RSfloat>::value && ...)) {
-                        if constexpr (numArgs == 1) { glUniform1f(location, values...); }
-                        if constexpr (numArgs == 2) { glUniform2f(location, values...); }
-                        if constexpr (numArgs == 3) { glUniform3f(location, values...); }
-                        if constexpr (numArgs == 4) { glUniform4f(location, values...); }
+                        if constexpr (numArgs == 1) { setUniform1f(location, values...); }
+                        if constexpr (numArgs == 2) { setUniform2f(location, values...); }
+                        if constexpr (numArgs == 3) { setUniform3f(location, values...); }
+                        if constexpr (numArgs == 4) { setUniform4f(location, values...); }
                     } else if constexpr ((std::is_same<Ts, RSint>::value && ...)) {
-                        if constexpr (numArgs == 1) { glUniform1i(location, values...); }
-                        if constexpr (numArgs == 2) { glUniform2i(location, values...); }
-                        if constexpr (numArgs == 3) { glUniform3i(location, values...); }
-                        if constexpr (numArgs == 4) { glUniform4i(location, values...); }
+                        if constexpr (numArgs == 1) { setUniform1i(location, values...); }
+                        if constexpr (numArgs == 2) { setUniform2i(location, values...); }
+                        if constexpr (numArgs == 3) { setUniform3i(location, values...); }
+                        if constexpr (numArgs == 4) { setUniform4i(location, values...); }
                     } else if constexpr ((std::is_same<Ts, RSuint>::value && ...)) {
-                        if constexpr (numArgs == 1) { glUniform1ui(location, values...); }
-                        if constexpr (numArgs == 2) { glUniform1ui(location, values...); }
-                        if constexpr (numArgs == 3) { glUniform1ui(location, values...); }
-                        if constexpr (numArgs == 4) { glUniform1ui(location, values...); }
+                        if constexpr (numArgs == 1) { setUniform1ui(location, values...); }
+                        if constexpr (numArgs == 2) { setUniform1ui(location, values...); }
+                        if constexpr (numArgs == 3) { setUniform1ui(location, values...); }
+                        if constexpr (numArgs == 4) { setUniform1ui(location, values...); }
                     }
                 }
 
@@ -61,20 +62,20 @@ namespace Flare
                     static_assert(std::is_arithmetic<T>::value, "setUniformv called with invalid type");
 
                     if constexpr (std::is_same<T, RSfloat>::value) {
-                        if constexpr (Count == 1) { glUniform1fv(location, Count, value); }
-                        if constexpr (Count == 2) { glUniform2fv(location, Count, value); }
-                        if constexpr (Count == 3) { glUniform3fv(location, Count, value); }
-                        if constexpr (Count == 4) { glUniform4fv(location, Count, value); }
+                        if constexpr (Count == 1) { setUniform1fv(location, Count, value); }
+                        if constexpr (Count == 2) { setUniform2fv(location, Count, value); }
+                        if constexpr (Count == 3) { setUniform3fv(location, Count, value); }
+                        if constexpr (Count == 4) { setUniform4fv(location, Count, value); }
                     } else if constexpr (std::is_same<T, RSint>::value) {
-                        if constexpr (Count == 1) { glUniform1iv(location, Count, value); }
-                        if constexpr (Count == 2) { glUniform2iv(location, Count, value); }
-                        if constexpr (Count == 3) { glUniform3iv(location, Count, value); }
-                        if constexpr (Count == 4) { glUniform4iv(location, Count, value); }
+                        if constexpr (Count == 1) { setUniform1iv(location, Count, value); }
+                        if constexpr (Count == 2) { setUniform2iv(location, Count, value); }
+                        if constexpr (Count == 3) { setUniform3iv(location, Count, value); }
+                        if constexpr (Count == 4) { setUniform4iv(location, Count, value); }
                     } else if constexpr (std::is_same<T, RSuint>::value) {
-                        if constexpr (Count == 1) { glUniform1uiv(location, Count, value); }
-                        if constexpr (Count == 2) { glUniform2uiv(location, Count, value); }
-                        if constexpr (Count == 3) { glUniform3uiv(location, Count, value); }
-                        if constexpr (Count == 4) { glUniform4uiv(location, Count, value); }
+                        if constexpr (Count == 1) { setUniform1uiv(location, Count, value); }
+                        if constexpr (Count == 2) { setUniform2uiv(location, Count, value); }
+                        if constexpr (Count == 3) { setUniform3uiv(location, Count, value); }
+                        if constexpr (Count == 4) { setUniform4uiv(location, Count, value); }
                     }
                 }
 
@@ -95,27 +96,27 @@ namespace Flare
 
                     if constexpr (Rows == 2) {
                         if constexpr (Columns == 2) {
-                            glUniformMatrix2fv(location, Count, transpose, value);
+                            setUniformMatrix2fv(location, Count, transpose, value);
                         } else if constexpr (Columns == 3) {
-                            glUniformMatrix2x3fv(location, Count, transpose, value);
+                            setUniformMatrix2x3fv(location, Count, transpose, value);
                         } else if constexpr (Columns == 4) {
-                            glUniformMatrix2x4fv(location, Count, transpose, value);
+                            setUniformMatrix2x4fv(location, Count, transpose, value);
                         }
                     } else if constexpr (Rows == 3) {
                         if constexpr (Columns == 2) {
-                            glUniformMatrix3x2fv(location, Count, transpose, value);
+                            setUniformMatrix3x2fv(location, Count, transpose, value);
                         } else if constexpr (Columns == 3) {
-                            glUniformMatrix3fv(location, Count, transpose, value);
+                            setUniformMatrix3fv(location, Count, transpose, value);
                         } else if constexpr (Columns == 4) {
-                            glUniformMatrix3x4fv(location, Count, transpose, value);
+                            setUniformMatrix3x4fv(location, Count, transpose, value);
                         }
                     } else if constexpr (Rows == 4) {
                         if constexpr (Columns == 2) {
-                            glUniformMatrix4x2fv(location, Count, transpose, value);
+                            setUniformMatrix4x2fv(location, Count, transpose, value);
                         } else if constexpr (Columns == 3) {
-                            glUniformMatrix4x3fv(location, Count, transpose, value);
+                            setUniformMatrix4x3fv(location, Count, transpose, value);
                         } else if constexpr (Columns == 4) {
-                            glUniformMatrix4fv(location, Count, transpose, value);
+                            setUniformMatrix4fv(location, Count, transpose, value);
                         }
                     }
                 }
