@@ -29,6 +29,14 @@ namespace Flare
                 virtual bool setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture) = 0;
                 virtual bool setTextureArray(const std::string &textureUnitArrayName, const std::vector<RenderSystem::Texture *> &textures) = 0;
                 virtual void unbind() = 0;
+
+                template<typename... Ts> void setUniform(RSint location, Ts... values) {
+                    static_assert(sizeof...(Ts) >= 1 && sizeof...(Ts) <= 4, "setUniform called with incorrect number of values");
+                    static_assert((std::is_arithmetic<Ts>::value && ...),"setUniform called with invalid type");
+                }
+
+                template<int... Ts> void setUniform(RSint location, Ts... values) {
+                }
         };
 
         class ShaderProgramBuilder

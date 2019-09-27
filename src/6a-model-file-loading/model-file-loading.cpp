@@ -8,6 +8,9 @@
 #include <flare/scenegraph/modelmanager.h>
 #include <flare/rendersystem/factory.h>
 
+#include <glm-0.9.9/glm.hpp>
+#include <glm-0.9.9/gtc/matrix_transform.hpp>
+
 namespace Tutorial
 {
     void ModelFileLoading::initialize()
@@ -74,6 +77,22 @@ namespace Tutorial
     {
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
+
+        auto identityMatrix = glm::mat4{
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        };
+
+        auto perspectiveMatrix = glm::perspective(
+            50.0f,
+            renderWindow->getAspectRatio(),
+            0.1f,
+            1000.0f
+        );
+
+        shaderManager->get("untexturedUnlitMeshDisplay").shader->setUniform(5, 20, 40, 60);
 
         auto bunnyModel = modelManager->get("stanford-bunny");
         bunnyModel->render(shaderManager->get("untexturedUnlitMeshDisplay"), 1);
