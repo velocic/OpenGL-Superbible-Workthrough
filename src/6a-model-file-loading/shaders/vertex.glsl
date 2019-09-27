@@ -16,8 +16,7 @@ uniform mat4 proj_matrix;
 
 void main(void)
 {
-    //gl_Position = proj_matrix * mv_matrix * vec4(position, 0);
-    gl_Position = vec4(position, 1);
+    gl_Position = proj_matrix * mv_matrix * vec4(position, 1);
     vs_out.color = vec4(position, 0) * 2.0 + vec4(0.5, 0.5, 0.5, 0.0);
 
     //prevent fields from optimizing out

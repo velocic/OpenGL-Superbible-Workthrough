@@ -78,6 +78,8 @@ namespace Tutorial
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 1.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
 
+        auto untexturedUnlitMeshDisplayShaderData = shaderManager->get("untexturedUnlitMeshDisplay");
+
         auto identityMatrix = glm::mat4{
             1, 0, 0, 0,
             0, 1, 0, 0,
@@ -92,8 +94,49 @@ namespace Tutorial
             1000.0f
         );
 
+        elapsedTime += deltaTime;
+        auto dampeningValue = 0.00005f;
+        float f = static_cast<float>(elapsedTime) * 0.3f * dampeningValue;
+
+        auto modelViewMatrix =
+            glm::translate(
+                identityMatrix,
+                glm::vec3(0.0f, 0.0f, -5.0f)
+            ) *
+            glm::rotate(
+                identityMatrix,
+                static_cast<float>(elapsedTime * dampeningValue) * 20.0f,
+                glm::vec3(0.0f, 1.0f, 0.0f)
+            ) *
+            glm::rotate(
+                identityMatrix,
+                static_cast<float>(elapsedTime * dampeningValue) * 10.0f,
+                glm::vec3(1.0f, 0.0f, 0.0f)
+            ) *
+            glm::translate(
+                identityMatrix,
+                glm::vec3(
+                    sinf(2.1f * f) * 0.5f,
+                    cosf(1.7f * f) * 0.5f,
+                    sinf(1.3f * f) * cosf(1.5f * f) * 0.5f
+                )
+            );
+
+        untexturedUnlitMeshDisplayShaderData.shader->bind();
+        untexturedUnlitMeshDisplayShaderData.vertexArray->bind();
+        untexturedUnlitMeshDisplayShaderData.shader->setUniformMatrix<4, 4, 1>(
+            untexturedUnlitMeshDisplayShaderData.shader->getUniformAttribute("proj_matrix"),
+            GL_FALSE,
+            &perspectiveMatrix[0][0]
+        );
+        untexturedUnlitMeshDisplayShaderData.shader->setUniformMatrix<4, 4, 1>(
+            untexturedUnlitMeshDisplayShaderData.shader->getUniformAttribute("mv_matrix"),
+            GL_FALSE,
+            &modelViewMatrix[0][0]
+        );
+
         auto bunnyModel = modelManager->get("stanford-bunny");
-        bunnyModel->render(shaderManager->get("untexturedUnlitMeshDisplay"), 1);
+        bunnyModel->render(untexturedUnlitMeshDisplayShaderData, 1);
 
         renderWindow->swapWindow();
     }
