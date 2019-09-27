@@ -92,8 +92,6 @@ namespace Tutorial
             1000.0f
         );
 
-        shaderManager->get("untexturedUnlitMeshDisplay").shader->setUniform(5, 20, 40, 60);
-
         auto bunnyModel = modelManager->get("stanford-bunny");
         bunnyModel->render(shaderManager->get("untexturedUnlitMeshDisplay"), 1);
 
