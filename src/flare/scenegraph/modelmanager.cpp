@@ -39,7 +39,7 @@ namespace Flare
                 throw std::runtime_error(importer.GetErrorString());
             }
 
-            auto modelDirectory = file.path.substr(0, file.path.find_last_of('/'));
+            auto modelDirectory = file.path.substr(0, file.path.find_last_of('/') + 1);
             auto meshes = std::vector<std::unique_ptr<Mesh>>{};
 
             processNode(scene->mRootNode, scene, modelDirectory, meshes);

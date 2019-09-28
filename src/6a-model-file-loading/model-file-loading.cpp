@@ -67,8 +67,14 @@ namespace Tutorial
 
         modelManager->load(
             Flare::SceneGraph::ModelManager::ModelFile{"stanford-bunny", "../src/6a-model-file-loading/models/stanford-bunny/stanford-bunny.obj"},
-            [&](auto){
+            [](auto){
                 std::cout << "stanford bunny model loaded" << std::endl;
+            }
+        );
+        modelManager->load(
+            Flare::SceneGraph::ModelManager::ModelFile{"lantern", "../src/6a-model-file-loading/models/Lantern/Lantern.gltf"},
+            [](auto) {
+                std::cout << "lantern model loaded" << std::endl;
             }
         );
     }
@@ -136,8 +142,16 @@ namespace Tutorial
         );
 
         auto bunnyModel = modelManager->get("stanford-bunny");
+        auto lanternModel = modelManager->get("lantern");
         bunnyModel->render(untexturedUnlitMeshDisplayShaderData, 1);
 
+        auto lanternMVMatrix = glm::translate(identityMatrix, glm::vec3(0.0f, 0.0f, -100.0f));
+        untexturedUnlitMeshDisplayShaderData.shader->setUniformMatrix<4, 4, 1>(
+            untexturedUnlitMeshDisplayShaderData.shader->getUniformAttribute("mv_matrix"),
+            GL_FALSE,
+            &lanternMVMatrix[0][0]
+        );
+        lanternModel->render(untexturedUnlitMeshDisplayShaderData, 1);
         renderWindow->swapWindow();
     }
 
