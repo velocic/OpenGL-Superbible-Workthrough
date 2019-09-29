@@ -39,6 +39,13 @@ namespace Flare
                     RSenum pixelDataFormat;
                 };
 
+                struct MaterialTextures {
+                    std::unique_ptr<Texture> baseColor;
+                    std::unique_ptr<Texture> normal;
+                    std::unique_ptr<Texture> metallic;
+                    std::unique_ptr<Texture> roughness;
+                }
+
                 virtual ~TextureManager() {}
 
                 virtual void batchLoadTexture1D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
