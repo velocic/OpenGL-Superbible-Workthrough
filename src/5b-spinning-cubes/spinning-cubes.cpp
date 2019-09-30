@@ -33,9 +33,10 @@ namespace Tutorial
             .build();
 
         textureManager->loadTexture2D(
-            Flare::RenderSystem::TextureManager::TextureFile{
+            Flare::RenderSystem::TextureManager::PhongTextureFile{
                 "../src/5b-spinning-cubes/textures/brick.png",
                 "brick",
+                Flare::RenderSystem::TextureManager::PhongMaterialTextureType::DIFFUSE,
                 Flare::RenderSystem::TextureManager::SupportedFileType::PNG,
                 GL_RGBA
             },
@@ -45,7 +46,7 @@ namespace Tutorial
                 false
             },
             [&](auto loadedTexture){
-                spinningCubeShader->setTexture(demoTextureSampler->getName(), loadedTexture);
+                spinningCubeShader->setTexture(demoTextureSampler->getName(), loadedTexture.diffuse);
             }
         );
 
