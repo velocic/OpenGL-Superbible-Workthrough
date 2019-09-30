@@ -14,7 +14,8 @@ namespace Flare
         class TextureManager : public RenderSystem::TextureManager
         {
             private:
-                std::unordered_map<size_t, std::unique_ptr<Texture>> textures;
+                std::unordered_map<size_t, MaterialTextures> textures;
+                std::unordered_map<size_t, std::unique_ptr<Texture>> arrayTextures;
                 std::hash<std::string> stringHasher;
             public:
                 TextureManager() {}
@@ -28,12 +29,14 @@ namespace Flare
                 virtual void batchLoadTexture2D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) override;
                 virtual void batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) override;
 
-                virtual void loadTexture1D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
-                virtual void loadTexture2D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
+                virtual void loadTexture1D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::MaterialTextures)> onLoadComplete) override;
+                virtual void loadTexture2D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::MaterialTextures)> onLoadComplete) override;
                 virtual void loadArrayTexture2D(const ArrayTextureFiles &files, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) override;
 
-                virtual RenderSystem::Texture *get(const std::string &alias) const override;
+                virtual RenderSystem::MaterialTextures get(const std::string &alias) const override;
+                virtual RenderSystem::Texture *getArrayTexture(const std::string &alias) const override;
                 virtual void remove(const std::string &alias) override;
+                virtual void removeArrayTexture(const std::string &alias) override;
                 virtual void removeAll() override;
         };
     }

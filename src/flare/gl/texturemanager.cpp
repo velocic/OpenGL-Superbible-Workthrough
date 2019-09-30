@@ -49,16 +49,17 @@ namespace Flare
             onLoadComplete();
         }
 
-        void TextureManager::loadTexture1D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
+        void TextureManager::loadTexture1D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::MaterialTextures)> onLoadComplete)
         {
             throw std::runtime_error("GL::TextureManager::loadTexture1D() not yet implemented.");
         }
 
-        void TextureManager::loadTexture2D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
+        void TextureManager::loadTexture2D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::MaterialTextures)> onLoadComplete)
         {
             auto width = 0u;
             auto height = 0u;
             auto decodedImage = std::vector<unsigned char>{};
+            auto lookupKey = stringHasher(file.alias);
 
             lodepng::decode(decodedImage, width, height, file.path);
 
@@ -68,13 +69,32 @@ namespace Flare
                 width,
                 height
             );
-
             newTexture->bufferPixelData(file.pixelDataFormat, GL_UNSIGNED_BYTE, decodedImage.data(), initParams.generateMipmaps);
 
-            auto callbackResult = newTexture.get();
-            textures.insert_or_assign(stringHasher(file.alias), std::move(newTexture));
+            auto entryExists = textures.find(lookupKey) != textures.end();
+            if (!entryExists) {
+                textures.insert_or_assign(lookupKey, MaterialTextures{});
+            }
+            auto &entry = textures.find(lookupKey)->second;
 
-            onLoadComplete(callbackResult);
+            if (file.materialTextureType == MaterialTextureType::BASE_COLOR) {
+                entry.baseColor = std::move(newTexture);
+            } else if (file.materialTextureType == MaterialTextureType::NORMAL) {
+                entry.normal = std::move(newTexture);
+            } else if (file.materialTextureType == MaterialTextureType::METALLIC) {
+                entry.metallic = std::move(newTexture);
+            } else if (file.materialTextureType == MaterialTextureType::ROUGHNESS) {
+                entry.roughness = std::move(newTexture);
+            }
+
+            onLoadComplete(
+                RenderSystem::MaterialTextures{
+                    entry.baseColor.get(),
+                    entry.normal.get(),
+                    entry.metallic.get(),
+                    entry.roughness.get()
+                }
+            );
         }
 
         void TextureManager::loadArrayTexture2D(const ArrayTextureFiles &files, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
@@ -120,16 +140,34 @@ namespace Flare
             }
 
             auto callbackResult = newArrayTexture.get();
-            textures.insert_or_assign(stringHasher(files.alias), std::move(newArrayTexture));
+            arrayTextures.insert_or_assign(stringHasher(files.alias), std::move(newArrayTexture));
 
             onLoadComplete(callbackResult);
         }
 
-        RenderSystem::Texture *TextureManager::get(const std::string &alias) const
+        RenderSystem::MaterialTextures TextureManager::get(const std::string &alias) const
         {
             auto result = textures.find(stringHasher(alias));
 
             if (result != textures.end()) {
+                const auto &internalMaterialTexture = result->second;
+
+                return RenderSystem::MaterialTextures{
+                    internalMaterialTexture.baseColor.get(),
+                    internalMaterialTexture.normal.get(),
+                    internalMaterialTexture.metallic.get(),
+                    internalMaterialTexture.roughness.get()
+                };
+            }
+
+            return RenderSystem::MaterialTextures{};
+        }
+
+        RenderSystem::Texture *TextureManager::getArrayTexture(const std::string &alias) const
+        {
+            auto result = arrayTextures.find(stringHasher(alias));
+
+            if (result != arrayTextures.end()) {
                 return result->second.get();
             }
 
@@ -141,13 +179,15 @@ namespace Flare
             textures.erase(stringHasher(alias));
         }
 
+        void TextureManager::removeArrayTexture(const std::string &alias)
+        {
+            arrayTextures.erase(stringHasher(alias));
+        }
+
         void TextureManager::removeAll()
         {
-            for (const auto &it : textures) {
-                it.second->destroy();
-            }
-
             textures.clear();
+            arrayTextures.clear();
         }
     }
 }
