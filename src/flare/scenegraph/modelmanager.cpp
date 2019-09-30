@@ -114,8 +114,8 @@ namespace Flare
             //process material
             auto material = scene->mMaterials[mesh->mMaterialIndex];
 
-            textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, modelDirectory);
-            auto specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, modelDirectory);
+            textures = loadPBRMaterialTextures(material, aiTextureType_DIFFUSE, modelDirectory);
+            auto specularMaps = loadPBRMaterialTextures(material, aiTextureType_SPECULAR, modelDirectory);
 
             textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
@@ -126,7 +126,7 @@ namespace Flare
             );
         }
 
-        std::vector<std::pair<std::string, RenderSystem::Texture *>> ModelManager::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &modelDirectory)
+        std::vector<std::pair<std::string, RenderSystem::Texture *>> ModelManager::loadPBRMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &modelDirectory)
         {
             auto textureCount = mat->GetTextureCount(type);
             auto loadedTextures = std::vector<std::pair<std::string, RenderSystem::Texture *>>{};

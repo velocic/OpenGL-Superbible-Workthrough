@@ -10,7 +10,7 @@ namespace Flare
 {
     namespace RenderSystem
     {
-        struct MaterialTextures {
+        struct PBRMaterialTextures {
             Texture *baseColor;
             Texture *normal;
             Texture *metallic;
@@ -20,12 +20,18 @@ namespace Flare
         class TextureManager
         {
             protected:
-                struct MaterialTextures {
+                struct PBRMaterialTextures {
                     std::unique_ptr<Texture> baseColor;
                     std::unique_ptr<Texture> normal;
                     std::unique_ptr<Texture> metallic;
                     std::unique_ptr<Texture> roughness;
                 };
+
+                struct PhongMaterialTextures {
+                    std::unique_ptr<Texture> diffuse;
+                    std::unique_ptr<Texture> specular;
+                    std::unique_ptr<Texture> normal;
+                }
 
             public:
                 static constexpr RSsizei DEFAULT_NUM_MIPMAP_LEVELS = 4;
@@ -34,11 +40,17 @@ namespace Flare
                     PNG
                 };
 
-                enum class MaterialTextureType {
+                enum class PBRMaterialTextureType {
                     BASE_COLOR,
                     NORMAL,
                     METALLIC,
                     ROUGHNESS
+                };
+
+                enum class PhongMaterialTextureType {
+                    DIFFUSE,
+                    SPECULAR,
+                    NORMAL
                 };
 
                 struct TextureInitParams {
@@ -47,10 +59,18 @@ namespace Flare
                     RSboolean generateMipmaps;
                 };
 
-                struct TextureFile {
+                struct PBRTextureFile {
                     std::string path;
                     std::string alias;
-                    MaterialTextureType materialTextureType;
+                    PBRMaterialTextureType materialTextureType;
+                    SupportedFileType fileType;
+                    RSenum pixelDataFormat;
+                };
+
+                struct PhongTextureFile {
+                    std::string path;
+                    std::string alias;
+                    PhongMaterialTextureType materialTextureType;
                     SupportedFileType fileType;
                     RSenum pixelDataFormat;
                 };
@@ -64,19 +84,25 @@ namespace Flare
 
                 virtual ~TextureManager() {}
 
-                virtual void batchLoadTexture1D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
-                virtual void batchLoadTexture2D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
+                virtual void batchLoadTexture1D(const std::vector<PBRTextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
+                virtual void batchLoadTexture1D(const std::vector<PhongTextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
+                virtual void batchLoadTexture2D(const std::vector<PBRTextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
+                virtual void batchLoadTexture2D(const std::vector<PhongTextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
                 virtual void batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
 
-                virtual void loadTexture1D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::MaterialTextures)> onLoadComplete) = 0;
-                virtual void loadTexture2D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::MaterialTextures)> onLoadComplete) = 0;
+                virtual void loadTexture1D(const PBRTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PBRMaterialTextures)> onLoadComplete) = 0;
+                virtual void loadTexture1D(const PhongTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PBRMaterialTextures)> onLoadComplete) = 0;
+                virtual void loadTexture2D(const PBRTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PBRMaterialTextures)> onLoadComplete) = 0;
+                virtual void loadTexture2D(const PhongTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PBRMaterialTextures)> onLoadComplete) = 0;
                 virtual void loadArrayTexture2D(const ArrayTextureFiles &files, const TextureInitParams &initParams, std::function<void(Texture *)> onLoadComplete) = 0;
 
                 //TODO: support loading in-memory textures (for making runtime-generated textures available)
 
-                virtual RenderSystem::MaterialTextures get(const std::string &alias) const = 0;
+                virtual RenderSystem::PBRMaterialTextures get(const std::string &alias) const = 0;
+                virtual RenderSystem::PhongMaterialTextures getPhongMaterialTextures(const std::string &alias) const = 0;
                 virtual Texture *getArrayTexture(const std::string &alias) const = 0;
                 virtual void remove(const std::string &alias) = 0;
+                virtual void removePhongMaterialTextures(const std::string &alias) const = 0;
                 virtual void removeArrayTexture(const std::string &alias) = 0;
                 virtual void removeAll() = 0;
         };
