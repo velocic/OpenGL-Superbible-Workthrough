@@ -134,9 +134,9 @@ namespace Flare
             );
             newTexture->bufferPixelData(file.pixelDataFormat, GL_UNSIGNED_BYTE, decodedImage.data(), initParams.generateMipmaps);
 
-            auto entryExists = PhongTextures.find(lookupKey) != PhongTextures.end();
+            auto entryExists = phongTextures.find(lookupKey) != phongTextures.end();
             if (!entryExists) {
-                PhongTextures.insert_or_assign(lookupKey, PhongMaterialTextures{});
+                phongTextures.insert_or_assign(lookupKey, PhongMaterialTextures{});
             }
             auto &entry = phongTextures.find(lookupKey)->second;
 
@@ -225,9 +225,9 @@ namespace Flare
 
         RenderSystem::PhongMaterialTextures TextureManager::getPhongMaterialTextures(const std::string &alias) const
         {
-            auto result = PhongTextures.find(stringHasher(alias));
+            auto result = phongTextures.find(stringHasher(alias));
 
-            if (result != PhongTextures.end()) {
+            if (result != phongTextures.end()) {
                 const auto &internalMaterialTexture = result->second;
 
                 return RenderSystem::PhongMaterialTextures{
