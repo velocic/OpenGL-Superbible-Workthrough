@@ -98,23 +98,16 @@ namespace Flare
             auto &entry = PBRTextures.find(lookupKey)->second;
 
             if (file.materialTextureType == PBRMaterialTextureType::BASE_COLOR) {
-                entry.baseColor = std::move(newTexture);
+                entry.baseColor.emplace_back(std::move(newTexture));
             } else if (file.materialTextureType == PBRMaterialTextureType::NORMAL) {
-                entry.normal = std::move(newTexture);
+                entry.normal.emplace_back(std::move(newTexture));
             } else if (file.materialTextureType == PBRMaterialTextureType::METALLIC) {
-                entry.metallic = std::move(newTexture);
+                entry.metallic.emplace_back(std::move(newTexture));
             } else if (file.materialTextureType == PBRMaterialTextureType::ROUGHNESS) {
-                entry.roughness = std::move(newTexture);
+                entry.roughness.emplace_back(std::move(newTexture));
             }
 
-            onLoadComplete(
-                RenderSystem::PBRMaterialTextures{
-                    entry.baseColor.get(),
-                    entry.normal.get(),
-                    entry.metallic.get(),
-                    entry.roughness.get()
-                }
-            );
+            onLoadComplete(getNonOwningMaterialPointers(entry));
         }
 
         void TextureManager::loadTexture2D(const PhongTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PhongMaterialTextures)> onLoadComplete)
@@ -141,20 +134,14 @@ namespace Flare
             auto &entry = phongTextures.find(lookupKey)->second;
 
             if (file.materialTextureType == PhongMaterialTextureType::DIFFUSE) {
-                entry.diffuse = std::move(newTexture);
+                entry.diffuse.emplace_back(std::move(newTexture));
             } else if (file.materialTextureType == PhongMaterialTextureType::SPECULAR) {
-                entry.specular = std::move(newTexture);
+                entry.specular.emplace_back(std::move(newTexture));
             } else if (file.materialTextureType == PhongMaterialTextureType::NORMAL) {
-                entry.normal = std::move(newTexture);
+                entry.normal.emplace_back(std::move(newTexture));
             }
 
-            onLoadComplete(
-                RenderSystem::PhongMaterialTextures{
-                    entry.diffuse.get(),
-                    entry.specular.get(),
-                    entry.normal.get()
-                }
-            );
+            onLoadComplete(getNonOwningMaterialPointers(entry));
         }
 
         void TextureManager::loadArrayTexture2D(const ArrayTextureFiles &files, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
@@ -210,14 +197,7 @@ namespace Flare
             auto result = PBRTextures.find(stringHasher(alias));
 
             if (result != PBRTextures.end()) {
-                const auto &internalMaterialTexture = result->second;
-
-                return RenderSystem::PBRMaterialTextures{
-                    internalMaterialTexture.baseColor.get(),
-                    internalMaterialTexture.normal.get(),
-                    internalMaterialTexture.metallic.get(),
-                    internalMaterialTexture.roughness.get()
-                };
+                return getNonOwningMaterialPointers(result->second);
             }
 
             return RenderSystem::PBRMaterialTextures{};
@@ -228,13 +208,7 @@ namespace Flare
             auto result = phongTextures.find(stringHasher(alias));
 
             if (result != phongTextures.end()) {
-                const auto &internalMaterialTexture = result->second;
-
-                return RenderSystem::PhongMaterialTextures{
-                    internalMaterialTexture.diffuse.get(),
-                    internalMaterialTexture.specular.get(),
-                    internalMaterialTexture.normal.get()
-                };
+                return getNonOwningMaterialPointers(result->second);
             }
 
             return RenderSystem::PhongMaterialTextures{};
@@ -271,6 +245,57 @@ namespace Flare
             PBRTextures.clear();
             phongTextures.clear();
             arrayTextures.clear();
+        }
+
+        RenderSystem::PBRMaterialTextures TextureManager::getNonOwningMaterialPointers(const PBRMaterialTextures &owningPointers) const
+        {
+            auto nonOwningPointers = RenderSystem::PBRMaterialTextures{};
+
+            nonOwningPointers.baseColor.reserve(owningPointers.baseColor.size());
+            nonOwningPointers.normal.reserve(owningPointers.normal.size());
+            nonOwningPointers.metallic.reserve(owningPointers.metallic.size());
+            nonOwningPointers.roughness.reserve(owningPointers.roughness.size());
+
+            for (const auto &texture : owningPointers.baseColor) {
+                nonOwningPointers.baseColor.push_back(texture.get());
+            }
+
+            for (const auto &texture : owningPointers.normal) {
+                nonOwningPointers.normal.push_back(texture.get());
+            }
+
+            for (const auto &texture : owningPointers.metallic) {
+                nonOwningPointers.metallic.push_back(texture.get());
+            }
+
+            for (const auto &texture : owningPointers.roughness) {
+                nonOwningPointers.roughness.push_back(texture.get());
+            }
+
+            return nonOwningPointers;
+        }
+
+        RenderSystem::PhongMaterialTextures TextureManager::getNonOwningMaterialPointers(const PhongMaterialTextures &owningPointers) const
+        {
+            auto nonOwningPointers = RenderSystem::PhongMaterialTextures{};
+
+            nonOwningPointers.diffuse.reserve(owningPointers.diffuse.size());
+            nonOwningPointers.specular.reserve(owningPointers.specular.size());
+            nonOwningPointers.normal.reserve(owningPointers.normal.size());
+
+            for (const auto &texture : owningPointers.diffuse) {
+                nonOwningPointers.diffuse.push_back(texture.get());
+            }
+
+            for (const auto &texture : owningPointers.specular) {
+                nonOwningPointers.specular.push_back(texture.get());
+            }
+
+            for (const auto &texture : owningPointers.normal) {
+                nonOwningPointers.normal.push_back(texture.get());
+            }
+
+            return nonOwningPointers;
         }
     }
 }

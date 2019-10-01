@@ -18,6 +18,9 @@ namespace Flare
                 std::unordered_map<size_t, PhongMaterialTextures> phongTextures;
                 std::unordered_map<size_t, std::unique_ptr<Texture>> arrayTextures;
                 std::hash<std::string> stringHasher;
+
+                RenderSystem::PBRMaterialTextures getNonOwningMaterialPointers(const PBRMaterialTextures &owningPointers) const;
+                RenderSystem::PhongMaterialTextures getNonOwningMaterialPointers(const PhongMaterialTextures &owningPointers) const;
             public:
                 TextureManager() {}
                 ~TextureManager();

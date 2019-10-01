@@ -114,10 +114,12 @@ namespace Flare
             //process material
             auto material = scene->mMaterials[mesh->mMaterialIndex];
 
-            textures = loadPBRMaterialTextures(material, aiTextureType_DIFFUSE, modelDirectory);
-            auto specularMaps = loadPBRMaterialTextures(material, aiTextureType_SPECULAR, modelDirectory);
+            textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, modelDirectory);
+            auto specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, modelDirectory);
+            auto normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, modelDirectory);
 
             textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+            textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
             return std::make_unique<Mesh>(
                 std::move(vertices),
@@ -126,7 +128,7 @@ namespace Flare
             );
         }
 
-        std::vector<std::pair<std::string, RenderSystem::Texture *>> ModelManager::loadPBRMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &modelDirectory)
+        std::vector<std::pair<std::string, RenderSystem::Texture *>> ModelManager::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &modelDirectory)
         {
             auto textureCount = mat->GetTextureCount(type);
             auto loadedTextures = std::vector<std::pair<std::string, RenderSystem::Texture *>>{};
@@ -168,6 +170,17 @@ namespace Flare
             }
 
             return loadedTextures;
+        }
+
+        RenderSystem::TextureManager::PhongMaterialTextureType ModelManager::aiTexTypeToPhongTexType(aiTextureType aiTexType)
+        {
+            if (aiTexType == aiTextureType_DIFFUSE) {
+                return RenderSystem::TextureManager::PhongMaterialTextureType::DIFFUSE;
+            } else if (aiTexType == aiTextureType_SPECULAR) {
+                return RenderSystem::TextureManager::PhongMaterialTextureType::SPECULAR;
+            }
+
+            return RenderSystem::TextureManager::PhongMaterialTextureType::NORMAL;
         }
 
         void ModelManager::batchLoad(const std::vector<ModelFile> &files, std::function<void()> onLoadComplete)

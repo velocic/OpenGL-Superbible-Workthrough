@@ -2,7 +2,9 @@
 #define FLARE_RENDERSYSTEM_TEXTUREMANAGER_H
 
 #include <functional>
+#include <memory>
 #include <string>
+#include <vector>
 
 #include <flare/rendersystem/texture.h>
 
@@ -11,34 +13,33 @@ namespace Flare
     namespace RenderSystem
     {
         struct PBRMaterialTextures {
-            Texture *baseColor;
-            Texture *normal;
-            Texture *metallic;
-            Texture *roughness;
+            std::vector<Texture *> baseColor;
+            std::vector<Texture *> normal;
+            std::vector<Texture *> metallic;
+            std::vector<Texture *> roughness;
         };
 
         struct PhongMaterialTextures {
-            Texture *diffuse;
-            Texture *specular;
-            Texture *normal;
+            std::vector<Texture *> diffuse;
+            std::vector<Texture *> specular;
+            std::vector<Texture *> normal;
         };
 
         class TextureManager
         {
             protected:
                 struct PBRMaterialTextures {
-                    std::unique_ptr<Texture> baseColor;
-                    std::unique_ptr<Texture> normal;
-                    std::unique_ptr<Texture> metallic;
-                    std::unique_ptr<Texture> roughness;
+                    std::vector<std::unique_ptr<Texture>> baseColor;
+                    std::vector<std::unique_ptr<Texture>> normal;
+                    std::vector<std::unique_ptr<Texture>> metallic;
+                    std::vector<std::unique_ptr<Texture>> roughness;
                 };
 
                 struct PhongMaterialTextures {
-                    std::unique_ptr<Texture> diffuse;
-                    std::unique_ptr<Texture> specular;
-                    std::unique_ptr<Texture> normal;
+                    std::vector<std::unique_ptr<Texture>> diffuse;
+                    std::vector<std::unique_ptr<Texture>> specular;
+                    std::vector<std::unique_ptr<Texture>> normal;
                 };
-
             public:
                 static constexpr RSsizei DEFAULT_NUM_MIPMAP_LEVELS = 4;
 
