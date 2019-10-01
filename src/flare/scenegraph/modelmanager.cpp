@@ -54,7 +54,6 @@ namespace Flare
 
         void ModelManager::processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, std::vector<std::unique_ptr<Mesh>> &meshes)
         {
-            //Process all meshes attached to this node
             for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
                 auto mesh = scene->mMeshes[node->mMeshes[i]];
                 meshes.push_back(
@@ -62,7 +61,6 @@ namespace Flare
                 );
             }
 
-            //Process all nodes of this node's children
             for (unsigned int i = 0; i < node->mNumChildren; ++i) {
                 processNode(node->mChildren[i], scene, modelDirectory, meshes);
             }
@@ -72,12 +70,10 @@ namespace Flare
         {
             std::vector<DataTypes::Vertex> vertices;
             std::vector<unsigned int> indices;
-            std::vector<std::pair<std::string, RenderSystem::Texture *>> textures;
 
             vertices.resize(mesh->mNumVertices);
             indices.reserve(mesh->mNumFaces * 3);
 
-            //process vertex positions, normals, tex coordinates
             for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
                 auto &vertex = vertices[i];
                 const auto &sourceVertex = mesh->mVertices[i];
@@ -111,65 +107,63 @@ namespace Flare
                 }
             }
 
-            //process material
             auto material = scene->mMaterials[mesh->mMaterialIndex];
-
-            textures = loadMaterialTextures(material, aiTextureType_DIFFUSE, modelDirectory);
-            auto specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, modelDirectory);
-            auto normalMaps = loadMaterialTextures(material, aiTextureType_NORMALS, modelDirectory);
-
-            textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-            textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
+            auto textures = loadPhongMaterialTextures(std::string{mesh->mName.C_Str()}, material, modelDirectory);
 
             return std::make_unique<Mesh>(
                 std::move(vertices),
                 std::move(indices),
-                std::move(textures)
+                textures
             );
         }
 
-        std::vector<std::pair<std::string, RenderSystem::Texture *>> ModelManager::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string &modelDirectory)
+        RenderSystem::PhongMaterialTextures ModelManager::loadPhongMaterialTextures(const std::string &meshName, aiMaterial *mat, const std::string &modelDirectory)
         {
-            auto textureCount = mat->GetTextureCount(type);
-            auto loadedTextures = std::vector<std::pair<std::string, RenderSystem::Texture *>>{};
-            loadedTextures.reserve(textureCount);
+            auto loadTexturesOfType = [](
+                auto &textureManager,
+                const auto &modelDirectory,
+                const auto &meshName,
+                const auto assimpMaterial,
+                auto assimpTexType
+            ) {
+                auto textureCount = assimpMaterial->GetTextureCount(assimpTexType);
+                auto textureLoadTargets = std::vector<RenderSystem::TextureManager::PhongTextureFile>{};
+                textureLoadTargets.reserve(textureCount);
 
-            for (unsigned int i = 0; i < textureCount; ++i) {
-                aiString textureName;
-                mat->GetTexture(type, i, &textureName);
-
-                //Textures loaded from models will use their full path as their alias, to avoid collisions
-                auto textureFullPath = modelDirectory + std::string{textureName.C_Str()};
-                auto loadedTexture = textureManager.get(textureFullPath);
-
-                if (loadedTexture != nullptr) {
-                    loadedTextures.emplace_back(textureFullPath, loadedTexture);
-                    continue;
-                }
-
-                auto fileInfo = RenderSystem::TextureManager::TextureFile{
-                    textureFullPath,
-                    textureFullPath, //texture's alias name
-                    RenderSystem::TextureManager::SupportedFileType::PNG, //TODO: proper detection of file type
-                    RenderSystem::RS_RGBA //TODO: support for other color channel layouts
-                };
-
-                auto initParams = RenderSystem::TextureManager::TextureInitParams{
+                auto textureInitParams = RenderSystem::TextureManager::TextureInitParams{
                     RenderSystem::TextureManager::DEFAULT_NUM_MIPMAP_LEVELS,
                     RenderSystem::RS_RGBA8, //TODO: support for other color channel layouts
                     true //auto-generate mipmaps according to number of mip-levels specified
                 };
 
-                textureManager.loadTexture2D(
-                    fileInfo,
-                    initParams,
-                    [&loadedTextures, &textureFullPath](auto texture){
-                        loadedTextures.emplace_back(textureFullPath, texture);
-                    }
-                );
-            }
+                for (size_t i = 0; i < textureCount; ++i) {
+                    auto textureName = aiString{};
+                    assimpMaterial->GetTexture(assimpTexType, i, &textureName);
 
-            return loadedTextures;
+                    //Textures loaded from models will use their submesh path as their lookup key
+                    auto textureFullPath = modelDirectory + std::string{textureName.C_Str()};
+                    auto textureAlias = modelDirectory + meshName;
+
+                    textureLoadTargets.emplace_back(
+                        textureFullPath,
+                        textureAlias,
+                        RenderSystem::TextureManager::SupportedFileType::PNG, //TODO: proper detection of file type
+                        RenderSystem::RS_RGBA //TODO: support for other color channel layouts
+                    );
+                }
+
+                textureManager.batchLoadTexture2D(
+                    textureLoadTargets,
+                    textureInitParams,
+                    [](){}
+                );
+            };
+
+            loadTexturesOfType(textureManager, modelDirectory, meshName, mat, aiTextureType_DIFFUSE);
+            loadTexturesOfType(textureManager, modelDirectory, meshName, mat, aiTextureType_SPECULAR);
+            loadTexturesOfType(textureManager, modelDirectory, meshName, mat, aiTextureType_NORMALS);
+
+            return textureManager.getPhongMaterialTextures(modelDirectory + meshName);
         }
 
         RenderSystem::TextureManager::PhongMaterialTextureType ModelManager::aiTexTypeToPhongTexType(aiTextureType aiTexType)

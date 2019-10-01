@@ -25,7 +25,7 @@ namespace Flare
 
                 void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, std::vector<std::unique_ptr<Mesh>> &meshes);
                 std::unique_ptr<Mesh> processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory);
-                std::vector<std::pair<std::string, RenderSystem::Texture *>> loadMaterialTextures(aiMaterial *mat, const aiTextureType type, const std::string &modelDirectory);
+                RenderSystem::PhongMaterialTextures loadPhongMaterialTextures(const std::string &meshName, aiMaterial *mat, const std::string &modelDirectory);
                 RenderSystem::TextureManager::PhongMaterialTextureType aiTexTypeToPhongTexType(aiTextureType aiTexType);
             public:
                 struct ModelFile
