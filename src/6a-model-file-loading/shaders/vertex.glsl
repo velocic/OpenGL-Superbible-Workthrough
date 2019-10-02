@@ -9,8 +9,6 @@ out VS_OUT
     vec4 color;
 } vs_out;
 
-layout (binding = 0) uniform sampler2D demoTexture;
-
 uniform mat4 mv_matrix;
 uniform mat4 proj_matrix;
 

@@ -184,7 +184,11 @@ namespace Flare
         {
             for (auto &textureUnitKVPair : textureUnits) {
                 auto &textureUnit = textureUnitKVPair.second;
-                textureUnit.texture->bind(textureUnit.index);
+
+                if (textureUnit.texture != nullptr) {
+                    textureUnit.texture->bind(textureUnit.index);
+                }
+
                 textureUnit.sampler->bind(textureUnit.index);
             }
 
@@ -194,7 +198,11 @@ namespace Flare
 
                 for (auto &texture : textureUnitArray.textures) {
                     auto textureUnitIndex = textureUnitArray.firstIndexInclusive + currentTextureOffset;
-                    texture->bind(textureUnitIndex);
+
+                    if (texture != nullptr) {
+                        texture->bind(textureUnitIndex);
+                    }
+
                     textureUnitArray.sampler->bind(textureUnitIndex);
                 }
             }

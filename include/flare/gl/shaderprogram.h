@@ -45,8 +45,8 @@ namespace Flare
                     TextureUnit(const TextureUnit& other) = delete;
                     TextureUnit &operator=(const TextureUnit &other) = delete;
 
-                    RenderSystem::Sampler *sampler;
-                    RenderSystem::Texture *texture;
+                    RenderSystem::Sampler *sampler = nullptr;
+                    RenderSystem::Texture *texture = nullptr;
                     unsigned int index = 0;
                 };
 
