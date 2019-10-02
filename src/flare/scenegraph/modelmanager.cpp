@@ -1,5 +1,4 @@
 #include <flare/scenegraph/modelmanager.h>
-#include <iostream>
 
 namespace Flare
 {

@@ -182,7 +182,10 @@ namespace Tutorial
         auto lanternModel = modelManager->get("lantern");
         bunnyModel->render(untexturedUnlitMeshDisplayShaderData, 1);
 
-        auto lanternMVMatrix = glm::translate(identityMatrix, glm::vec3(0.0f, 0.0f, -100.0f));
+        auto rotationAngle = elapsedTime * .001f;
+        std::cout << rotationAngle << std::endl;
+        auto lanternMVMatrix = glm::translate(identityMatrix, glm::vec3(0.0f, 0.0f, -100.0f))
+            * glm::rotate(identityMatrix, elapsedTime * .0005f, glm::vec3(0, 0, 1));
 
         texturedDisplayShaderData.shader->bind();
         texturedDisplayShaderData.vertexArray->bind();
