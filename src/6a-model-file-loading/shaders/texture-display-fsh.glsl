@@ -13,5 +13,6 @@ layout (binding = 2) uniform sampler2D textureNormal0;
 
 void main(void)
 {
-    color = fs_in.color;
+    //color = fs_in.color;
+    color = texture(textureDiffuse0, vec2(0, 0)) + texture(textureSpecular0, vec2(0, 0)) + texture(textureNormal0, vec2(0, 0)) + fs_in.color;
 }
