@@ -190,7 +190,7 @@ namespace Tutorial
             &lanternMVMatrix[0][0]
         );
 
-        lanternModel->render(untexturedUnlitMeshDisplayShaderData, 1);
+        lanternModel->render(texturedDisplayShaderData, 1);
         renderWindow->swapWindow();
     }
 
