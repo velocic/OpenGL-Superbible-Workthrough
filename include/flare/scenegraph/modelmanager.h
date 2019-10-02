@@ -23,9 +23,9 @@ namespace Flare
                 std::unordered_map<size_t, std::unique_ptr<Model>> models;
                 std::hash<std::string> stringHasher;
 
-                void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, std::vector<std::unique_ptr<Mesh>> &meshes);
-                std::unique_ptr<Mesh> processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory);
-                RenderSystem::PhongMaterialTextures loadPhongMaterialTextures(const std::string &meshName, aiMaterial *mat, const std::string &modelDirectory);
+                void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes);
+                std::unique_ptr<Mesh> processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName);
+                RenderSystem::PhongMaterialTextures loadPhongMaterialTextures(aiMaterial *mat, const std::string &modelDirectory, const std::string &modelName);
                 RenderSystem::TextureManager::PhongMaterialTextureType aiTexTypeToPhongTexType(aiTextureType aiTexType);
             public:
                 struct ModelFile

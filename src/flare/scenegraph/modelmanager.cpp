@@ -1,4 +1,5 @@
 #include <flare/scenegraph/modelmanager.h>
+#include <iostream>
 
 namespace Flare
 {
@@ -32,6 +33,12 @@ namespace Flare
 
         void ModelManager::load(const ModelFile &file, std::function<void(Model *)> onLoadComplete)
         {
+            auto alreadyLoadedModel = get(file.alias);
+            if (alreadyLoadedModel != nullptr) {
+                onLoadComplete(alreadyLoadedModel);
+                return;
+            }
+
             auto importer = Assimp::Importer{}; 
             const auto scene = importer.ReadFile(file.path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 
@@ -39,10 +46,12 @@ namespace Flare
                 throw std::runtime_error(importer.GetErrorString());
             }
 
-            auto modelDirectory = file.path.substr(0, file.path.find_last_of('/') + 1);
+            auto lastSlashIndex = file.path.rfind('/');
+            auto modelDirectory = file.path.substr(0, lastSlashIndex + 1);
+            auto modelName = file.path.substr(lastSlashIndex + 1, file.path.rfind('.') - lastSlashIndex - 1);
             auto meshes = std::vector<std::unique_ptr<Mesh>>{};
 
-            processNode(scene->mRootNode, scene, modelDirectory, meshes);
+            processNode(scene->mRootNode, scene, modelDirectory, modelName, meshes);
 
             auto loadedModel = std::make_unique<Model>(std::move(meshes));
             auto resultForCallback = loadedModel.get();
@@ -52,21 +61,21 @@ namespace Flare
             onLoadComplete(resultForCallback);
         }
 
-        void ModelManager::processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, std::vector<std::unique_ptr<Mesh>> &meshes)
+        void ModelManager::processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes)
         {
             for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
                 auto mesh = scene->mMeshes[node->mMeshes[i]];
                 meshes.push_back(
-                    processMesh(mesh, scene, modelDirectory)
+                    processMesh(mesh, scene, modelDirectory, modelName)
                 );
             }
 
             for (unsigned int i = 0; i < node->mNumChildren; ++i) {
-                processNode(node->mChildren[i], scene, modelDirectory, meshes);
+                processNode(node->mChildren[i], scene, modelDirectory, modelName, meshes);
             }
         }
 
-        std::unique_ptr<Mesh> ModelManager::processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory)
+        std::unique_ptr<Mesh> ModelManager::processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName)
         {
             std::vector<DataTypes::Vertex> vertices;
             std::vector<unsigned int> indices;
@@ -112,16 +121,21 @@ namespace Flare
             return std::make_unique<Mesh>(
                 std::move(vertices),
                 std::move(indices),
-                loadPhongMaterialTextures(std::string{mesh->mName.C_Str()}, material, modelDirectory)
+                loadPhongMaterialTextures(material, modelDirectory, modelName)
             );
         }
 
-        RenderSystem::PhongMaterialTextures ModelManager::loadPhongMaterialTextures(const std::string &meshName, aiMaterial *mat, const std::string &modelDirectory)
+        RenderSystem::PhongMaterialTextures ModelManager::loadPhongMaterialTextures(aiMaterial *mat, const std::string &modelDirectory, const std::string &modelName)
         {
+            auto textureAlias = modelDirectory + modelName;
+            if (textureManager.arePhongMaterialTexturesLoaded(textureAlias)) {
+                return textureManager.getPhongMaterialTextures(textureAlias);
+            }
+
             auto loadTexturesOfType = [&](
                 auto &textureManager,
                 const auto &modelDirectory,
-                const auto &meshName,
+                const auto &textureAlias,
                 const auto assimpMaterial,
                 auto assimpTexType
             ) {
@@ -139,9 +153,8 @@ namespace Flare
                     auto textureName = aiString{};
                     assimpMaterial->GetTexture(assimpTexType, i, &textureName);
 
-                    //Textures loaded from models will use their submesh path as their lookup key
+                    //Textures loaded from models will use their model path + model name (minus extension) as their lookup key
                     auto textureFullPath = modelDirectory + std::string{textureName.C_Str()};
-                    auto textureAlias = modelDirectory + meshName;
 
                     textureLoadTargets.push_back(
                         RenderSystem::TextureManager::PhongTextureFile{
@@ -161,11 +174,11 @@ namespace Flare
                 );
             };
 
-            loadTexturesOfType(textureManager, modelDirectory, meshName, mat, aiTextureType_DIFFUSE);
-            loadTexturesOfType(textureManager, modelDirectory, meshName, mat, aiTextureType_SPECULAR);
-            loadTexturesOfType(textureManager, modelDirectory, meshName, mat, aiTextureType_NORMALS);
+            loadTexturesOfType(textureManager, modelDirectory, textureAlias, mat, aiTextureType_DIFFUSE);
+            loadTexturesOfType(textureManager, modelDirectory, textureAlias, mat, aiTextureType_SPECULAR);
+            loadTexturesOfType(textureManager, modelDirectory, textureAlias, mat, aiTextureType_NORMALS);
 
-            return textureManager.getPhongMaterialTextures(modelDirectory + meshName);
+            return textureManager.getPhongMaterialTextures(textureAlias);
         }
 
         RenderSystem::TextureManager::PhongMaterialTextureType ModelManager::aiTexTypeToPhongTexType(aiTextureType aiTexType)

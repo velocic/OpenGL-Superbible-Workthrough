@@ -108,6 +108,8 @@ namespace Flare
                 virtual RenderSystem::PBRMaterialTextures get(const std::string &alias) const = 0;
                 virtual RenderSystem::PhongMaterialTextures getPhongMaterialTextures(const std::string &alias) const = 0;
                 virtual Texture *getArrayTexture(const std::string &alias) const = 0;
+                virtual bool areTexturesLoaded(const std::string &alias) const = 0;
+                virtual bool arePhongMaterialTexturesLoaded(const std::string &alias) const = 0;
                 virtual void remove(const std::string &alias) = 0;
                 virtual void removePhongMaterialTextures(const std::string &alias) = 0;
                 virtual void removeArrayTexture(const std::string &alias) = 0;

@@ -225,6 +225,16 @@ namespace Flare
             return nullptr;
         }
 
+        bool TextureManager::areTexturesLoaded(const std::string &alias) const
+        {
+            return PBRTextures.find(stringHasher(alias)) != PBRTextures.end();
+        }
+
+        bool TextureManager::arePhongMaterialTexturesLoaded(const std::string &alias) const
+        {
+            return phongTextures.find(stringHasher(alias)) != phongTextures.end();
+        }
+
         void TextureManager::remove(const std::string &alias)
         {
             PBRTextures.erase(stringHasher(alias));
