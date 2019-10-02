@@ -9,7 +9,7 @@
 
 #include <flare/rendersystem/buffer.h>
 #include <flare/rendersystem/shadermanager.h>
-#include <flare/rendersystem/texture.h>
+#include <flare/rendersystem/texturemanager.h>
 #include <flare/utility/datatypes.h>
 
 namespace Flare
@@ -19,16 +19,14 @@ namespace Flare
         class Mesh
         {
             private:
-                using TextureUnitBinding = std::pair<std::string, RenderSystem::Texture *>;
-
-                std::vector<TextureUnitBinding> textures;
+                RenderSystem::PhongMaterialTextures textures;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
                 size_t elementCount = 0;
 
                 void populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
             public:
-                Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<TextureUnitBinding> &&textures);
+                Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures);
                 ~Mesh();
                 Mesh(Mesh &&other);
                 Mesh &operator=(Mesh &&other);

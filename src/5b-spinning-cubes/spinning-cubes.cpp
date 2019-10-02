@@ -46,7 +46,7 @@ namespace Tutorial
                 false
             },
             [&](auto loadedTexture){
-                spinningCubeShader->setTexture(demoTextureSampler->getName(), loadedTexture.diffuse);
+                spinningCubeShader->setTexture(demoTextureSampler->getName(), loadedTexture.diffuse[0]);
             }
         );
 

@@ -7,7 +7,7 @@ namespace Flare
 {
     namespace SceneGraph
     {
-        Mesh::Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<TextureUnitBinding> &&textures)
+        Mesh::Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures)
         :
             textures(textures),
             elementCount(indices.size())
@@ -26,6 +26,8 @@ namespace Flare
         Mesh::Mesh(Mesh &&other)
         :
             textures(std::move(other.textures)),
+            VBO(std::move(other.VBO)),
+            EBO(std::move(other.EBO)),
             elementCount(other.elementCount)
         {
             other.elementCount = 0;
@@ -34,6 +36,8 @@ namespace Flare
         Mesh &Mesh::operator=(Mesh &&other)
         {
             textures = std::move(other.textures);
+            VBO = std::move(other.VBO);
+            EBO = std::move(other.EBO);
             elementCount = other.elementCount;
 
             other.elementCount = 0;
@@ -74,14 +78,20 @@ namespace Flare
         {
             VBO = nullptr;
             EBO = nullptr;
-
-            std::vector<TextureUnitBinding>().swap(textures);
         }
 
         void Mesh::bind(RenderSystem::ShaderData shaderData)
         {
-            for (const auto &textureUnitBinding : textures) {
-                shaderData.shader->setTexture(textureUnitBinding.first, textureUnitBinding.second);
+            for (size_t i = 0; i < textures.diffuse.size(); ++i) {
+                shaderData.shader->setTexture("textureDiffuse" + std::to_string(i), textures.diffuse[i]);
+            }
+
+            for (size_t i = 0; i < textures.specular.size(); ++i) {
+                shaderData.shader->setTexture("textureSpecular" + std::to_string(i), textures.specular[i]);
+            }
+
+            for (size_t i = 0; i < textures.normal.size(); ++i) {
+                shaderData.shader->setTexture("textureNormal" + std::to_string(i), textures.normal[i]);
             }
 
             shaderData.vertexArray->linkBuffers(

@@ -108,18 +108,17 @@ namespace Flare
             }
 
             auto material = scene->mMaterials[mesh->mMaterialIndex];
-            auto textures = loadPhongMaterialTextures(std::string{mesh->mName.C_Str()}, material, modelDirectory);
 
             return std::make_unique<Mesh>(
                 std::move(vertices),
                 std::move(indices),
-                textures
+                loadPhongMaterialTextures(std::string{mesh->mName.C_Str()}, material, modelDirectory)
             );
         }
 
         RenderSystem::PhongMaterialTextures ModelManager::loadPhongMaterialTextures(const std::string &meshName, aiMaterial *mat, const std::string &modelDirectory)
         {
-            auto loadTexturesOfType = [](
+            auto loadTexturesOfType = [&](
                 auto &textureManager,
                 const auto &modelDirectory,
                 const auto &meshName,
@@ -144,11 +143,14 @@ namespace Flare
                     auto textureFullPath = modelDirectory + std::string{textureName.C_Str()};
                     auto textureAlias = modelDirectory + meshName;
 
-                    textureLoadTargets.emplace_back(
-                        textureFullPath,
-                        textureAlias,
-                        RenderSystem::TextureManager::SupportedFileType::PNG, //TODO: proper detection of file type
-                        RenderSystem::RS_RGBA //TODO: support for other color channel layouts
+                    textureLoadTargets.push_back(
+                        RenderSystem::TextureManager::PhongTextureFile{
+                            textureFullPath,
+                            textureAlias,
+                            aiTexTypeToPhongTexType(assimpTexType),
+                            RenderSystem::TextureManager::SupportedFileType::PNG, //TODO: proper detection of file type
+                            RenderSystem::RS_RGBA //TODO: support for other color channel layouts
+                        }
                     );
                 }
 
