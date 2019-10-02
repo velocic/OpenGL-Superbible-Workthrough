@@ -72,8 +72,8 @@ namespace Tutorial
         );
 
         auto texturedDisplayShader = Flare::GL::ShaderProgramBuilder()
-            .setVertexShader(vertexShaderPath)
-            .setFragmentShader(textureDisplayShaderPath)
+            .setVertexShader(textureDisplayVertexShaderPath)
+            .setFragmentShader(textureDisplayFragmentShaderPath)
             .addTextureUnit(diffuse0TextureSampler.get())
             .addTextureUnit(diffuse1TextureSampler.get())
             .addTextureUnit(specularTextureSampler.get())

@@ -5,6 +5,7 @@ layout (location = 0) out vec4 color;
 in VS_OUT
 {
     vec4 color;
+    vec2 uvCoord;
 } fs_in;
 
 layout (binding = 0) uniform sampler2D textureDiffuse0;
@@ -14,6 +15,5 @@ layout (binding = 3) uniform sampler2D textureNormal0;
 
 void main(void)
 {
-    //color = fs_in.color;
-    color = texture(textureDiffuse0, vec2(0, 0)) + texture(textureSpecular0, vec2(0, 0)) + texture(textureNormal0, vec2(0, 0)) + fs_in.color + texture(textureDiffuse1, vec2(0, 0));
+    color = texture(textureDiffuse0, fs_in.uvCoord);
 }

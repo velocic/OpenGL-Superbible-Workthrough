@@ -26,7 +26,8 @@ namespace Tutorial
             std::unique_ptr<Flare::RenderSystem::Buffer> mvpMatrixBuffer = nullptr;
             const std::string vertexShaderPath{"../src/6a-model-file-loading/shaders/vertex.glsl"};
             const std::string fragmentShaderPath{"../src/6a-model-file-loading/shaders/fragment.glsl"};
-            const std::string textureDisplayShaderPath{"../src/6a-model-file-loading/shaders/texture-display-fsh.glsl"};
+            const std::string textureDisplayVertexShaderPath{"../src/6a-model-file-loading/shaders/texture-display-vsh.glsl"};
+            const std::string textureDisplayFragmentShaderPath{"../src/6a-model-file-loading/shaders/texture-display-fsh.glsl"};
             unsigned long long elapsedTime = 0;
         public:
             virtual void initialize() override;
