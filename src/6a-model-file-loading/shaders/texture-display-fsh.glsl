@@ -4,7 +4,6 @@ layout (location = 0) out vec4 color;
 
 in VS_OUT
 {
-    vec4 color;
     vec2 uvCoord;
 } fs_in;
 
