@@ -16,7 +16,8 @@ namespace Tutorial
     {
         private:
             std::unique_ptr<Flare::RenderWindow> renderWindow = nullptr;
-            std::unique_ptr<Flare::RenderSystem::Sampler> diffuseTextureSampler = nullptr;
+            std::unique_ptr<Flare::RenderSystem::Sampler> diffuse0TextureSampler = nullptr;
+            std::unique_ptr<Flare::RenderSystem::Sampler> diffuse1TextureSampler = nullptr;
             std::unique_ptr<Flare::RenderSystem::Sampler> specularTextureSampler = nullptr;
             std::unique_ptr<Flare::RenderSystem::Sampler> normalTextureSampler = nullptr;
             std::unique_ptr<Flare::RenderSystem::ShaderManager> shaderManager = nullptr;

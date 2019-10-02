@@ -25,14 +25,20 @@ namespace Tutorial
         modelManager = std::make_unique<Flare::SceneGraph::ModelManager>(*textureManager.get());
         shaderManager = std::make_unique<Flare::RenderSystem::ShaderManager>();
 
-        diffuseTextureSampler = std::make_unique<Flare::GL::Sampler>("textureDiffuse0");
+        diffuse0TextureSampler = std::make_unique<Flare::GL::Sampler>("textureDiffuse0");
+        diffuse1TextureSampler = std::make_unique<Flare::GL::Sampler>("textureDiffuse1");
         specularTextureSampler = std::make_unique<Flare::GL::Sampler>("textureSpecular0");
         normalTextureSampler = std::make_unique<Flare::GL::Sampler>("textureNormal0");
 
-        diffuseTextureSampler->samplerParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        diffuseTextureSampler->samplerParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        diffuseTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-        diffuseTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+        diffuse0TextureSampler->samplerParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        diffuse0TextureSampler->samplerParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        diffuse0TextureSampler->samplerParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        diffuse0TextureSampler->samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+        diffuse1TextureSampler->samplerParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        diffuse1TextureSampler->samplerParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        diffuse1TextureSampler->samplerParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        diffuse1TextureSampler->samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
         specularTextureSampler->samplerParameteri(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         specularTextureSampler->samplerParameteri(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -68,7 +74,8 @@ namespace Tutorial
         auto texturedDisplayShader = Flare::GL::ShaderProgramBuilder()
             .setVertexShader(vertexShaderPath)
             .setFragmentShader(textureDisplayShaderPath)
-            .addTextureUnit(diffuseTextureSampler.get())
+            .addTextureUnit(diffuse0TextureSampler.get())
+            .addTextureUnit(diffuse1TextureSampler.get())
             .addTextureUnit(specularTextureSampler.get())
             .addTextureUnit(normalTextureSampler.get())
             .build();
