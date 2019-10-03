@@ -20,7 +20,7 @@ namespace Flare
         class Mesh
         {
             private:
-                std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures> textures;
+                std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, nullptr_t> textures;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
                 size_t elementCount = 0;
@@ -29,6 +29,7 @@ namespace Flare
             public:
                 Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures);
                 Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PBRMaterialTextures &textures);
+                Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
                 ~Mesh();
                 Mesh(Mesh &&other);
                 Mesh &operator=(Mesh &&other);

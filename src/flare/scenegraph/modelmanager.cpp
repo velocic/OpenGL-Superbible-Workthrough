@@ -60,6 +60,47 @@ namespace Flare
             onLoadComplete(resultForCallback);
         }
 
+        void ModelManager::load(const std::string &alias, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PBRMaterialTextures &textures, std::function<void(Model *)> onLoadComplete)
+        {
+            throw std::runtime_error("Models using PBR materials are not yet supported by ModelManager");
+        }
+
+        void ModelManager::load(const std::string &alias, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures, std::function<void(Model *)> onLoadComplete)
+        {
+            auto alreadyLoadedModel = get(alias);
+            if (alreadyLoadedModel != nullptr) {
+                onLoadComplete(alreadyLoadedModel);
+                return;
+            }
+
+            auto modelMeshes = std::vector<std::unique_ptr<Mesh>>{};
+            modelMeshes.emplace_back(std::make_unique<Mesh>(std::move(vertices), std::move(indices), textures));
+
+            auto model = std::make_unique<Model>(std::move(modelMeshes));
+            auto result = model.get();
+            models.insert_or_assign(stringHasher(alias), std::move(model));
+
+            onLoadComplete(result);
+        }
+
+        void ModelManager::load(const std::string &alias, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::function<void(Model *)> onLoadComplete)
+        {
+            auto alreadyLoadedModel = get(alias);
+            if (alreadyLoadedModel != nullptr) {
+                onLoadComplete(alreadyLoadedModel);
+                return;
+            }
+
+            auto modelMeshes = std::vector<std::unique_ptr<Mesh>>{};
+            modelMeshes.emplace_back(std::make_unique<Mesh>(std::move(vertices), std::move(indices)));
+
+            auto model = std::make_unique<Model>(std::move(modelMeshes));
+            auto result = model.get();
+            models.insert_or_assign(stringHasher(alias), std::move(model));
+
+            onLoadComplete(result);
+        }
+
         void ModelManager::processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes)
         {
             for (unsigned int i = 0; i < node->mNumMeshes; ++i) {

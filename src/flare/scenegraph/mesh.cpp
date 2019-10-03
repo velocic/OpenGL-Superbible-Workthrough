@@ -29,6 +29,17 @@ namespace Flare
             );
         }
 
+        Mesh::Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices)
+        :
+            textures(nullptr),
+            elementCount(indices.size())
+        {
+            populateBuffers(
+                std::move(vertices),
+                std::move(indices)
+            );
+        }
+
         Mesh::~Mesh()
         {
             destroy();
