@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <variant>
 
 #include <glm-0.9.9/glm.hpp>
 
@@ -19,7 +20,7 @@ namespace Flare
         class Mesh
         {
             private:
-                RenderSystem::PhongMaterialTextures textures;
+                std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures> textures;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
                 size_t elementCount = 0;

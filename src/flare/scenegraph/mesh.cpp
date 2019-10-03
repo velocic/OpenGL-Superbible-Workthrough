@@ -82,16 +82,31 @@ namespace Flare
 
         void Mesh::bind(RenderSystem::ShaderData shaderData)
         {
-            for (size_t i = 0; i < textures.diffuse.size(); ++i) {
-                shaderData.shader->setTexture("textureDiffuse" + std::to_string(i), textures.diffuse[i]);
-            }
-
-            for (size_t i = 0; i < textures.specular.size(); ++i) {
-                shaderData.shader->setTexture("textureSpecular" + std::to_string(i), textures.specular[i]);
-            }
-
-            for (size_t i = 0; i < textures.normal.size(); ++i) {
-                shaderData.shader->setTexture("textureNormal" + std::to_string(i), textures.normal[i]);
+            if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(textures)) {
+                const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(textures);
+                for (size_t i = 0; i < phongTextures.diffuse.size(); ++i) {
+                    shaderData.shader->setTexture("textureDiffuse" + std::to_string(i), phongTextures.diffuse[i]);
+                }
+                for (size_t i = 0; i < phongTextures.specular.size(); ++i) {
+                    shaderData.shader->setTexture("textureSpecular" + std::to_string(i), phongTextures.specular[i]);
+                }
+                for (size_t i = 0; i < phongTextures.normal.size(); ++i) {
+                    shaderData.shader->setTexture("textureNormal" + std::to_string(i), phongTextures.normal[i]);
+                }
+            } else if (std::holds_alternative<RenderSystem::PBRMaterialTextures>(textures)) {
+                const auto &PBRTextures = std::get<RenderSystem::PBRMaterialTextures>(textures);
+                for (size_t i = 0; i < PBRTextures.baseColor.size(); ++i) {
+                    shaderData.shader->setTexture("textureBaseColor" + std::to_string(i), PBRTextures.baseColor[i]);
+                }
+                for (size_t i = 0; i < PBRTextures.normal.size(); ++i) {
+                    shaderData.shader->setTexture("textureNormal" + std::to_string(i), PBRTextures.normal[i]);
+                }
+                for (size_t i = 0; i < PBRTextures.metallic.size(); ++i) {
+                    shaderData.shader->setTexture("textureMetallic" + std::to_string(i), PBRTextures.metallic[i]);
+                }
+                for (size_t i = 0; i < PBRTextures.roughness.size(); ++i) {
+                    shaderData.shader->setTexture("textureRoughness" + std::to_string(i), PBRTextures.roughness[i]);
+                }
             }
 
             shaderData.vertexArray->linkBuffers(
