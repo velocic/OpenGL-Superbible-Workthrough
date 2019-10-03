@@ -43,6 +43,9 @@ namespace Flare
 
                 void batchLoad(const std::vector<ModelFile> &files, std::function<void()> onLoadComplete);
                 void load(const ModelFile &file, std::function<void(Model *)> onLoadComplete);
+
+                //Creates a model with a single mesh using in-memory data.
+                void load(const std::string &alias, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
                 Model *get(const std::string &alias) const;
                 void remove(const std::string &alias);
                 void removeAll();
