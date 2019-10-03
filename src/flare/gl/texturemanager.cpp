@@ -18,7 +18,8 @@ namespace Flare
         : 
             PBRTextures(std::move(other.PBRTextures)),
             phongTextures(std::move(other.phongTextures)),
-            arrayTextures(std::move(other.arrayTextures))
+            arrayTextures(std::move(other.arrayTextures)),
+            textures(std::move(other.textures))
         {}
 
         TextureManager &TextureManager::operator=(TextureManager &&other)
@@ -26,6 +27,7 @@ namespace Flare
             PBRTextures = std::move(other.PBRTextures);
             phongTextures = std::move(other.phongTextures);
             arrayTextures = std::move(other.arrayTextures);
+            textures = std::move(other.textures);
 
             return *this;
         }
@@ -40,6 +42,11 @@ namespace Flare
             throw std::runtime_error("GL::TextureManager::batchLoadTexture1D() not yet implemented.");
         }
 
+        void TextureManager::batchLoadTexture1D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete)
+        {
+            throw std::runtime_error("GL::TextureManager::batchLoadTexture1D() not yet implemented.");
+        }
+
         void TextureManager::batchLoadTexture2D(const std::vector<PBRTextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete)
         {
             for (const auto &target : targets) {
@@ -50,6 +57,13 @@ namespace Flare
         }
 
         void TextureManager::batchLoadTexture2D(const std::vector<PhongTextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) {
+            for (const auto &target : targets) {
+                loadTexture2D(target, initParams, [](auto){});
+            }
+        }
+
+        void TextureManager::batchLoadTexture2D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete)
+        {
             for (const auto &target : targets) {
                 loadTexture2D(target, initParams, [](auto){});
             }
@@ -70,6 +84,11 @@ namespace Flare
         }
 
         void TextureManager::loadTexture1D(const PhongTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PhongMaterialTextures)> onLoadComplete)
+        {
+            throw std::runtime_error("GL::TextureManager::loadTexture1D() not yet implemented.");
+        }
+
+        void TextureManager::loadTexture1D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
         {
             throw std::runtime_error("GL::TextureManager::loadTexture1D() not yet implemented.");
         }
@@ -144,6 +163,28 @@ namespace Flare
             onLoadComplete(getNonOwningMaterialPointers(entry));
         }
 
+        void TextureManager::loadTexture2D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
+        {
+            auto width = 0u;
+            auto height = 0u;
+            auto decodedImage = std::vector<unsigned char>{};
+            auto lookupKey = stringHasher(file.alias);
+
+            lodepng::decode(decodedImage, width, height, file.path);
+
+            auto newTexture = std::make_unique<Texture2D>(
+                initParams.numMipmapLevels,
+                initParams.internalFormat,
+                width,
+                height
+            );
+            newTexture->bufferPixelData(file.pixelDataFormat, GL_UNSIGNED_BYTE, decodedImage.data(), initParams.generateMipmaps);
+
+            auto result = newTexture.get();
+            textures.insert_or_assign(lookupKey, std::move(newTexture));
+            onLoadComplete(result);
+        }
+
         void TextureManager::loadArrayTexture2D(const ArrayTextureFiles &files, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
         {
             if (files.paths.empty()) {
@@ -192,7 +233,18 @@ namespace Flare
             onLoadComplete(callbackResult);
         }
 
-        RenderSystem::PBRMaterialTextures TextureManager::get(const std::string &alias) const
+        RenderSystem::Texture *TextureManager::get(const std::string &alias) const
+        {
+            auto result = textures.find(stringHasher(alias));
+
+            if (result != textures.end()) {
+                return result->second.get();
+            }
+
+            return nullptr;
+        }
+
+        RenderSystem::PBRMaterialTextures TextureManager::getPBRMaterialTextures(const std::string &alias) const
         {
             auto result = PBRTextures.find(stringHasher(alias));
 
@@ -225,7 +277,7 @@ namespace Flare
             return nullptr;
         }
 
-        bool TextureManager::areTexturesLoaded(const std::string &alias) const
+        bool TextureManager::arePBRMaterialTexturesLoaded(const std::string &alias) const
         {
             return PBRTextures.find(stringHasher(alias)) != PBRTextures.end();
         }
@@ -236,6 +288,11 @@ namespace Flare
         }
 
         void TextureManager::remove(const std::string &alias)
+        {
+            textures.erase(stringHasher(alias));
+        }
+
+        void TextureManager::removePBRMaterialTextures(const std::string &alias)
         {
             PBRTextures.erase(stringHasher(alias));
         }
@@ -255,6 +312,7 @@ namespace Flare
             PBRTextures.clear();
             phongTextures.clear();
             arrayTextures.clear();
+            textures.clear();
         }
 
         RenderSystem::PBRMaterialTextures TextureManager::getNonOwningMaterialPointers(const PBRMaterialTextures &owningPointers) const
