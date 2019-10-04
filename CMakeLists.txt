@@ -17,6 +17,7 @@ add_executable(
     src/5b-spinning-cubes/spinning-cubes.cpp
     src/5c-array-textures/array-textures.cpp
     src/6a-model-file-loading/model-file-loading.cpp
+    src/7a-instancing/instancing.cpp
     src/flare/gl/buffer.cpp
     src/flare/gl/vertexarray.cpp
     src/flare/gl/shaderprogram.cpp

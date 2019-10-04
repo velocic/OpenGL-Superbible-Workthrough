@@ -34,6 +34,6 @@ namespace Tutorial
             virtual void render(unsigned int deltaTime) override;
             virtual void shutdown() override;
     };
-};
+}
 
 #endif

@@ -7,6 +7,7 @@
 #include <5b-spinning-cubes/spinning-cubes.h>
 #include <5c-array-textures/array-textures.h>
 #include <6a-model-file-loading/model-file-loading.h>
+#include <7a-instancing/instancing.h>
 
 #include <flare/gl/uniformblock.h>
 
@@ -20,7 +21,8 @@ int main()
     // Tutorial::Data selectedTutorial;
     // Tutorial::SpinningCubes selectedTutorial;
     // Tutorial::ArrayTextures selectedTutorial;
-    Tutorial::ModelFileLoading selectedTutorial;
+    // Tutorial::ModelFileLoading selectedTutorial;
+    Tutorial::Instancing selectedTutorial;
 
     Flare::Application* demoApp = &selectedTutorial;
 
