@@ -102,13 +102,13 @@ namespace Tutorial
         );
 
         modelManager->load(
-            Flare::SceneGraph::ModelManager::ModelFile{"stanford-bunny", "../src/6a-model-file-loading/models/stanford-bunny/stanford-bunny.obj"},
+            Flare::SceneGraph::ModelManager::ModelFile{"stanford-bunny", "../src/common-resources/models/stanford-bunny/stanford-bunny.obj"},
             [](auto){
                 std::cout << "stanford bunny model loaded" << std::endl;
             }
         );
         modelManager->load(
-            Flare::SceneGraph::ModelManager::ModelFile{"lantern", "../src/6a-model-file-loading/models/Lantern/Lantern.gltf"},
+            Flare::SceneGraph::ModelManager::ModelFile{"lantern", "../src/common-resources/models/Lantern/Lantern.gltf"},
             [](auto) {
                 std::cout << "lantern model loaded" << std::endl;
             }
