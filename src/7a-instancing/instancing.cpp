@@ -67,8 +67,9 @@ namespace Tutorial
             .build();
 
         auto mvpMatrixBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
-            .addMatrixAttribute("mvpMatrix", 4, 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0, 1)
+            .addMatrixAttribute("mvpMatrix", 4, 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
             .setStride(sizeof(glm::mat4))
+            .setDivisor(1)
             .build();
 
         auto instanceShader = Flare::GL::ShaderProgramBuilder()

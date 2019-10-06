@@ -73,10 +73,6 @@ namespace Flare
                         );
                         glEnableVertexArrayAttrib(VAO, attributeIndex);
                         glEnableVertexAttribArray(bufferBindingIndex);
-
-                        if (vertexAttribute.attribDivisor != 0) {
-                            glVertexArrayBindingDivisor(VAO, bufferBindingIndex, vertexAttribute.attribDivisor);
-                        }
                     } else if (std::holds_alternative<RenderSystem::MatrixVertexAttribute>(vertexAttributeVariant)) {
                         const auto &vertexAttribute = std::get<RenderSystem::MatrixVertexAttribute>(vertexAttributeVariant);
                         auto attributeIndex = shaderProgram.getAttribute(vertexAttribute.name);
@@ -100,12 +96,12 @@ namespace Flare
                             );
                             glEnableVertexArrayAttrib(VAO, attributeIndex + matrixRow);
                             glEnableVertexAttribArray(bufferBindingIndex);
-
-                            if (vertexAttribute.attribDivisor != 0) {
-                                glVertexArrayBindingDivisor(VAO, bufferBindingIndex, vertexAttribute.attribDivisor);
-                            }
                         }
                     }
+                }
+
+                if (bufferLayout.bufferContentDescription.divisor != 0) {
+                    glVertexArrayBindingDivisor(VAO, bufferBindingIndex, bufferLayout.bufferContentDescription.divisor);
                 }
             }
         }

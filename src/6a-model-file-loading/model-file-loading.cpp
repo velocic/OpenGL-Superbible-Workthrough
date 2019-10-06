@@ -64,8 +64,9 @@ namespace Tutorial
         normalTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
         auto dummyMVPMatrixBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
-            .addMatrixAttribute("dummyMVPMatrix", 4, 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0, 1)
+            .addMatrixAttribute("dummyMVPMatrix", 4, 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
             .setStride(sizeof(glm::mat4))
+            .setDivisor(1)
             .build();
 
         initializeDummyMVPMatrixBuffer(dummyMVPMatrixBufferLayout);

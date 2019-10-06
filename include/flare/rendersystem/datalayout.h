@@ -19,7 +19,6 @@ namespace Flare
             RSenum type;
             RSboolean normalized = GL_FALSE;
             RSuint relativeOffset = 0;
-            RSuint attribDivisor = 0;
         };
 
         struct MatrixVertexAttribute
@@ -30,7 +29,6 @@ namespace Flare
             RSenum type;
             RSboolean normalized = GL_FALSE;
             RSuint relativeOffset = 0;
-            RSuint attribDivisor = 0;
         };
 
         struct VertexDataLayout
@@ -38,8 +36,8 @@ namespace Flare
             friend class VertexDataLayoutBuilder;
 
             private:
-                VertexDataLayout(RSsizei stride, RSintptr offset, std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>> &&vertexAttributes)
-                : stride(stride), offset(offset), vertexAttributes(vertexAttributes)
+                VertexDataLayout(RSsizei stride, RSintptr offset, RSuint divisor, std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>> &&vertexAttributes)
+                : stride(stride), offset(offset), divisor(divisor), vertexAttributes(vertexAttributes)
                 {
                 }
 
@@ -49,6 +47,7 @@ namespace Flare
                 const RSsizei stride = 0;
                 //always set to zero unless interleaving data blocks within a single buffer
                 const RSintptr offset = 0;
+                const RSuint divisor = 0;
                 const std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>> vertexAttributes;
 
                 const std::variant<VertexAttribute, MatrixVertexAttribute> *getAttribute(const std::string &attributeName)
@@ -77,28 +76,17 @@ namespace Flare
                 std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>> vertexAttributes;
                 RSsizei stride = 0;
                 RSintptr offset = 0;
+                RSuint divisor = 0;
             public:
                 VertexDataLayoutBuilder &addAttribute(const std::string &attributeName, RSint size, RSenum type, RSboolean normalized, RSuint relativeOffset)
                 {
-                    vertexAttributes.push_back(VertexAttribute{attributeName, size, type, normalized, relativeOffset, 0});
-                    return *this;
-                }
-
-                VertexDataLayoutBuilder &addAttribute(const std::string &attributeName, RSint size, RSenum type, RSboolean normalized, RSuint relativeOffset, RSuint attribDivisor)
-                {
-                    vertexAttributes.push_back(VertexAttribute{attributeName, size, type, normalized, relativeOffset, attribDivisor});
+                    vertexAttributes.push_back(VertexAttribute{attributeName, size, type, normalized, relativeOffset});
                     return *this;
                 }
 
                 VertexDataLayoutBuilder &addMatrixAttribute(const std::string &attributeName, RSint rows, RSint cols, RSenum type, RSboolean normalized, RSuint relativeOffset)
                 {
-                    vertexAttributes.push_back(MatrixVertexAttribute{attributeName, rows, cols, type, normalized, relativeOffset, 0});
-                    return *this;
-                }
-
-                VertexDataLayoutBuilder &addMatrixAttribute(const std::string &attributeName, RSint rows, RSint cols, RSenum type, RSboolean normalized, RSuint relativeOffset, RSuint attribDivisor)
-                {
-                    vertexAttributes.push_back(MatrixVertexAttribute{attributeName, rows, cols, type, normalized, relativeOffset, attribDivisor});
+                    vertexAttributes.push_back(MatrixVertexAttribute{attributeName, rows, cols, type, normalized, relativeOffset});
                     return *this;
                 }
 
@@ -114,12 +102,19 @@ namespace Flare
                     return *this;
                 }
 
+                VertexDataLayoutBuilder &setDivisor(RSuint divisor)
+                {
+                    this->divisor = divisor;
+                    return *this;
+                }
+
                 VertexDataLayout build()
                 {
-                    VertexDataLayout result = VertexDataLayout(stride, offset, std::move(vertexAttributes));
+                    VertexDataLayout result = VertexDataLayout(stride, offset, divisor, std::move(vertexAttributes));
                     vertexAttributes = std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>>();
                     stride = 0;
                     offset = 0;
+                    divisor = 0;
 
                     return result;
                 }
