@@ -40,7 +40,7 @@ namespace Tutorial
 
                     writableBuffer[x * y * z] = projectionMatrix * glm::translate(
                         identityMatrix,
-                        glm::vec3(xCoord * .05, yCoord * .05, (zCoord * .05) - 15)
+                        glm::vec3(xCoord * .45, yCoord * .45, zCoord * .45 - 30)
                     );
                 }
             }
