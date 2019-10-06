@@ -78,6 +78,33 @@ namespace Flare
                             glVertexAttribDivisor(attributeIndex, vertexAttribute.attribDivisor);
                         }
                     } else if (std::holds_alternative<RenderSystem::MatrixVertexAttribute>(vertexAttributeVariant)) {
+                        const auto &vertexAttribute = std::get<RenderSystem::MatrixVertexAttribute>(vertexAttributeVariant);
+                        auto attributeIndex = shaderProgram.getAttribute(vertexAttribute.name);
+
+                        if (attributeIndex == -1) {
+                            throw std::runtime_error("Failed to configure vertex attributes. Attribute '" + vertexAttribute.name
+                                + "' does not exist in the associated shader program.");
+                        }
+
+                        //Matrices have to be assigned as multiple vectors (i.e. a 4x4 matrix has to be uploaded to the GPU
+                        //as 4 4-element vectors
+                        for (int matrixRow = 0; matrixRow < vertexAttribute.rows; ++matrixRow) {
+                            glVertexArrayAttribBinding(VAO, attributeIndex + matrixRow, bufferBindingIndex);
+                            glVertexArrayAttribFormat(
+                                VAO,
+                                attributeIndex + matrixRow,
+                                vertexAttribute.cols,
+                                vertexAttribute.type,
+                                vertexAttribute.normalized,
+                                vertexAttribute.relativeOffset + (matrixRow * (vertexAttribute.cols * sizeof(float)))
+                            );
+                            glEnableVertexArrayAttrib(VAO, attributeIndex + matrixRow);
+                            glEnableVertexAttribArray(bufferBindingIndex);
+
+                            if (vertexAttribute.attribDivisor != 0) {
+                                glVertexAttribDivisor(attributeIndex + matrixRow, vertexAttribute.attribDivisor);
+                            }
+                        }
                     }
                 }
             }
@@ -120,6 +147,17 @@ namespace Flare
 
                         glVertexArrayAttribBinding(VAO, attributeIndex, bindingIndexIterator->second);
                     } else if (std::holds_alternative<RenderSystem::MatrixVertexAttribute>(vertexAttributeVariant)) {
+                        const auto &vertexAttribute = std::get<RenderSystem::MatrixVertexAttribute>(vertexAttributeVariant);
+                        auto attributeIndex = shaderProgram->getAttribute(vertexAttribute.name);
+
+                        if (attributeIndex == -1) {
+                            throw std::runtime_error("Attempting to link an incompatible buffer to a vertex array. Attribute '" + vertexAttribute.name
+                                + "' does not exist in the associated shader program.");
+                        }
+
+                        for (int matrixRow = 0; matrixRow < vertexAttribute.rows; ++matrixRow) {
+                            glVertexArrayAttribBinding(VAO, attributeIndex + matrixRow, bindingIndexIterator->second);
+                        }
                     }
                 }
             }
