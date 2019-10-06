@@ -51,28 +51,33 @@ namespace Flare
                 auto hashedBufferName = std::hash<std::string>{}(bufferLayout.bufferName);
                 linkedBufferBindingIndices[hashedBufferName] = bufferBindingIndex;
 
-                for (const auto &vertexAttribute : bufferLayout.bufferContentDescription.vertexAttributes) {
-                    auto attributeIndex = shaderProgram.getAttribute(vertexAttribute.name);
+                for (const auto &vertexAttributeVariant : bufferLayout.bufferContentDescription.vertexAttributes) {
+                    if (std::holds_alternative<RenderSystem::VertexAttribute>(vertexAttributeVariant)) {
+                        const auto &vertexAttribute = std::get<RenderSystem::VertexAttribute>(vertexAttributeVariant);
 
-                    if (attributeIndex == -1) {
-                        throw std::runtime_error("Failed to configure vertex attributes. Attribute '" + vertexAttribute.name
-                            + "' does not exist in the associated shader program.");
-                    }
+                        auto attributeIndex = shaderProgram.getAttribute(vertexAttribute.name);
 
-                    glVertexArrayAttribBinding(VAO, attributeIndex, bufferBindingIndex);
-                    glVertexArrayAttribFormat(
-                        VAO,
-                        attributeIndex,
-                        vertexAttribute.size,
-                        vertexAttribute.type,
-                        vertexAttribute.normalized,
-                        vertexAttribute.relativeOffset
-                    );
-                    glEnableVertexArrayAttrib(VAO, attributeIndex);
-                    glEnableVertexAttribArray(bufferBindingIndex);
+                        if (attributeIndex == -1) {
+                            throw std::runtime_error("Failed to configure vertex attributes. Attribute '" + vertexAttribute.name
+                                + "' does not exist in the associated shader program.");
+                        }
 
-                    if (vertexAttribute.attribDivisor != 0) {
-                        glVertexAttribDivisor(attributeIndex, vertexAttribute.attribDivisor);
+                        glVertexArrayAttribBinding(VAO, attributeIndex, bufferBindingIndex);
+                        glVertexArrayAttribFormat(
+                            VAO,
+                            attributeIndex,
+                            vertexAttribute.size,
+                            vertexAttribute.type,
+                            vertexAttribute.normalized,
+                            vertexAttribute.relativeOffset
+                        );
+                        glEnableVertexArrayAttrib(VAO, attributeIndex);
+                        glEnableVertexAttribArray(bufferBindingIndex);
+
+                        if (vertexAttribute.attribDivisor != 0) {
+                            glVertexAttribDivisor(attributeIndex, vertexAttribute.attribDivisor);
+                        }
+                    } else if (std::holds_alternative<RenderSystem::MatrixVertexAttribute>(vertexAttributeVariant)) {
                     }
                 }
             }
@@ -103,15 +108,19 @@ namespace Flare
 
                 glVertexArrayVertexBuffer(VAO, bindingIndexIterator->second, buffer.getId(), bufferLayout.offset, bufferLayout.stride);
 
-                for (const auto &vertexAttribute : bufferLayout.vertexAttributes) {
-                    auto attributeIndex = shaderProgram->getAttribute(vertexAttribute.name);
+                for (const auto &vertexAttributeVariant : bufferLayout.vertexAttributes) {
+                    if (std::holds_alternative<RenderSystem::VertexAttribute>(vertexAttributeVariant)) {
+                        const auto &vertexAttribute = std::get<RenderSystem::VertexAttribute>(vertexAttributeVariant);
+                        auto attributeIndex = shaderProgram->getAttribute(vertexAttribute.name);
 
-                    if (attributeIndex == -1) {
-                        throw std::runtime_error("Attempting to link an incompatible buffer to a vertex array. Attribute '" + vertexAttribute.name
-                            + "' does not exist in the associated shader program.");
+                        if (attributeIndex == -1) {
+                            throw std::runtime_error("Attempting to link an incompatible buffer to a vertex array. Attribute '" + vertexAttribute.name
+                                + "' does not exist in the associated shader program.");
+                        }
+
+                        glVertexArrayAttribBinding(VAO, attributeIndex, bindingIndexIterator->second);
+                    } else if (std::holds_alternative<RenderSystem::MatrixVertexAttribute>(vertexAttributeVariant)) {
                     }
-
-                    glVertexArrayAttribBinding(VAO, attributeIndex, bindingIndexIterator->second);
                 }
             }
         }
