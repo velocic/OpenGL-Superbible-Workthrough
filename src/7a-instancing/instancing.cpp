@@ -21,13 +21,27 @@ namespace Tutorial
             1, 0, 0, 0,
             0, 1, 0, 0,
             0, 0, 1, 0,
-            0, 0, 0, 0
+            0, 0, 0, 1
         };
 
-        for (size_t x = 0; x < 10; ++x) {
-            for (size_t y = 0; y < 10; ++y) {
-                for (size_t z = 0; z < 10; z++) {
-                    writableBuffer[x * y * z] = glm::translate(identityMatrix, glm::vec3(x, y, -z - 5));
+        auto projectionMatrix = glm::perspective(
+            50.0f,
+            renderWindow->getAspectRatio(),
+            0.1f,
+            1000.0f
+        );
+
+        for (int x = 0; x < 10; ++x) {
+            for (int y = 0; y < 10; ++y) {
+                for (int z = 0; z < 10; z++) {
+                    auto xCoord = x % 2 == 0 ? x : -x;
+                    auto yCoord = y % 2 == 0 ? y : -y;
+                    auto zCoord = z % 2 == 0 ? z : -z;
+
+                    writableBuffer[x * y * z] = projectionMatrix * glm::translate(
+                        identityMatrix,
+                        glm::vec3(xCoord * .05, yCoord * .05, (zCoord * .05) - 15)
+                    );
                 }
             }
         }
@@ -86,6 +100,12 @@ namespace Tutorial
 
     void Instancing::render(unsigned int deltaTime)
     {
+        const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
+        glClearBufferfv(GL_COLOR, 0, clearColor);
+        auto instanceShaderData = shaderManager->get("instanceShader");
+        auto bunnyModel = modelManager->get("stanford-bunny");
+        bunnyModel->render(instanceShaderData, *mvpMatrixBuffer.get(), 1000);
+        renderWindow->swapWindow();
     }
 
     void Instancing::shutdown()

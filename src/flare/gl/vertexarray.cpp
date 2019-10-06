@@ -75,7 +75,6 @@ namespace Flare
                         glEnableVertexAttribArray(bufferBindingIndex);
 
                         if (vertexAttribute.attribDivisor != 0) {
-                            // glVertexAttribDivisor(attributeIndex, vertexAttribute.attribDivisor);
                             glVertexArrayBindingDivisor(VAO, bufferBindingIndex, vertexAttribute.attribDivisor);
                         }
                     } else if (std::holds_alternative<RenderSystem::MatrixVertexAttribute>(vertexAttributeVariant)) {
@@ -103,7 +102,6 @@ namespace Flare
                             glEnableVertexAttribArray(bufferBindingIndex);
 
                             if (vertexAttribute.attribDivisor != 0) {
-                                // glVertexAttribDivisor(attributeIndex + matrixRow, vertexAttribute.attribDivisor);
                                 glVertexArrayBindingDivisor(VAO, bufferBindingIndex, vertexAttribute.attribDivisor);
                             }
                         }

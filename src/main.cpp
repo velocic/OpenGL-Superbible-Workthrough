@@ -21,8 +21,8 @@ int main()
     // Tutorial::Data selectedTutorial;
     // Tutorial::SpinningCubes selectedTutorial;
     // Tutorial::ArrayTextures selectedTutorial;
-    Tutorial::ModelFileLoading selectedTutorial;
-    // Tutorial::Instancing selectedTutorial;
+    // Tutorial::ModelFileLoading selectedTutorial;
+    Tutorial::Instancing selectedTutorial;
 
     Flare::Application* demoApp = &selectedTutorial;
 
