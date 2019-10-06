@@ -29,10 +29,10 @@ namespace Flare
             return *this;
         }
 
-        void Model::render(RenderSystem::ShaderData shaderData, size_t instanceCount)
+        void Model::render(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount)
         {
             for (auto &mesh : meshes) {
-                mesh->bind(shaderData);
+                mesh->bind(shaderData, mvpMatrixBuffer);
                 mesh->render(instanceCount);
             }
         }

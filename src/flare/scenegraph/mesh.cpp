@@ -102,7 +102,7 @@ namespace Flare
             EBO = nullptr;
         }
 
-        void Mesh::bind(RenderSystem::ShaderData shaderData)
+        void Mesh::bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer)
         {
             if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(textures)) {
                 const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(textures);
@@ -132,7 +132,7 @@ namespace Flare
             }
 
             shaderData.vertexArray->linkBuffers(
-                std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*VBO}
+                std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*VBO, mvpMatrixBuffer}
             );
             shaderData.shader->bind();
             shaderData.vertexArray->bind();

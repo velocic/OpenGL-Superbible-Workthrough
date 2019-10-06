@@ -77,9 +77,6 @@ namespace Tutorial
             std::move(instanceShaderVAO),
             "instanceShader"
         );
-        shaderManager->get("instanceShader").vertexArray->linkBuffers(
-            std::vector<std::reference_wrapper<const Flare::RenderSystem::Buffer>>{*mvpMatrixBuffer.get()}
-        );
 
         modelManager->load(
             Flare::SceneGraph::ModelManager::ModelFile{"stanford-bunny", "../src/common-resources/models/stanford-bunny/stanford-bunny.obj"},

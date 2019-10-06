@@ -13,6 +13,19 @@
 
 namespace Tutorial
 {
+    void ModelFileLoading::initializeDummyMVPMatrixBuffer(const Flare::RenderSystem::VertexDataLayout &dummyMVPMatrixBufferLayout)
+    {
+        auto identityMatrix = glm::mat4{
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        };
+
+        mvpMatrixBuffer = Flare::RenderSystem::createBuffer("dummyMVPMatrix", dummyMVPMatrixBufferLayout);
+        mvpMatrixBuffer->allocateBufferStorage(sizeof(glm::mat4), &identityMatrix[0][0], 0);
+    }
+
     void ModelFileLoading::initialize()
     {
         renderWindow = std::make_unique<Flare::RenderWindow>(
@@ -50,6 +63,13 @@ namespace Tutorial
         normalTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
         normalTextureSampler->samplerParameteri(GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
+        auto dummyMVPMatrixBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+            .addMatrixAttribute("dummyMVPMatrix", 4, 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0, 1)
+            .setStride(sizeof(glm::mat4))
+            .build();
+
+        initializeDummyMVPMatrixBuffer(dummyMVPMatrixBufferLayout);
+
         auto vertexBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
             .addAttribute("position", 3, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
             .addAttribute("normal", 3, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec3))
@@ -67,7 +87,8 @@ namespace Tutorial
         auto untexturedUnlitMeshDisplayVAO = Flare::RenderSystem::createVertexArray(
             basicUntexturedUnlitMeshDisplayShader.get(),
             std::vector<Flare::RenderSystem::VertexBufferVertexDataLayout>{
-                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout}
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout},
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"dummyMVPMatrix", dummyMVPMatrixBufferLayout}
             }
         );
 
@@ -85,7 +106,8 @@ namespace Tutorial
         auto texturedDisplayShaderVAO = Flare::RenderSystem::createVertexArray(
             texturedDisplayShader.get(),
             std::vector<Flare::RenderSystem::VertexBufferVertexDataLayout>{
-                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout}
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout},
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"dummyMVPMatrix", dummyMVPMatrixBufferLayout}
             }
         );
 
@@ -180,7 +202,7 @@ namespace Tutorial
 
         auto bunnyModel = modelManager->get("stanford-bunny");
         auto lanternModel = modelManager->get("lantern");
-        bunnyModel->render(untexturedUnlitMeshDisplayShaderData, 1);
+        bunnyModel->render(untexturedUnlitMeshDisplayShaderData, *mvpMatrixBuffer.get(), 1);
 
         auto rotationAngle = elapsedTime * .001f;
         std::cout << rotationAngle << std::endl;
@@ -200,7 +222,7 @@ namespace Tutorial
             &lanternMVMatrix[0][0]
         );
 
-        lanternModel->render(texturedDisplayShaderData, 1);
+        lanternModel->render(texturedDisplayShaderData, *mvpMatrixBuffer.get(), 1);
         renderWindow->swapWindow();
     }
 

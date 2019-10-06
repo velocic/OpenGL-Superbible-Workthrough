@@ -29,7 +29,7 @@ namespace Flare
                 Model(const Model &other) = delete;
                 Model &operator=(const Model &other) = delete;
 
-                void render(RenderSystem::ShaderData shaderData, size_t instanceCount);
+                void render(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount);
         };
     }
 }

@@ -37,7 +37,7 @@ namespace Flare
                 Mesh &operator=(const Mesh &other) = delete;
 
                 void destroy();
-                void bind(RenderSystem::ShaderData shaderData);
+                void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer);
                 void render(size_t instanceCount);
         };
     }

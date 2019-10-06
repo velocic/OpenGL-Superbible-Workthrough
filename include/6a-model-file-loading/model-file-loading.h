@@ -29,6 +29,8 @@ namespace Tutorial
             const std::string textureDisplayVertexShaderPath{"../src/6a-model-file-loading/shaders/texture-display-vsh.glsl"};
             const std::string textureDisplayFragmentShaderPath{"../src/6a-model-file-loading/shaders/texture-display-fsh.glsl"};
             unsigned long long elapsedTime = 0;
+
+            void initializeDummyMVPMatrixBuffer(const Flare::RenderSystem::VertexDataLayout &dummyMVPMatrixBufferLayout);
         public:
             virtual void initialize() override;
             virtual void render(unsigned int deltaTime) override;
