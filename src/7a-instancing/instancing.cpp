@@ -4,6 +4,9 @@
 #include <flare/gl/shaderprogram.h>
 #include <flare/rendersystem/factory.h>
 
+#include <glm-0.9.9/glm.hpp>
+#include <glm-0.9.9/gtc/matrix_transform.hpp>
+
 namespace Tutorial
 {
     void Instancing::initializeMVPMatrixBuffer(const Flare::RenderSystem::VertexDataLayout &bufferLayout)
@@ -21,8 +24,12 @@ namespace Tutorial
             0, 0, 0, 0
         };
 
-        for (size_t i = 0; i < 1000; ++i) {
-            writableBuffer[i] = identityMatrix;
+        for (size_t x = 0; x < 10; ++x) {
+            for (size_t y = 0; y < 10; ++y) {
+                for (size_t z = 0; z < 10; z++) {
+                    writableBuffer[x * y * z] = glm::translate(identityMatrix, glm::vec3(x, y, -z - 5));
+                }
+            }
         }
 
         mvpMatrixBuffer->unmap();
@@ -69,6 +76,9 @@ namespace Tutorial
             std::move(instanceShader),
             std::move(instanceShaderVAO),
             "instanceShader"
+        );
+        shaderManager->get("instanceShader").vertexArray->linkBuffers(
+            std::vector<std::reference_wrapper<const Flare::RenderSystem::Buffer>>{*mvpMatrixBuffer.get()}
         );
 
         modelManager->load(
