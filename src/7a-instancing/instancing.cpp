@@ -6,6 +6,28 @@
 
 namespace Tutorial
 {
+    void Instancing::initializeMVPMatrixBuffer(const Flare::RenderSystem::VertexDataLayout &bufferLayout)
+    {
+        mvpMatrixBuffer = Flare::RenderSystem::createBuffer("mvpMatrix", bufferLayout);
+        mvpMatrixBuffer->allocateBufferStorage(sizeof(glm::mat4) * 1000, nullptr, GL_STATIC_DRAW);
+        auto bufferMapping = mvpMatrixBuffer->mapRange(0, sizeof(glm::mat4) * 1000);
+
+        auto writableBuffer = reinterpret_cast<glm::mat4*>(bufferMapping->mappedData);
+
+        auto identityMatrix = glm::mat4{
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 0
+        };
+
+        for (size_t i = 0; i < 1000; ++i) {
+            writableBuffer[i] = identityMatrix;
+        }
+
+        mvpMatrixBuffer->unmap();
+    }
+
     void Instancing::initialize()
     {
         renderWindow = std::make_unique<Flare::RenderWindow>(
@@ -23,19 +45,23 @@ namespace Tutorial
             .setStride(sizeof(Flare::DataTypes::Vertex))
             .build();
 
-        // auto mvpMatrixBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
-        //     .addAttribute("mvpMatrix", 1, )
+        auto mvpMatrixBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+            .addMatrixAttribute("mvpMatrix", 4, 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0, 1)
+            .setStride(sizeof(glm::mat4))
+            .build();
 
         auto instanceShader = Flare::GL::ShaderProgramBuilder()
             .setVertexShader(vertexShaderPath)
             .setFragmentShader(fragmentShaderPath)
             .build();
-        instanceShader->addUniformAttribute("mvpMatrix");
+
+        initializeMVPMatrixBuffer(mvpMatrixBufferLayout);
 
         auto instanceShaderVAO = Flare::RenderSystem::createVertexArray(
             instanceShader.get(),
             std::vector<Flare::RenderSystem::VertexBufferVertexDataLayout>{
-                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout}
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout},
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"mvpMatrix", mvpMatrixBufferLayout}
             }
         );
 

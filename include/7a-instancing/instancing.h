@@ -19,8 +19,11 @@ namespace Tutorial
             std::unique_ptr<Flare::RenderSystem::ShaderManager> shaderManager = nullptr;
             std::unique_ptr<Flare::RenderSystem::TextureManager> textureManager = nullptr;
             std::unique_ptr<Flare::SceneGraph::ModelManager> modelManager = nullptr;
+            std::unique_ptr<Flare::RenderSystem::Buffer> mvpMatrixBuffer = nullptr;
             const std::string vertexShaderPath{"../src/7a-instancing/shaders/vertex.glsl"};
             const std::string fragmentShaderPath{"../src/7a-instancing/shaders/fragment.glsl"};
+
+            void initializeMVPMatrixBuffer(const Flare::RenderSystem::VertexDataLayout &bufferLayout);
         public:
             virtual void initialize() override;
             virtual void render(unsigned int deltaTime) override;
