@@ -237,6 +237,11 @@ namespace Flare
             valid = false;
         }
 
+        void *MappedBufferRange::get() const
+        {
+            return mappedData;
+        }
+
         bool MappedBufferRange::hasReadAccess() const
         {
             return sourceBuffer.getUsageFlags().mapRead;

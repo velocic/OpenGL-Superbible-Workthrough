@@ -32,10 +32,9 @@ namespace Flare
         class MappedBufferRange
         {
             public:
-                void *mappedData = nullptr;
-
                 virtual ~MappedBufferRange() {}
 
+                virtual void *get() const = 0;
                 virtual bool hasReadAccess() const = 0;
                 virtual bool hasWriteAccess() const = 0;
                 virtual bool isPersistent() const = 0;

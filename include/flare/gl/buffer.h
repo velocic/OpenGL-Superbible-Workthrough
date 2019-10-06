@@ -97,6 +97,7 @@ namespace Flare
                 MappedBufferRange(const MappedBufferRange& other) = delete;
                 MappedBufferRange& operator=(const Buffer& other) = delete;
 
+                virtual void *get() const override;
                 virtual bool hasReadAccess() const override;
                 virtual bool hasWriteAccess() const override;
                 virtual bool isPersistent() const override;

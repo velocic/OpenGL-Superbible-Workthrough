@@ -9,10 +9,10 @@ namespace Tutorial
     void Instancing::initializeMVPMatrixBuffer(const Flare::RenderSystem::VertexDataLayout &bufferLayout)
     {
         mvpMatrixBuffer = Flare::RenderSystem::createBuffer("mvpMatrix", bufferLayout);
-        mvpMatrixBuffer->allocateBufferStorage(sizeof(glm::mat4) * 1000, nullptr, GL_STATIC_DRAW);
+        mvpMatrixBuffer->allocateBufferStorage(sizeof(glm::mat4) * 1000, nullptr, GL_MAP_WRITE_BIT);
         auto bufferMapping = mvpMatrixBuffer->mapRange(0, sizeof(glm::mat4) * 1000);
 
-        auto writableBuffer = reinterpret_cast<glm::mat4*>(bufferMapping->mappedData);
+        auto writableBuffer = reinterpret_cast<glm::mat4*>(bufferMapping->get());
 
         auto identityMatrix = glm::mat4{
             1, 0, 0, 0,
