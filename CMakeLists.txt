@@ -31,7 +31,7 @@ add_executable(
     src/flare/rendersystem/shadermanager.cpp
     src/flare/rendersystem/wrappers.cpp
     src/flare/scenegraph/modelmanager.cpp
-    src/flare/scenegraph/mesh.cpp
+    src/flare/scenegraph/basicmesh.cpp
     src/flare/scenegraph/model.cpp
     src/flare/ui/renderwindow.cpp
     src/flare/utility/file.cpp

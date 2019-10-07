@@ -17,7 +17,7 @@ namespace Flare
 {
     namespace SceneGraph
     {
-        class Mesh
+        class BasicMesh
         {
             private:
                 std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, nullptr_t> textures;
@@ -27,14 +27,14 @@ namespace Flare
 
                 void populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
             public:
-                Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures);
-                Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PBRMaterialTextures &textures);
-                Mesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
-                ~Mesh();
-                Mesh(Mesh &&other);
-                Mesh &operator=(Mesh &&other);
-                Mesh(const Mesh &other) = delete;
-                Mesh &operator=(const Mesh &other) = delete;
+                BasicMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures);
+                BasicMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PBRMaterialTextures &textures);
+                BasicMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
+                ~BasicMesh();
+                BasicMesh(BasicMesh &&other);
+                BasicMesh &operator=(BasicMesh &&other);
+                BasicMesh(const BasicMesh &other) = delete;
+                BasicMesh &operator=(const BasicMesh &other) = delete;
 
                 void destroy();
                 void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer);

@@ -48,7 +48,7 @@ namespace Flare
             auto lastSlashIndex = file.path.rfind('/');
             auto modelDirectory = file.path.substr(0, lastSlashIndex + 1);
             auto modelName = file.path.substr(lastSlashIndex + 1, file.path.rfind('.') - lastSlashIndex - 1);
-            auto meshes = std::vector<std::unique_ptr<Mesh>>{};
+            auto meshes = std::vector<std::unique_ptr<BasicMesh>>{};
 
             processNode(scene->mRootNode, scene, modelDirectory, modelName, meshes);
 
@@ -73,8 +73,8 @@ namespace Flare
                 return;
             }
 
-            auto modelMeshes = std::vector<std::unique_ptr<Mesh>>{};
-            modelMeshes.emplace_back(std::make_unique<Mesh>(std::move(vertices), std::move(indices), textures));
+            auto modelMeshes = std::vector<std::unique_ptr<BasicMesh>>{};
+            modelMeshes.emplace_back(std::make_unique<BasicMesh>(std::move(vertices), std::move(indices), textures));
 
             auto model = std::make_unique<Model>(std::move(modelMeshes));
             auto result = model.get();
@@ -91,8 +91,8 @@ namespace Flare
                 return;
             }
 
-            auto modelMeshes = std::vector<std::unique_ptr<Mesh>>{};
-            modelMeshes.emplace_back(std::make_unique<Mesh>(std::move(vertices), std::move(indices)));
+            auto modelMeshes = std::vector<std::unique_ptr<BasicMesh>>{};
+            modelMeshes.emplace_back(std::make_unique<BasicMesh>(std::move(vertices), std::move(indices)));
 
             auto model = std::make_unique<Model>(std::move(modelMeshes));
             auto result = model.get();
@@ -101,7 +101,7 @@ namespace Flare
             onLoadComplete(result);
         }
 
-        void ModelManager::processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes)
+        void ModelManager::processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<BasicMesh>> &meshes)
         {
             for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
                 auto mesh = scene->mMeshes[node->mMeshes[i]];
@@ -115,7 +115,7 @@ namespace Flare
             }
         }
 
-        std::unique_ptr<Mesh> ModelManager::processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName)
+        std::unique_ptr<BasicMesh> ModelManager::processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName)
         {
             std::vector<DataTypes::Vertex> vertices;
             std::vector<unsigned int> indices;
@@ -158,7 +158,7 @@ namespace Flare
 
             auto material = scene->mMaterials[mesh->mMaterialIndex];
 
-            return std::make_unique<Mesh>(
+            return std::make_unique<BasicMesh>(
                 std::move(vertices),
                 std::move(indices),
                 loadPhongMaterialTextures(material, modelDirectory, modelName)
