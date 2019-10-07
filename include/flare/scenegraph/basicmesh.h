@@ -1,5 +1,5 @@
-#ifndef FLARE_SCENEGRAPH_MESH_H
-#define FLARE_SCENEGRAPH_MESH_H
+#ifndef FLARE_SCENEGRAPH_BASICMESH_H
+#define FLARE_SCENEGRAPH_BASICMESH_H
 
 #include <memory>
 #include <string>
@@ -11,13 +11,14 @@
 #include <flare/rendersystem/buffer.h>
 #include <flare/rendersystem/shadermanager.h>
 #include <flare/rendersystem/texturemanager.h>
+#include <flare/scenegraph/mesh.h>
 #include <flare/utility/datatypes.h>
 
 namespace Flare
 {
     namespace SceneGraph
     {
-        class BasicMesh
+        class BasicMesh : Mesh
         {
             private:
                 std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, nullptr_t> textures;
@@ -36,9 +37,9 @@ namespace Flare
                 BasicMesh(const BasicMesh &other) = delete;
                 BasicMesh &operator=(const BasicMesh &other) = delete;
 
-                void destroy();
-                void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer);
-                void render(size_t instanceCount);
+                virtual void destroy() override;
+                virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer) override;
+                virtual void render(size_t instanceCount) override;
         };
     }
 }
