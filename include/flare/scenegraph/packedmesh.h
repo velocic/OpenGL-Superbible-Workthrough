@@ -16,7 +16,7 @@ namespace Flare
 {
     namespace SceneGraph
     {
-        class PackedMesh : Mesh
+        class PackedMesh : public Mesh
         {
             public:
                 struct SubMeshEntry;
@@ -34,7 +34,7 @@ namespace Flare
                 void populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
             public:
                 struct SubMeshEntry {
-                    std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, nullptr_t> textures;
+                    std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, std::nullptr_t> textures;
                     RenderSystem::RSsizei elementCount;
                     RenderSystem::RSint baseVertex;
                     RenderSystem::RSuint baseInstance;

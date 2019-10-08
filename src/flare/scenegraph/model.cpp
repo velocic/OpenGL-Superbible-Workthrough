@@ -6,7 +6,7 @@ namespace Flare
 {
     namespace SceneGraph
     {
-        Model::Model(std::vector<std::unique_ptr<BasicMesh>> &&meshes)
+        Model::Model(std::vector<std::unique_ptr<Mesh>> &&meshes)
         :
             meshes(std::move(meshes))
         {

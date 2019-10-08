@@ -9,8 +9,10 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <flare/scenegraph/basicmesh.h>
 #include <flare/scenegraph/model.h>
 #include <flare/rendersystem/texturemanager.h>
+#include <flare/utility/datatypes.h>
 
 namespace Flare
 {
@@ -23,8 +25,8 @@ namespace Flare
                 std::unordered_map<size_t, std::unique_ptr<Model>> models;
                 std::hash<std::string> stringHasher;
 
-                void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<BasicMesh>> &meshes);
-                std::unique_ptr<BasicMesh> processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName);
+                void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes);
+                std::unique_ptr<Mesh> processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName);
                 RenderSystem::PhongMaterialTextures loadPhongMaterialTextures(aiMaterial *mat, const std::string &modelDirectory, const std::string &modelName);
                 RenderSystem::TextureManager::PhongMaterialTextureType aiTexTypeToPhongTexType(aiTextureType aiTexType);
             public:

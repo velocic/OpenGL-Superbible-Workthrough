@@ -15,10 +15,10 @@ namespace Flare
 {
     namespace SceneGraph
     {
-        class BasicMesh : Mesh
+        class BasicMesh : public Mesh
         {
             private:
-                std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, nullptr_t> textures;
+                std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, std::nullptr_t> textures;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
                 size_t elementCount = 0;

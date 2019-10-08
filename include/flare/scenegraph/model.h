@@ -11,7 +11,7 @@
 
 #include <flare/rendersystem/texture.h>
 #include <flare/rendersystem/shadermanager.h>
-#include <flare/scenegraph/basicmesh.h>
+#include <flare/scenegraph/mesh.h>
 
 namespace Flare
 {
@@ -20,9 +20,9 @@ namespace Flare
         class Model
         {
             private:
-                std::vector<std::unique_ptr<BasicMesh>> meshes;
+                std::vector<std::unique_ptr<Mesh>> meshes;
             public:
-                Model(std::vector<std::unique_ptr<BasicMesh>> &&meshes);
+                Model(std::vector<std::unique_ptr<Mesh>> &&meshes);
                 ~Model();
                 Model(Model &&other);
                 Model &operator=(Model &&other);
