@@ -28,7 +28,7 @@ namespace Flare
                 BasicMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures);
                 BasicMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PBRMaterialTextures &textures);
                 BasicMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
-                ~BasicMesh();
+                virtual ~BasicMesh();
                 BasicMesh(BasicMesh &&other);
                 BasicMesh &operator=(BasicMesh &&other);
                 BasicMesh(const BasicMesh &other) = delete;

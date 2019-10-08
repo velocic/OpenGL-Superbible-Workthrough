@@ -11,6 +11,7 @@ namespace Flare
         class Mesh
         {
             public:
+                virtual ~Mesh() {}
                 virtual void destroy() = 0;
                 virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer) = 0;
                 virtual void render(size_t instanceCount) = 0;

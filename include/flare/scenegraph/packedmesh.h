@@ -41,7 +41,7 @@ namespace Flare
                 };
 
                 PackedMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<SubMeshEntry> &&subMeshEntries);
-                ~PackedMesh();
+                virtual ~PackedMesh();
                 PackedMesh(PackedMesh &&other);
                 PackedMesh &operator=(PackedMesh &&other);
                 PackedMesh(const PackedMesh &other) = delete;
