@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <flare/rendersystem/buffer.h>
+#include <flare/rendersystem/datatypes.h>
 #include <flare/rendersystem/shadermanager.h>
 #include <flare/rendersystem/texturemanager.h>
 #include <flare/scenegraph/mesh.h>
@@ -17,18 +18,26 @@ namespace Flare
     {
         class PackedMesh : Mesh
         {
+            public:
+                struct SubMeshEntry;
             private:
+                struct BoundData {
+                    RenderSystem::ShaderData shaderData;
+                    const RenderSystem::Buffer *mvpMatrixBuffer = nullptr;
+                };
+
                 std::vector<SubMeshEntry> subMeshEntries;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
+                BoundData boundData;
 
                 void populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
             public:
                 struct SubMeshEntry {
                     std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, nullptr_t> textures;
-                    RSsizei elementCount;
-                    RSint baseVertex;
-                    RSuint baseInstance;
+                    RenderSystem::RSsizei elementCount;
+                    RenderSystem::RSint baseVertex;
+                    RenderSystem::RSuint baseInstance;
                 };
 
                 PackedMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<SubMeshEntry> &&subMeshEntries);
