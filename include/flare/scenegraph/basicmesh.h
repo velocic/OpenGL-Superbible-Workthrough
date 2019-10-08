@@ -2,11 +2,8 @@
 #define FLARE_SCENEGRAPH_BASICMESH_H
 
 #include <memory>
-#include <string>
-#include <vector>
 #include <variant>
-
-#include <glm-0.9.9/glm.hpp>
+#include <vector>
 
 #include <flare/rendersystem/buffer.h>
 #include <flare/rendersystem/shadermanager.h>
