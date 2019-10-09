@@ -8,6 +8,7 @@
 #include <5c-array-textures/array-textures.h>
 #include <6a-model-file-loading/model-file-loading.h>
 #include <7a-instancing/instancing.h>
+#include <7b-packed-mesh-rendering/packed-mesh-rendering.h>
 
 #include <flare/gl/uniformblock.h>
 
@@ -22,7 +23,8 @@ int main()
     // Tutorial::SpinningCubes selectedTutorial;
     // Tutorial::ArrayTextures selectedTutorial;
     // Tutorial::ModelFileLoading selectedTutorial;
-    Tutorial::Instancing selectedTutorial;
+    // Tutorial::Instancing selectedTutorial;
+    Tutorial::PackedMeshRendering selectedTutorial;
 
     Flare::Application* demoApp = &selectedTutorial;
 
