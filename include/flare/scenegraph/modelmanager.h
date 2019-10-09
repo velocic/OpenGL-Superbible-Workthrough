@@ -10,6 +10,7 @@
 #include <assimp/postprocess.h>
 
 #include <flare/scenegraph/basicmesh.h>
+#include <flare/scenegraph/packedmesh.h>
 #include <flare/scenegraph/model.h>
 #include <flare/rendersystem/texturemanager.h>
 #include <flare/utility/datatypes.h>
@@ -21,12 +22,21 @@ namespace Flare
         class ModelManager
         {
             private:
+                struct PackedSubMeshes {
+                    std::vector<DataTypes::Vertex> vertices;
+                    std::vector<unsigned int> indices;
+                    std::vector<PackedMesh::SubMeshEntry> subMeshEntries;
+                };
+
                 RenderSystem::TextureManager &textureManager;
                 std::unordered_map<size_t, std::unique_ptr<Model>> models;
                 std::hash<std::string> stringHasher;
 
                 void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes);
+                void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes);
                 std::unique_ptr<Mesh> processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName);
+                void processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes);
+
                 RenderSystem::PhongMaterialTextures loadPhongMaterialTextures(aiMaterial *mat, const std::string &modelDirectory, const std::string &modelName);
                 RenderSystem::TextureManager::PhongMaterialTextureType aiTexTypeToPhongTexType(aiTextureType aiTexType);
             public:
@@ -48,6 +58,7 @@ namespace Flare
                 void load(const std::string &alias, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PBRMaterialTextures &textures, std::function<void(Model *)> onLoadComplete);
                 void load(const std::string &alias, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures, std::function<void(Model *)> onLoadComplete);
                 void load(const std::string &alias, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::function<void(Model *)> onLoadComplete);
+                void loadWithPackedSubMeshes(const ModelFile &file, std::function<void(Model *)> onLoadComplete);
                 Model *get(const std::string &alias) const;
                 void remove(const std::string &alias);
                 void removeAll();

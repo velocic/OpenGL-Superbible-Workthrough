@@ -98,7 +98,7 @@ namespace Flare
                     0,
                     instanceCount,
                     subMeshEntry.baseVertex,
-                    subMeshEntry.baseInstance
+                    0
                 );
             }
         }

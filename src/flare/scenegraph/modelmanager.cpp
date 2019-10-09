@@ -38,7 +38,7 @@ namespace Flare
                 return;
             }
 
-            auto importer = Assimp::Importer{}; 
+            auto importer = Assimp::Importer{};
             const auto scene = importer.ReadFile(file.path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
 
             if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
@@ -99,6 +99,44 @@ namespace Flare
             models.insert_or_assign(stringHasher(alias), std::move(model));
 
             onLoadComplete(result);
+        }
+
+        void ModelManager::loadWithPackedSubMeshes(const ModelFile &file, std::function<void(Model *)> onLoadComplete)
+        {
+            auto alreadyLoadedModel = get(file.alias);
+            if (alreadyLoadedModel != nullptr) {
+                onLoadComplete(alreadyLoadedModel);
+                return;
+            }
+
+            auto importer = Assimp::Importer{};
+            const auto scene = importer.ReadFile(file.path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
+
+            if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
+                throw std::runtime_error(importer.GetErrorString());
+            }
+
+            auto lastSlashIndex = file.path.rfind('/');
+            auto modelDirectory = file.path.substr(0, lastSlashIndex + 1);
+            auto modelName = file.path.substr(lastSlashIndex + 1, file.path.rfind('.') - lastSlashIndex - 1);
+
+            auto packedSubMeshData = PackedSubMeshes{};
+            processNode(scene->mRootNode, scene, modelDirectory, modelName, packedSubMeshData);
+
+            auto meshForModel = std::vector<std::unique_ptr<Mesh>>{};
+            meshForModel.push_back(
+                std::make_unique<PackedMesh>(
+                    std::move(packedSubMeshData.vertices),
+                    std::move(packedSubMeshData.indices),
+                    std::move(packedSubMeshData.subMeshEntries)
+                )
+            );
+            auto loadedModel = std::make_unique<Model>(std::move(meshForModel));
+            auto resultForCallback = loadedModel.get();
+
+            models.insert_or_assign(stringHasher(file.alias), std::move(loadedModel));
+
+            onLoadComplete(resultForCallback);
         }
 
         void ModelManager::processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes)
@@ -163,6 +201,79 @@ namespace Flare
                 std::move(indices),
                 loadPhongMaterialTextures(material, modelDirectory, modelName)
             );
+        }
+
+        void ModelManager::processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes)
+        {
+            for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
+                auto mesh = scene->mMeshes[node->mMeshes[i]];
+                processMesh(mesh, scene, modelDirectory, modelName, packedMeshes);
+            }
+
+            for (unsigned int i = 0; i < node->mNumChildren; ++i) {
+                processNode(node->mChildren[i], scene, modelDirectory, modelName, packedMeshes);
+            }
+        }
+
+        void ModelManager::processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes)
+        {
+            std::vector<DataTypes::Vertex> vertices;
+            std::vector<unsigned int> indices;
+
+            vertices.resize(mesh->mNumVertices);
+            indices.reserve(mesh->mNumFaces * 3);
+
+            for (unsigned int i = 0; i < mesh->mNumVertices; ++i) {
+                auto &vertex = vertices[i];
+                const auto &sourceVertex = mesh->mVertices[i];
+                const auto &sourceNormal = mesh->mNormals[i];
+
+                vertex.position.x = sourceVertex.x;
+                vertex.position.y = sourceVertex.y;
+                vertex.position.z = sourceVertex.z;
+
+                vertex.normal.x = sourceNormal.x;
+                vertex.normal.y = sourceNormal.y;
+                vertex.normal.z = sourceNormal.z;
+
+                if (mesh->mTextureCoords[0] == nullptr) {
+                    vertex.uvCoords.x = 0.0f;
+                    vertex.uvCoords.y = 0.0f;
+
+                    continue;
+                }
+
+                const auto &sourceUVs = mesh->mTextureCoords[0][i];
+
+                vertex.uvCoords.x = sourceUVs.x;
+                vertex.uvCoords.y = sourceUVs.y;
+            }
+
+            for (unsigned int currentFace = 0; currentFace < mesh->mNumFaces; ++currentFace) {
+                const auto &face = mesh->mFaces[currentFace];
+                for (unsigned int index = 0; index < face.mNumIndices; ++index) {
+                    indices.push_back(face.mIndices[index]);
+                }
+            }
+
+            auto material = scene->mMaterials[mesh->mMaterialIndex];
+
+            auto subMeshEntry = PackedMesh::SubMeshEntry{};
+            subMeshEntry.elementCount = indices.size();
+            subMeshEntry.baseVertex = packedMeshes.vertices.size();
+            subMeshEntry.textures = loadPhongMaterialTextures(material, modelDirectory, modelName);
+
+            packedMeshes.vertices.insert(
+                packedMeshes.vertices.end(),
+                vertices.begin(),
+                vertices.end()
+            );
+            packedMeshes.indices.insert(
+                packedMeshes.indices.end(),
+                indices.begin(),
+                indices.end()
+            );
+            packedMeshes.subMeshEntries.push_back(std::move(subMeshEntry));
         }
 
         RenderSystem::PhongMaterialTextures ModelManager::loadPhongMaterialTextures(aiMaterial *mat, const std::string &modelDirectory, const std::string &modelName)
