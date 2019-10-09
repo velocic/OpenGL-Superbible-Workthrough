@@ -6,6 +6,7 @@
 
 #include <flare/application.h>
 #include <flare/ui/renderwindow.h>
+#include <flare/rendersystem/sampler.h>
 #include <flare/rendersystem/shadermanager.h>
 #include <flare/rendersystem/texturemanager.h>
 #include <flare/scenegraph/modelmanager.h>
@@ -20,6 +21,10 @@ namespace Tutorial
             std::unique_ptr<Flare::RenderSystem::TextureManager> textureManager = nullptr;
             std::unique_ptr<Flare::SceneGraph::ModelManager> modelManager = nullptr;
             std::unique_ptr<Flare::RenderSystem::Buffer> mvpMatrixBuffer = nullptr;
+            std::unique_ptr<Flare::RenderSystem::Sampler> diffuse0TextureSampler = nullptr;
+            std::unique_ptr<Flare::RenderSystem::Sampler> diffuse1TextureSampler = nullptr;
+            std::unique_ptr<Flare::RenderSystem::Sampler> specularTextureSampler = nullptr;
+            std::unique_ptr<Flare::RenderSystem::Sampler> normalTextureSampler = nullptr;
             const std::string vertexShaderPath{"../src/7b-packed-mesh-rendering/shaders/vertex.glsl"};
             const std::string fragmentShaderPath{"../src/7b-packed-mesh-rendering/shaders/fragment.glsl"};
 
