@@ -95,7 +95,7 @@ namespace Flare
                     GL_TRIANGLES,
                     subMeshEntry.elementCount,
                     GL_UNSIGNED_INT,
-                    0,
+                    subMeshEntry.elementBufferOffset,
                     instanceCount,
                     subMeshEntry.baseVertex,
                     0

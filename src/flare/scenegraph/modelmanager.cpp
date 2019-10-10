@@ -260,6 +260,7 @@ namespace Flare
 
             auto subMeshEntry = PackedMesh::SubMeshEntry{};
             subMeshEntry.elementCount = indices.size();
+            subMeshEntry.elementBufferOffset = reinterpret_cast<void *>(packedMeshes.indices.size() * sizeof(RenderSystem::RSsizei));
             subMeshEntry.baseVertex = packedMeshes.vertices.size();
             subMeshEntry.textures = loadPhongMaterialTextures(material, modelDirectory, modelName);
 

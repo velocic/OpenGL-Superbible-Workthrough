@@ -37,6 +37,7 @@ namespace Flare
                     std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, std::nullptr_t> textures;
                     RenderSystem::RSsizei elementCount;
                     RenderSystem::RSint baseVertex;
+                    void *elementBufferOffset = nullptr;
                 };
 
                 PackedMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<SubMeshEntry> &&subMeshEntries);
