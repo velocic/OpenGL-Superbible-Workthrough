@@ -35,6 +35,7 @@ add_executable(
     src/flare/scenegraph/basicmesh.cpp
     src/flare/scenegraph/model.cpp
     src/flare/scenegraph/packedmesh.cpp
+    src/flare/scenegraph/node.cpp
     src/flare/ui/renderwindow.cpp
     src/flare/utility/file.cpp
     src/flare/utility/math.cpp
