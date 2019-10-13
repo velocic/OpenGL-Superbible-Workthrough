@@ -3,6 +3,7 @@
 
 #include <flare/rendersystem/buffermanager.h>
 #include <flare/scenegraph/model.h>
+#include <flare/scenegraph/scenegraph.h>
 
 #include <glm-0.9.9/glm.hpp>
 #include <glm-0.9.9/gtc/matrix_transform.hpp>
@@ -13,6 +14,7 @@ namespace Flare
     {
         class Node
         {
+            friend class SceneGraph;
             private:
                 struct InstanceData
                 {
@@ -20,21 +22,26 @@ namespace Flare
                     size_t numActive = 0;
                 };
 
+                InstanceData instanceData;
                 std::vector<Node *> children;
                 glm::vec3 translation;
                 glm::vec3 rotation;
                 glm::vec3 scale;
-                //const RenderSystem::BufferManager &bufferManager;
+                size_t name = 0;
+                SceneGraph &sceneGraph;
+                RenderSystem::BufferManager &bufferManager;
                 RenderSystem::Buffer *mvpMatrixBuffer = nullptr;
                 Node *parent = nullptr;
-                Model *renderModel = nullptr;
+                Model *model = nullptr;
+
+                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent);
+                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, Model *model);
+                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize);
+                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize, Model *model);
 
                 void notifyChildReparented(Node *child);
+                RenderSystem::VertexDataLayout getMVPMatrixBufferLayout() const;
             public:
-                Node(RenderSystem::BufferManager &bufferManager, Node *parent);
-                Node(RenderSystem::BufferManager &bufferManager, Node *parent, Model *model);
-                Node(RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize);
-                Node(RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize, Model *model);
                 ~Node();
                 Node(const Node &other);
                 Node(Node &&other);
@@ -43,6 +50,7 @@ namespace Flare
 
                 void destroy();
 
+                size_t getName() const;
                 glm::mat4 getLocalTransform(size_t instanceId) const;
 
                 void setParent(Node *newParent);

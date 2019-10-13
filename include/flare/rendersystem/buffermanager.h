@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <flare/rendersystem/buffer.h>
+#include <flare/rendersystem/datalayout.h>
 
 namespace Flare
 {
@@ -13,6 +14,7 @@ namespace Flare
         {
             private:
             public:
+                Buffer *createBuffer(const std::string &name, const VertexDataLayout &bufferContentDescription);
         };
     }
 }
