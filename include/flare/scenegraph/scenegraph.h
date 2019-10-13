@@ -11,6 +11,7 @@ namespace Flare
 {
     namespace SceneGraph
     {
+        class Node;
         class SceneGraph
         {
             private:

@@ -56,12 +56,28 @@ namespace Flare
             translation(translation),
             rotation(rotation),
             scale(scale),
+            sceneGraph(other.sceneGraph),
+            bufferManager(other.bufferManager),
+            parent(other.parent),
+            model(other.model)
         {
             //TODO: deep copy children
             //TODO: request unique name from SceneGraph
         }
 
         Node::Node(Node &&other)
+        :
+            instanceData(std::move(other.instanceData)),
+            children(std::move(other.children)),
+            translation(std::move(other.translation)),
+            rotation(std::move(other.rotation)),
+            scale(std::move(other.scale)),
+            name(std::exchange(other.name, 0)),
+            sceneGraph(other.sceneGraph),
+            bufferManager(other.bufferManager),
+            mvpMatrixBuffer(std::exchange(other.mvpMatrixBuffer, nullptr)),
+            parent(std::exchange(other.parent, nullptr)),
+            model(std::exchange(other.model, nullptr))
         {
         }
 
@@ -77,7 +93,7 @@ namespace Flare
         {
         }
 
-        size_t getName() const
+        size_t Node::getName() const
         {
             return name;
         }
