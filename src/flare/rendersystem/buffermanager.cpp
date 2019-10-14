@@ -13,8 +13,14 @@ namespace Flare
         {
         }
 
-        void BufferManager::resize(const std::string &name, size_t sizeInElements)
+        Buffer *BufferManager::resizeBytes(const std::string &name, size_t sizeInBytes)
         {
+            return nullptr;
+        }
+
+        Buffer *BufferManager::resizeElements(const std::string &name, size_t sizeInElements)
+        {
+            return nullptr;
         }
     }
 }

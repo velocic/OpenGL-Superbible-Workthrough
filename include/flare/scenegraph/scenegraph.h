@@ -62,7 +62,10 @@ namespace Flare
 
                 void copyModelMatrixBufferOfOtherNode(const Node &other);
                 void notifyChildRemoved(Node *child);
-                RenderSystem::VertexDataLayout getMVPMatrixBufferLayout() const;
+                RenderSystem::VertexDataLayout getModelMatrixBufferLayout() const;
+                constexpr RenderSystem::RSbitfield getModelMatrixBufferUsageFlags() const {
+                    return RenderSystem::RSbitfield{} | RenderSystem::RS_DYNAMIC_STORAGE_BIT;
+                }
             public:
                 ~Node();
                 Node(const Node &other);

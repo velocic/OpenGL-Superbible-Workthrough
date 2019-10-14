@@ -195,8 +195,37 @@ namespace Flare
 
         size_t Node::addInstance()
         {
-            //TODO: implement; requires buffer.getSize() to detect
-            //when to force a resize via bufferManager
+            auto newInstanceId = instanceData.numActive;
+
+            if (modelMatrixBuffer == nullptr) {
+                instanceData.modelMatrices.resize(1);
+                instanceData.TRSData.resize(1);
+                instanceData.numActive = 1;
+
+                modelMatrixBuffer = bufferManager.create(nodeBaseName + std::to_string(name), getModelMatrixBufferLayout());
+                modelMatrixBuffer->allocateBufferStorage(
+                    sizeof(glm::mat4),
+                    nullptr,
+                    getModelMatrixBufferUsageFlags()
+                );
+                return newInstanceId;
+            }
+
+            const auto modelMatrixBufferSize = modelMatrixBuffer->getSizeInElements();
+
+            if (instanceData.numActive < modelMatrixBufferSize) {
+                ++instanceData.numActive;
+                return newInstanceId;
+            }
+
+            const auto newModelMatrixBufferSize = modelMatrixBufferSize * 2;
+
+            modelMatrixBuffer = bufferManager.resizeElements(nodeBaseName + std::to_string(name), newModelMatrixBufferSize);
+            instanceData.modelMatrices.resize(newModelMatrixBufferSize);
+            instanceData.TRSData.resize(newModelMatrixBufferSize);
+            ++instanceData.numActive;
+
+            return newInstanceId;
         }
 
         void Node::addChildNode(Node *child)
@@ -272,7 +301,7 @@ namespace Flare
             removeChildNode(removedChild);
         }
 
-        RenderSystem::VertexDataLayout Node::getMVPMatrixBufferLayout() const
+        RenderSystem::VertexDataLayout Node::getModelMatrixBufferLayout() const
         {
             return Flare::RenderSystem::VertexDataLayoutBuilder()
                 .addMatrixAttribute("mvpMatrix", 4, 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)

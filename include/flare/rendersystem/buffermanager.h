@@ -16,7 +16,8 @@ namespace Flare
             public:
                 Buffer *create(const std::string &name, const VertexDataLayout &bufferContentDescription);
                 void destroy(const std::string &name);
-                void resize(const std::string &name, size_t sizeInElements);
+                Buffer *resizeBytes(const std::string &name, size_t sizeInBytes);
+                Buffer *resizeElements(const std::string &name, size_t sizeInElements);
         };
     }
 }
