@@ -66,6 +66,7 @@ namespace Flare
                 constexpr RenderSystem::RSbitfield getModelMatrixBufferUsageFlags() const {
                     return RenderSystem::RSbitfield{} | RenderSystem::RS_DYNAMIC_STORAGE_BIT;
                 }
+                void setParallelBufferSizes(size_t size);
             public:
                 ~Node();
                 Node(const Node &other);

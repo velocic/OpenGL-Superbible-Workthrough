@@ -34,8 +34,7 @@ namespace Flare
             bufferManager(bufferManager),
             parent(parent)
         {
-            instanceData.modelMatrices.resize(instanceCountReserveSize);
-            instanceData.TRSData.resize(instanceCountReserveSize);
+            setParallelBufferSizes(instanceCountReserveSize);
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize, Model *model)
@@ -45,8 +44,7 @@ namespace Flare
             parent(parent),
             model(model)
         {
-            instanceData.modelMatrices.resize(instanceCountReserveSize);
-            instanceData.TRSData.resize(instanceCountReserveSize);
+            setParallelBufferSizes(instanceCountReserveSize);
         }
 
         Node::~Node()
@@ -198,16 +196,8 @@ namespace Flare
             auto newInstanceId = instanceData.numActive;
 
             if (modelMatrixBuffer == nullptr) {
-                instanceData.modelMatrices.resize(1);
-                instanceData.TRSData.resize(1);
+                setParallelBufferSizes(1);
                 instanceData.numActive = 1;
-
-                modelMatrixBuffer = bufferManager.create(nodeBaseName + std::to_string(name), getModelMatrixBufferLayout());
-                modelMatrixBuffer->allocateBufferStorage(
-                    sizeof(glm::mat4),
-                    nullptr,
-                    getModelMatrixBufferUsageFlags()
-                );
                 return newInstanceId;
             }
 
@@ -219,10 +209,7 @@ namespace Flare
             }
 
             const auto newModelMatrixBufferSize = modelMatrixBufferSize * 2;
-
-            modelMatrixBuffer = bufferManager.resizeElements(nodeBaseName + std::to_string(name), newModelMatrixBufferSize);
-            instanceData.modelMatrices.resize(newModelMatrixBufferSize);
-            instanceData.TRSData.resize(newModelMatrixBufferSize);
+            setParallelBufferSizes(newModelMatrixBufferSize);
             ++instanceData.numActive;
 
             return newInstanceId;
@@ -308,6 +295,23 @@ namespace Flare
                 .setStride(sizeof(glm::mat4))
                 .setDivisor(1)
                 .build();
+        }
+
+        void Node::setParallelBufferSizes(size_t size)
+        {
+            instanceData.modelMatrices.resize(size);
+            instanceData.TRSData.resize(size);
+            if (modelMatrixBuffer != nullptr) {
+                modelMatrixBuffer = bufferManager.resizeElements(nodeBaseName + std::to_string(name), size);
+                return;
+            }
+
+            modelMatrixBuffer = bufferManager.create(nodeBaseName + std::to_string(name), getModelMatrixBufferLayout());
+            modelMatrixBuffer->allocateBufferStorage(
+                sizeof(glm::mat4) * size,
+                nullptr,
+                getModelMatrixBufferUsageFlags()
+            );
         }
     }
 }
