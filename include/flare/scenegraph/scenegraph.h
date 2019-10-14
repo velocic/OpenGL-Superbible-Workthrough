@@ -3,6 +3,7 @@
 
 #include <flare/rendersystem/buffermanager.h>
 #include <flare/scenegraph/model.h>
+#include <flare/utility/math.h>
 
 #include <glm-0.9.9/glm.hpp>
 #include <glm-0.9.9/gtc/matrix_transform.hpp>
@@ -30,21 +31,26 @@ namespace Flare
         {
             friend class SceneGraph;
             private:
-                struct InstanceData
-                {
-                    std::vector<glm::mat4> worldMatrices;
+                struct TranslateRotateScaleData {
+                    glm::mat4 translation = Math::identityMatrix;
+                    glm::mat4 rotation = Math::identityMatrix;
+                    glm::mat4 scale = Math::identityMatrix;
+                };
+
+                struct InstanceData {
+                    std::vector<glm::mat4> modelMatrices;
+                    std::vector<TranslateRotateScaleData> TRSData;
                     size_t numActive = 0;
                 };
 
+                const std::string nodeBaseName = "node";
+                TranslateRotateScaleData TRSData;
                 InstanceData instanceData;
                 std::vector<Node *> children;
-                glm::vec3 translation;
-                glm::vec3 rotation;
-                glm::vec3 scale;
                 size_t name = 0;
                 SceneGraph &sceneGraph;
                 RenderSystem::BufferManager &bufferManager;
-                RenderSystem::Buffer *mvpMatrixBuffer = nullptr;
+                RenderSystem::Buffer *modelMatrixBuffer = nullptr;
                 Node *parent = nullptr;
                 Model *model = nullptr;
 
@@ -53,7 +59,7 @@ namespace Flare
                 Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize);
                 Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize, Model *model);
 
-                void notifyChildReparented(Node *child);
+                void notifyChildRemoved(Node *child);
                 RenderSystem::VertexDataLayout getMVPMatrixBufferLayout() const;
             public:
                 ~Node();
@@ -71,16 +77,16 @@ namespace Flare
                 void setModel(Model *newModel);
 
                 void translateNode(const glm::vec3 &translation);
-                void rotateNode(const glm::vec3 &rotation);
+                void rotateNode(float angleRadians, const glm::vec3 &axis);
                 void scaleNode(const glm::vec3 &scale);
 
-                void translateInstance(size_t index, const glm::vec3 &translation);
-                void rotateInstance(size_t index, const glm::vec3 &rotation);
-                void scaleInstance(size_t index, const glm::vec3 &scale);
+                void translateInstance(size_t instanceId, const glm::vec3 &translation);
+                void rotateInstance(size_t instanceId, float angleRadians, const glm::vec3 &axis);
+                void scaleInstance(size_t instanceId, const glm::vec3 &scale);
 
                 size_t addInstance();
                 void addChildNode(Node *child);
-                void removeInstance(size_t index);
+                void removeInstance(size_t instanceId);
                 void removeAllInstances();
                 void removeChildNode(Node *child);
                 void removeAllChildren();
