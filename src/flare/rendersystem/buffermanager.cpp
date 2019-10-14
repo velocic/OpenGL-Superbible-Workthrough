@@ -4,6 +4,17 @@ namespace Flare
 {
     namespace RenderSystem
     {
+        BufferManager::BufferManager(BufferManager &&other)
+        :
+            buffers(std::move(other.buffers))
+        {
+        }
+
+        BufferManager &BufferManager::operator=(BufferManager &&other)
+        {
+            buffers = std::move(other.buffers);
+        }
+
         Buffer *BufferManager::create(const std::string &name, const VertexDataLayout &bufferContentDescription)
         {
             return nullptr;

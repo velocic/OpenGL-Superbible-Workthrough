@@ -1,6 +1,8 @@
 #ifndef FLARE_SCENEGRAPH_SCENEGRAPH_H
 #define FLARE_SCENEGRAPH_SCENEGRAPH_H
 
+#include <unordered_map>
+
 #include <flare/rendersystem/buffermanager.h>
 #include <flare/scenegraph/model.h>
 #include <flare/utility/math.h>
@@ -16,15 +18,27 @@ namespace Flare
         class SceneGraph
         {
             private:
-                std::vector<Node> nodes;
+                std::unordered_map<size_t, std::unique_ptr<Node>> nodes;
+                RenderSystem::BufferManager bufferManager;
                 size_t nextNameToAssign = 0;
 
             public:
+                ~SceneGraph() {}
+                SceneGraph(SceneGraph &&other);
+                SceneGraph &operator=(SceneGraph &&other);
+                SceneGraph(const SceneGraph &other) = delete;
+                SceneGraph &operator=(const SceneGraph &other) = delete;
+
                 Node *createNode(Node *parent);
                 Node *createNode(Node *parent, Model *model);
                 Node *createNode(Node *parent, size_t instanceCountReserveSize);
                 Node *createNode(Node *parent, size_t instanceCountReserveSize, Model *model);
 
+                void destroyNode(Node *target);
+
+                //Used for fetching a unique numeric id for nodes on creation.
+                //Public so that nodes can request this in their copy constructor
+                //Avoid using for other scenarios
                 size_t requestName();
         };
 
@@ -49,18 +63,19 @@ namespace Flare
                 InstanceData instanceData;
                 std::vector<Node *> children;
                 size_t name = 0;
-                SceneGraph &sceneGraph;
-                RenderSystem::BufferManager &bufferManager;
+                SceneGraph *sceneGraph = nullptr;
+                RenderSystem::BufferManager *bufferManager = nullptr;
                 RenderSystem::Buffer *modelMatrixBuffer = nullptr;
                 Node *parent = nullptr;
                 Model *model = nullptr;
 
-                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent);
-                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, Model *model);
-                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize);
-                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize, Model *model);
+                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent);
+                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, Model *model);
+                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize);
+                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize, Model *model);
 
                 void copyModelMatrixBufferOfOtherNode(const Node &other);
+                void deepCopyChildrenOfOtherNode(std::vector<Node *> &destination, const Node &other);
                 void notifyChildRemoved(Node *child);
                 RenderSystem::VertexDataLayout getModelMatrixBufferLayout() const;
                 constexpr RenderSystem::RSbitfield getModelMatrixBufferUsageFlags() const {
@@ -77,7 +92,8 @@ namespace Flare
                 void destroy();
 
                 size_t getName() const;
-                glm::mat4 getLocalTransform(size_t instanceId) const;
+                glm::mat4 getNodeLocalTransform() const;
+                glm::mat4 getInstanceLocalTransform(size_t instanceId) const;
 
                 void setParent(Node *newParent);
                 void setModel(Model *newModel);
