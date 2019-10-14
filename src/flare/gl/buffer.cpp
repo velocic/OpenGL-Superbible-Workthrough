@@ -111,7 +111,7 @@ namespace Flare
             return mappedBuffer.get();
         }
 
-        Buffer::UsageFlags Buffer::getUsageFlags() const
+        Buffer::UsageFlags Buffer::getInternalUsageFlags() const
         {
             return usageFlags;
         }
@@ -204,6 +204,34 @@ namespace Flare
             return bufferContentDescription;
         }
 
+        size_t Buffer::getSizeInBytes() const
+        {
+            return dataCapacityBytes;
+        }
+
+        size_t Buffer::getSizeInElements() const
+        {
+            if (bufferContentDescription.stride == 0) {
+                const std::string errorMessage = "Attempted to calculate buffer capacity in elements, stride was 0. To fix this error, provide an explicit stride value.";
+                throw std::runtime_error(errorMessage);
+            }
+
+            return dataCapacityBytes / bufferContentDescription.stride;
+        }
+
+        RenderSystem::RSbitfield Buffer::getUsageFlags() const
+        {
+            auto result = RenderSystem::RSbitfield{};
+            if (usageFlags.dynamicStorage) { result |= GL_DYNAMIC_STORAGE_BIT; }
+            if (usageFlags.mapRead) { result |= GL_MAP_READ_BIT; }
+            if (usageFlags.mapWrite) { result |= GL_MAP_WRITE_BIT; }
+            if (usageFlags.mapPersistent) { result |= GL_MAP_PERSISTENT_BIT; }
+            if (usageFlags.mapCoherent) { result |= GL_MAP_COHERENT_BIT; }
+            if (usageFlags.clientStorage) { result |= GL_CLIENT_STORAGE_BIT; }
+
+            return result;
+        }
+
         RenderSystem::MappedBufferRange *Buffer::mapRange(RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr length)
         {
             return mapNamedBufferRange(offset, length);
@@ -244,22 +272,22 @@ namespace Flare
 
         bool MappedBufferRange::hasReadAccess() const
         {
-            return sourceBuffer.getUsageFlags().mapRead;
+            return sourceBuffer.getInternalUsageFlags().mapRead;
         }
 
         bool MappedBufferRange::hasWriteAccess() const
         {
-            return sourceBuffer.getUsageFlags().mapWrite;
+            return sourceBuffer.getInternalUsageFlags().mapWrite;
         }
 
         bool MappedBufferRange::isPersistent() const
         {
-            return sourceBuffer.getUsageFlags().mapPersistent;
+            return sourceBuffer.getInternalUsageFlags().mapPersistent;
         }
 
         bool MappedBufferRange::isCoherent() const
         {
-            return sourceBuffer.getUsageFlags().mapCoherent;
+            return sourceBuffer.getInternalUsageFlags().mapCoherent;
         }
 
         bool MappedBufferRange::isValid() const

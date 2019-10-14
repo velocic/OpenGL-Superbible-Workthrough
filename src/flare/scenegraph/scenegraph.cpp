@@ -63,8 +63,9 @@ namespace Flare
             parent(other.parent),
             model(other.model)
         {
+            name = sceneGraph.requestName();
             //TODO: deep copy children
-            //TODO: request unique name from SceneGraph
+            copyModelMatrixBufferOfOtherNode(other);
         }
 
         Node::Node(Node &&other)
@@ -90,8 +91,9 @@ namespace Flare
             parent = other.parent;
             model = other.model;
 
+            name = sceneGraph.requestName();
             //TODO: deep copy children
-            //TODO: request unique name from SceneGraph
+            copyModelMatrixBufferOfOtherNode(other);
         }
 
         Node &Node::operator=(Node &&other)
@@ -239,6 +241,30 @@ namespace Flare
         void Node::removeAllChildren()
         {
             children.clear();
+        }
+
+        void Node::copyModelMatrixBufferOfOtherNode(const Node &other)
+        {
+            if (modelMatrixBuffer != nullptr) {
+                bufferManager.destroy(nodeBaseName + std::to_string(name));
+            }
+
+            const auto &otherModelMatrixBuffer = *other.modelMatrixBuffer;
+            modelMatrixBuffer = bufferManager.create(
+                nodeBaseName + std::to_string(name),
+                otherModelMatrixBuffer.getContentDescription()
+            );
+            modelMatrixBuffer->allocateBufferStorage(
+                otherModelMatrixBuffer.getSizeInBytes(),
+                nullptr,
+                otherModelMatrixBuffer.getUsageFlags()
+            );
+            modelMatrixBuffer->copyRange(
+                otherModelMatrixBuffer,
+                0,
+                0,
+                otherModelMatrixBuffer.getSizeInBytes()
+            );
         }
 
         void Node::notifyChildRemoved(Node *removedChild)

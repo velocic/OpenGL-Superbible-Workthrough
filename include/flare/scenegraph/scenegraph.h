@@ -19,12 +19,13 @@ namespace Flare
                 std::vector<Node> nodes;
                 size_t nextNameToAssign = 0;
 
-                size_t requestName();
             public:
                 Node *createNode(Node *parent);
                 Node *createNode(Node *parent, Model *model);
                 Node *createNode(Node *parent, size_t instanceCountReserveSize);
                 Node *createNode(Node *parent, size_t instanceCountReserveSize, Model *model);
+
+                size_t requestName();
         };
 
         class Node
@@ -59,6 +60,7 @@ namespace Flare
                 Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize);
                 Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, Node *parent, size_t instanceCountReserveSize, Model *model);
 
+                void copyModelMatrixBufferOfOtherNode(const Node &other);
                 void notifyChildRemoved(Node *child);
                 RenderSystem::VertexDataLayout getMVPMatrixBufferLayout() const;
             public:

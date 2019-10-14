@@ -49,7 +49,7 @@ namespace Flare
                 void clearNamedBufferSubData(GLenum internalFormat, GLintptr offset, GLsizeiptr size, GLenum format, GLenum type, const void* data);
                 void copyNamedBufferSubData(const Buffer& readBuffer, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size);
                 const RenderSystem::VertexDataLayout &getBufferContentDescription() const {return bufferContentDescription;}
-                UsageFlags getUsageFlags() const;
+                UsageFlags getInternalUsageFlags() const;
                 MappedBufferRange* mapNamedBufferRange(GLintptr offset, GLsizeiptr length);
                 void namedBufferData(GLsizei size, const void* data, GLenum usage);
                 void namedBufferSubData(GLintptr offset, GLsizeiptr size, const void* data);
@@ -72,6 +72,9 @@ namespace Flare
                 virtual const RenderSystem::VertexDataLayout &getContentDescription() const override;
                 virtual RenderSystem::RSuint getId() const override { return glBuffer; };
                 virtual size_t getName() const override { return std::hash<std::string>{}(name); };
+                virtual size_t getSizeInBytes() const override;
+                virtual size_t getSizeInElements() const override;
+                virtual RenderSystem::RSbitfield getUsageFlags() const;
                 virtual RenderSystem::MappedBufferRange *mapRange(RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr length) override;
                 virtual void bufferData(RenderSystem::RSsizei size, const void *data, RenderSystem::RSenum usage) override;
                 virtual void bufferRange(RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr size, const void *data) override;
