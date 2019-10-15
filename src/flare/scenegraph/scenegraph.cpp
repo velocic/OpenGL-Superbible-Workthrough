@@ -44,10 +44,6 @@ namespace Flare
             auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent));
             auto result = newNode.get();
             nodes.insert_or_assign(newNodeName, std::move(newNode));
-
-            if (parent != nullptr) {
-                parent->addChildNode(result);
-            }
             return result;
         }
 
@@ -57,10 +53,6 @@ namespace Flare
             auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent, model));
             auto result = newNode.get();
             nodes.insert_or_assign(newNodeName, std::move(newNode));
-
-            if (parent != nullptr) {
-                parent->addChildNode(result);
-            }
             return result;
         }
 
@@ -70,10 +62,6 @@ namespace Flare
             auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent, instanceCountReserveSize));
             auto result = newNode.get();
             nodes.insert_or_assign(newNodeName, std::move(newNode));
-
-            if (parent != nullptr) {
-                parent->addChildNode(result);
-            }
             return result;
         }
 
@@ -83,10 +71,6 @@ namespace Flare
             auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent, instanceCountReserveSize, model));
             auto result = newNode.get();
             nodes.insert_or_assign(newNodeName, std::move(newNode));
-
-            if (parent != nullptr) {
-                parent->addChildNode(result);
-            }
             return result;
         }
 
@@ -107,39 +91,59 @@ namespace Flare
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent)
         :
+            name(name),
             sceneGraph(&sceneGraph),
             bufferManager(&bufferManager),
             parent(parent)
         {
+            if (parent != nullptr) {
+                parent->addChildNode(this);
+            }
+
             setParallelBufferSizes(1);
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, Model *model)
         :
+            name(name),
             sceneGraph(&sceneGraph),
             bufferManager(&bufferManager),
             parent(parent),
             model(model)
         {
+            if (parent != nullptr) {
+                parent->addChildNode(this);
+            }
+
             setParallelBufferSizes(1);
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize)
         :
+            name(name),
             sceneGraph(&sceneGraph),
             bufferManager(&bufferManager),
             parent(parent)
         {
+            if (parent != nullptr) {
+                parent->addChildNode(this);
+            }
+
             setParallelBufferSizes(instanceCountReserveSize);
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize, Model *model)
         :
+            name(name),
             sceneGraph(&sceneGraph),
             bufferManager(&bufferManager),
             parent(parent),
             model(model)
         {
+            if (parent != nullptr) {
+                parent->addChildNode(this);
+            }
+
             setParallelBufferSizes(instanceCountReserveSize);
         }
 
@@ -157,6 +161,10 @@ namespace Flare
             parent(other.parent),
             model(other.model)
         {
+            if (parent != nullptr) {
+                parent->addChildNode(this);
+            }
+
             name = sceneGraph->requestName();
             deepCopyChildrenOfOtherNode(children, other);
             copyModelMatrixBufferOfOtherNode(other);
@@ -178,6 +186,10 @@ namespace Flare
 
         Node &Node::operator=(const Node &other)
         {
+            if (parent != nullptr) {
+                parent->addChildNode(this);
+            }
+
             TRSData = other.TRSData;
             instanceData = other.instanceData;
             sceneGraph = other.sceneGraph;
@@ -228,8 +240,8 @@ namespace Flare
         glm::mat4 Node::getInstanceLocalTransform(size_t instanceId) const
         {
             const auto &instance = instanceData.TRSData[instanceId];
-            return (TRSData.translation * TRSData.rotation * TRSData.scale)
-                * (instance.translation * instance.rotation * instance.scale);
+            return getNodeLocalTransform()
+                * instance.translation * instance.rotation * instance.scale;
         }
 
         void Node::setParent(Node *newParent)
@@ -365,6 +377,7 @@ namespace Flare
 
         void Node::removeChildNode(Node *removedChild)
         {
+            int sizeBefore = children.size();
             std::remove_if(
                 children.begin(),
                 children.end(),
@@ -372,6 +385,8 @@ namespace Flare
                     return child->getName() == removedChild->getName();
                 }
             );
+            int sizeAfter = children.size();
+            int debug = 5;
         }
 
         void Node::removeAllChildren()

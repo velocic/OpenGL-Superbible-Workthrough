@@ -16,8 +16,14 @@ namespace Flare
 
         constexpr double PI = 3.1415926535897;
 
-        constexpr double degreesToRadians(double angle);
-        constexpr double radiansToDegrees(double angle);
+        constexpr double degreesToRadians(double angle)
+        {
+            return (angle * PI) / 180;
+        }
+        constexpr double radiansToDegrees(double angle)
+        {
+            return angle * (180/PI);
+        }
     }
 }
 

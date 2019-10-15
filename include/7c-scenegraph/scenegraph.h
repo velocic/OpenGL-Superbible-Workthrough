@@ -28,6 +28,9 @@ namespace Tutorial
             const std::string lanternFragmentShaderPath{"../src/7c-scenegraph/shaders/lantern-fragment.glsl"};
             unsigned long long elapsedTime = 0;
 
+            std::vector<Flare::SceneGraph::Node *> bunnyNodes;
+            std::vector<Flare::SceneGraph::Node *> lanternNodes;
+
             void initNodes();
             void initScene();
             void initSamplers();

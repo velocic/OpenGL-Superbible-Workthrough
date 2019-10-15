@@ -84,6 +84,8 @@ namespace Tutorial
 
     void SceneGraph::render(unsigned int deltaTime)
     {
+        elapsedTime += deltaTime;
+        bunnyNodes[0]->rotateNode(elapsedTime * (0.15/60.0f) * Flare::Math::degreesToRadians(36/360.0f), glm::vec3(0, 0.5, 0.5));
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
         sceneGraph->render();
@@ -99,12 +101,29 @@ namespace Tutorial
         auto bunnyShaderData = shaderManager->get("bunnyShader");
         auto bunnyModel = modelManager->get("bunny");
         auto lanternShaderData = shaderManager->get("lanternShader");
-        auto lanternModel = modelManager->get("bunny");
+        auto lanternModel = modelManager->get("lantern");
 
         auto testBunnyNode = sceneGraph->createNode(sceneGraph->getRootNode(), bunnyModel);
+        auto bunnyCubeCenterToOriginVector = glm::vec3(9 * .25, 9 * .25, 9 * .25) * .5f;
+        for (size_t x = 0; x < 10; ++x) {
+            for (size_t y = 0; y < 10; ++y) {
+                for (size_t z = 0; z < 10; z++) {
+                    auto instanceId = testBunnyNode->addInstance();
+                    testBunnyNode->translateInstance(instanceId, glm::vec3(x * .25, y * .25, z * .25) - bunnyCubeCenterToOriginVector);
+                }
+            }
+        }
+        testBunnyNode->translateNode(glm::vec3(-0.5, -0.5, -25));
         testBunnyNode->setShaderData(bunnyShaderData);
-        testBunnyNode->translateNode(glm::vec3(0, 0, -5));
-        testBunnyNode->addInstance();
+        bunnyNodes.push_back(testBunnyNode);
+
+        auto testLanternNode = sceneGraph->createNode(sceneGraph->getRootNode(), lanternModel);
+        testLanternNode->addInstance();
+        testLanternNode->setShaderData(lanternShaderData);
+        // testLanternNode->scaleNode(glm::vec3(0.5, 0.5, 0.5));
+        testLanternNode->addChildNode(testBunnyNode);
+        testLanternNode->translateNode(glm::vec3(0, 0, -100));
+        lanternNodes.push_back(testLanternNode);
     }
 
     void SceneGraph::initScene()
