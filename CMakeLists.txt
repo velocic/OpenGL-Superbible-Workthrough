@@ -19,6 +19,7 @@ add_executable(
     src/6a-model-file-loading/model-file-loading.cpp
     src/7a-instancing/instancing.cpp
     src/7b-packed-mesh-rendering/packed-mesh-rendering.cpp
+    src/7c-scenegraph/scenegraph.cpp
     src/flare/gl/buffer.cpp
     src/flare/gl/vertexarray.cpp
     src/flare/gl/shaderprogram.cpp

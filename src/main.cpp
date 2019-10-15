@@ -9,6 +9,7 @@
 #include <6a-model-file-loading/model-file-loading.h>
 #include <7a-instancing/instancing.h>
 #include <7b-packed-mesh-rendering/packed-mesh-rendering.h>
+#include <7c-scenegraph/scenegraph.h>
 
 #include <flare/gl/uniformblock.h>
 
@@ -24,7 +25,8 @@ int main()
     // Tutorial::ArrayTextures selectedTutorial;
     // Tutorial::ModelFileLoading selectedTutorial;
     // Tutorial::Instancing selectedTutorial;
-    Tutorial::PackedMeshRendering selectedTutorial;
+    // Tutorial::PackedMeshRendering selectedTutorial;
+    Tutorial::SceneGraph selectedTutorial;
 
     Flare::Application* demoApp = &selectedTutorial;
 
