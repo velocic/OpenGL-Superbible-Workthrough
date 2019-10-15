@@ -19,6 +19,7 @@ namespace Tutorial
         modelManager = std::make_unique<Flare::SceneGraph::ModelManager>(*textureManager.get());
         shaderManager = std::make_unique<Flare::RenderSystem::ShaderManager>();
         samplerManager = std::make_unique<Flare::RenderSystem::SamplerManager>();
+        sceneGraph = std::make_unique<Flare::SceneGraph::SceneGraph>();
         initSamplers();
 
         auto vertexBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
@@ -66,7 +67,7 @@ namespace Tutorial
         shaderManager->insert(std::move(lanternShader), std::move(lanternVAO), "lanternShader");
 
         modelManager->load(
-            Flare::SceneGraph::ModelManager::ModelFile{"stanford-bunny", "../src/common-resources/models/stanford-bunny/stanford-bunny.obj"},
+            Flare::SceneGraph::ModelManager::ModelFile{"bunny", "../src/common-resources/models/stanford-bunny/stanford-bunny.obj"},
             [](auto){}
         );
         modelManager->loadWithPackedSubMeshes(
@@ -81,6 +82,8 @@ namespace Tutorial
     {
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
+        sceneGraph->render();
+        renderWindow->swapWindow();
     }
 
     void SceneGraph::shutdown()
@@ -99,7 +102,25 @@ namespace Tutorial
         auto vpMatrix = viewMatrix * projectionMatrix;
 
         auto bunnyShaderData = shaderManager->get("bunnyShader");
+        auto bunnyModel = modelManager->get("bunny");
         auto lanternShaderData = shaderManager->get("lanternShader");
+        auto lanternModel = modelManager->get("bunny");
+
+        bunnyShaderData.shader->setUniformMatrix<4, 4, 1>(
+            bunnyShaderData.shader->getUniformAttribute("vpMatrix"),
+            GL_FALSE,
+            &vpMatrix[0][0]
+        );
+        lanternShaderData.shader->setUniformMatrix<4, 4, 1>(
+            lanternShaderData.shader->getUniformAttribute("vpMatrix"),
+            GL_FALSE,
+            &vpMatrix[0][0]
+        );
+
+        auto testBunnyNode = sceneGraph->createNode(sceneGraph->getRootNode(), bunnyModel);
+        testBunnyNode->setShaderData(bunnyShaderData);
+        testBunnyNode->translateNode(glm::vec3(0, 0, -5));
+        testBunnyNode->addInstance();
     }
 
     void SceneGraph::initSamplers()

@@ -95,6 +95,7 @@ namespace Flare
             bufferManager(&bufferManager),
             parent(parent)
         {
+            setParallelBufferSizes(1);
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, Model *model)
@@ -104,6 +105,7 @@ namespace Flare
             parent(parent),
             model(model)
         {
+            setParallelBufferSizes(1);
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize)
@@ -309,6 +311,10 @@ namespace Flare
 
         void Node::addChildNode(Node *child)
         {
+            if (child->parent != nullptr) {
+                child->parent->notifyChildRemoved(child);
+            }
+
             children.push_back(child);
         }
 
@@ -327,12 +333,18 @@ namespace Flare
                 instanceData.TRSData.begin() + std::min(instanceData.numActive - 1, static_cast<size_t>(0))
             );
             --instanceData.numActive;
+
+            if (instanceData.numActive <= 0) {
+                modelMatrixBuffer->destroy();
+            }
         }
 
         void Node::removeAllInstances()
         {
             instanceData.modelMatrices.clear();
             instanceData.TRSData.clear();
+            instanceData.numActive = 0;
+            modelMatrixBuffer->destroy();
         }
 
         void Node::removeChildNode(Node *removedChild)
@@ -411,6 +423,10 @@ namespace Flare
 
         void Node::updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix)
         {
+            if (instanceData.numActive <= 0) {
+                return;
+            }
+
             for (size_t i = 0; i < instanceData.numActive; ++i) {
                 instanceData.modelMatrices[i] =
                     parentModelMatrix
