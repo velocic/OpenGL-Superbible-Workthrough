@@ -377,7 +377,6 @@ namespace Flare
 
         void Node::removeChildNode(Node *removedChild)
         {
-            int sizeBefore = children.size();
             std::remove_if(
                 children.begin(),
                 children.end(),
@@ -385,8 +384,6 @@ namespace Flare
                     return child->getName() == removedChild->getName();
                 }
             );
-            int sizeAfter = children.size();
-            int debug = 5;
         }
 
         void Node::removeAllChildren()
