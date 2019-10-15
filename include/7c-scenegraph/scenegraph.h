@@ -28,6 +28,7 @@ namespace Tutorial
             const std::string lanternFragmentShaderPath{"../src/7c-scenegraph/shaders/lantern-fragment.glsl"};
             unsigned long long elapsedTime = 0;
 
+            void initScene();
             void initSamplers();
         public:
             virtual void initialize() override;

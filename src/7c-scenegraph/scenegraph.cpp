@@ -73,14 +73,33 @@ namespace Tutorial
             Flare::SceneGraph::ModelManager::ModelFile{"lantern", "../src/common-resources/models/Lantern/Lantern.gltf"},
             [](auto){}
         );
+
+        initScene();
     }
 
     void SceneGraph::render(unsigned int deltaTime)
     {
+        const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
+        glClearBufferfv(GL_COLOR, 0, clearColor);
     }
 
     void SceneGraph::shutdown()
     {
+    }
+
+    void SceneGraph::initScene()
+    {
+        auto projectionMatrix = glm::perspective(
+            50.0f,
+            renderWindow->getAspectRatio(),
+            0.1f,
+            1000.0f
+        );
+        auto viewMatrix = Flare::Math::identityMatrix;
+        auto vpMatrix = viewMatrix * projectionMatrix;
+
+        auto bunnyShaderData = shaderManager->get("bunnyShader");
+        auto lanternShaderData = shaderManager->get("lanternShader");
     }
 
     void SceneGraph::initSamplers()

@@ -84,6 +84,7 @@ namespace Flare
                 void copyModelMatrixBufferOfOtherNode(const Node &other);
                 void deepCopyChildrenOfOtherNode(std::vector<Node *> &destination, const Node &other);
                 void notifyChildRemoved(Node *child);
+                void updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix);
                 RenderSystem::VertexDataLayout getModelMatrixBufferLayout() const;
                 constexpr RenderSystem::RSbitfield getModelMatrixBufferUsageFlags() const {
                     return RenderSystem::RSbitfield{} | RenderSystem::RS_DYNAMIC_STORAGE_BIT;
@@ -121,7 +122,7 @@ namespace Flare
                 void removeChildNode(Node *child);
                 void removeAllChildren();
 
-                void render();
+                void render(const glm::mat4 &parentModelMatrix);
         };
     }
 }

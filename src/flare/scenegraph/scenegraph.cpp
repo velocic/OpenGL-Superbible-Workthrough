@@ -86,7 +86,7 @@ namespace Flare
 
         void SceneGraph::render()
         {
-            rootNode->render();
+            rootNode->render(Math::identityMatrix);
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent)
@@ -351,14 +351,18 @@ namespace Flare
             children.clear();
         }
 
-        void Node::render()
+        void Node::render(const glm::mat4 &parentModelMatrix)
         {
+            const auto localCoordinateSpace = parentModelMatrix * TRSData.translation * TRSData.rotation * TRSData.scale;
+
+            updateModelMatrixBuffer(localCoordinateSpace);
+
             if (model != nullptr && modelMatrixBuffer != nullptr && instanceData.numActive > 0) {
                 model->render(shaderData, *modelMatrixBuffer, instanceData.numActive);
             }
 
             for (auto child : children) {
-                child->render();
+                child->render(localCoordinateSpace);
             }
         }
 
@@ -403,6 +407,23 @@ namespace Flare
         void Node::notifyChildRemoved(Node *removedChild)
         {
             removeChildNode(removedChild);
+        }
+
+        void Node::updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix)
+        {
+            for (size_t i = 0; i < instanceData.numActive; ++i) {
+                instanceData.modelMatrices[i] =
+                    parentModelMatrix
+                    * instanceData.TRSData[i].translation
+                    * instanceData.TRSData[i].rotation
+                    * instanceData.TRSData[i].scale;
+            }
+
+            modelMatrixBuffer->bufferRange(
+                0,
+                sizeof(glm::mat4) * instanceData.numActive,
+                instanceData.modelMatrices.data()
+            );
         }
 
         RenderSystem::VertexDataLayout Node::getModelMatrixBufferLayout() const
