@@ -44,6 +44,10 @@ namespace Flare
             auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent));
             auto result = newNode.get();
             nodes.insert_or_assign(newNodeName, std::move(newNode));
+
+            if (parent != nullptr) {
+                parent->addChildNode(result);
+            }
             return result;
         }
 
@@ -53,6 +57,10 @@ namespace Flare
             auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent, model));
             auto result = newNode.get();
             nodes.insert_or_assign(newNodeName, std::move(newNode));
+
+            if (parent != nullptr) {
+                parent->addChildNode(result);
+            }
             return result;
         }
 
@@ -62,6 +70,10 @@ namespace Flare
             auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent, instanceCountReserveSize));
             auto result = newNode.get();
             nodes.insert_or_assign(newNodeName, std::move(newNode));
+
+            if (parent != nullptr) {
+                parent->addChildNode(result);
+            }
             return result;
         }
 
@@ -71,6 +83,10 @@ namespace Flare
             auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent, instanceCountReserveSize, model));
             auto result = newNode.get();
             nodes.insert_or_assign(newNodeName, std::move(newNode));
+
+            if (parent != nullptr) {
+                parent->addChildNode(result);
+            }
             return result;
         }
 
@@ -387,6 +403,7 @@ namespace Flare
             const auto &otherModelMatrixBuffer = *other.modelMatrixBuffer;
             modelMatrixBuffer = bufferManager->create(
                 nodeBaseName + std::to_string(name),
+                mvpMatrixBufferName,
                 otherModelMatrixBuffer.getContentDescription()
             );
             modelMatrixBuffer->allocateBufferStorage(
@@ -460,7 +477,11 @@ namespace Flare
                 return;
             }
 
-            modelMatrixBuffer = bufferManager->create(nodeBaseName + std::to_string(name), getModelMatrixBufferLayout());
+            modelMatrixBuffer = bufferManager->create(
+                nodeBaseName + std::to_string(name),
+                mvpMatrixBufferName,
+                getModelMatrixBufferLayout()
+            );
             modelMatrixBuffer->allocateBufferStorage(
                 sizeof(glm::mat4) * size,
                 nullptr,

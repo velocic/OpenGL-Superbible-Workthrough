@@ -24,10 +24,10 @@ namespace Flare
                 BufferManager(const BufferManager &other) = delete;
                 BufferManager &operator=(const BufferManager &other) = delete;
 
-                Buffer *create(const std::string &name, const VertexDataLayout &bufferContentDescription);
-                void destroy(const std::string &name);
-                Buffer *resizeBytes(const std::string &name, size_t sizeInBytes);
-                Buffer *resizeElements(const std::string &name, size_t sizeInElements);
+                Buffer *create(const std::string &alias, const std::string &bufferName, const VertexDataLayout &bufferContentDescription);
+                void destroy(const std::string &alias);
+                Buffer *resizeBytes(const std::string &alias, size_t sizeInBytes);
+                Buffer *resizeElements(const std::string &alias, size_t sizeInElements);
         };
     }
 }

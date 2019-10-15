@@ -65,6 +65,7 @@ namespace Flare
                 };
 
                 const std::string nodeBaseName = "node";
+                const std::string mvpMatrixBufferName = "mvpMatrix";
                 TranslateRotateScaleData TRSData;
                 InstanceData instanceData;
                 std::vector<Node *> children;

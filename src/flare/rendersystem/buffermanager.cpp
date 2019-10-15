@@ -20,26 +20,26 @@ namespace Flare
             return *this;
         }
 
-        Buffer *BufferManager::create(const std::string &name, const VertexDataLayout &bufferContentDescription)
+        Buffer *BufferManager::create(const std::string &alias, const std::string &bufferName, const VertexDataLayout &bufferContentDescription)
         {
-            auto newBuffer = RenderSystem::createBuffer(name, bufferContentDescription);
+            auto newBuffer = RenderSystem::createBuffer(bufferName, bufferContentDescription);
             auto result = newBuffer.get();
-            buffers.insert_or_assign(stringHasher(name), std::move(newBuffer));
+            buffers.insert_or_assign(stringHasher(alias), std::move(newBuffer));
             return result;
         }
 
-        void BufferManager::destroy(const std::string &name)
+        void BufferManager::destroy(const std::string &alias)
         {
-            buffers.erase(stringHasher(name));
+            buffers.erase(stringHasher(alias));
         }
 
-        Buffer *BufferManager::resizeBytes(const std::string &name, size_t sizeInBytes)
+        Buffer *BufferManager::resizeBytes(const std::string &alias, size_t sizeInBytes)
         {
-            auto targetBufferIterator = buffers.find(stringHasher(name));
+            auto targetBufferIterator = buffers.find(stringHasher(alias));
 
             if (targetBufferIterator != buffers.end()) {
                 auto &oldBuffer = targetBufferIterator->second;
-                auto newBuffer = RenderSystem::createBuffer(name, oldBuffer->getContentDescription());
+                auto newBuffer = RenderSystem::createBuffer(oldBuffer->getAlias(), oldBuffer->getContentDescription());
                 auto result = newBuffer.get();
 
                 newBuffer->allocateBufferStorage(
@@ -62,13 +62,13 @@ namespace Flare
             return nullptr;
         }
 
-        Buffer *BufferManager::resizeElements(const std::string &name, size_t sizeInElements)
+        Buffer *BufferManager::resizeElements(const std::string &alias, size_t sizeInElements)
         {
-            auto targetBufferIterator = buffers.find(stringHasher(name));
+            auto targetBufferIterator = buffers.find(stringHasher(alias));
 
             if (targetBufferIterator != buffers.end()) {
                 auto &oldBuffer = targetBufferIterator->second;
-                auto newBuffer = RenderSystem::createBuffer(name, oldBuffer->getContentDescription());
+                auto newBuffer = RenderSystem::createBuffer(oldBuffer->getAlias(), oldBuffer->getContentDescription());
                 auto result = newBuffer.get();
                 auto sizeInBytes = sizeInElements * oldBuffer->getContentDescription().stride;
 

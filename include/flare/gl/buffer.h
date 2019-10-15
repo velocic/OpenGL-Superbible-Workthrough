@@ -71,6 +71,7 @@ namespace Flare
                 virtual void copyRange(const RenderSystem::Buffer &readBuffer, RenderSystem::RSintptr readOffset, RenderSystem::RSintptr writeOffset, RenderSystem::RSsizeiptr size) override ;
                 virtual const RenderSystem::VertexDataLayout &getContentDescription() const override;
                 virtual RenderSystem::RSuint getId() const override { return glBuffer; };
+                virtual std::string getAlias() const override { return name; }
                 virtual size_t getName() const override { return std::hash<std::string>{}(name); };
                 virtual size_t getSizeInBytes() const override;
                 virtual size_t getSizeInElements() const override;

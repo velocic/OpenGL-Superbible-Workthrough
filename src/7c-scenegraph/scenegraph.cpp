@@ -48,6 +48,9 @@ namespace Tutorial
             .addTextureUnit(samplerManager->get("textureNormal0"))
             .build();
 
+        bunnyShader->addUniformAttribute("vpMatrix");
+        lanternShader->addUniformAttribute("vpMatrix");
+
         auto bunnyVAO = Flare::RenderSystem::createVertexArray(
             bunnyShader.get(),
             std::vector<Flare::RenderSystem::VertexBufferVertexDataLayout>{
@@ -76,6 +79,7 @@ namespace Tutorial
         );
 
         initScene();
+        initNodes();
     }
 
     void SceneGraph::render(unsigned int deltaTime)
@@ -90,6 +94,19 @@ namespace Tutorial
     {
     }
 
+    void SceneGraph::initNodes()
+    {
+        auto bunnyShaderData = shaderManager->get("bunnyShader");
+        auto bunnyModel = modelManager->get("bunny");
+        auto lanternShaderData = shaderManager->get("lanternShader");
+        auto lanternModel = modelManager->get("bunny");
+
+        auto testBunnyNode = sceneGraph->createNode(sceneGraph->getRootNode(), bunnyModel);
+        testBunnyNode->setShaderData(bunnyShaderData);
+        testBunnyNode->translateNode(glm::vec3(0, 0, -5));
+        testBunnyNode->addInstance();
+    }
+
     void SceneGraph::initScene()
     {
         auto projectionMatrix = glm::perspective(
@@ -102,25 +119,23 @@ namespace Tutorial
         auto vpMatrix = viewMatrix * projectionMatrix;
 
         auto bunnyShaderData = shaderManager->get("bunnyShader");
-        auto bunnyModel = modelManager->get("bunny");
         auto lanternShaderData = shaderManager->get("lanternShader");
-        auto lanternModel = modelManager->get("bunny");
 
+        bunnyShaderData.shader->bind();
+        bunnyShaderData.vertexArray->bind();
         bunnyShaderData.shader->setUniformMatrix<4, 4, 1>(
             bunnyShaderData.shader->getUniformAttribute("vpMatrix"),
             GL_FALSE,
             &vpMatrix[0][0]
         );
+
+        lanternShaderData.shader->bind();
+        lanternShaderData.vertexArray->bind();
         lanternShaderData.shader->setUniformMatrix<4, 4, 1>(
             lanternShaderData.shader->getUniformAttribute("vpMatrix"),
             GL_FALSE,
             &vpMatrix[0][0]
         );
-
-        auto testBunnyNode = sceneGraph->createNode(sceneGraph->getRootNode(), bunnyModel);
-        testBunnyNode->setShaderData(bunnyShaderData);
-        testBunnyNode->translateNode(glm::vec3(0, 0, -5));
-        testBunnyNode->addInstance();
     }
 
     void SceneGraph::initSamplers()

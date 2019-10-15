@@ -1,6 +1,8 @@
 #ifndef FLARE_RENDERSYSTEM_BUFFER_H
 #define FLARE_RENDERSYSTEM_BUFFER_H
 
+#include <string>
+
 #include <flare/rendersystem/datatypes.h>
 #include <flare/rendersystem/datalayout.h>
 
@@ -21,6 +23,7 @@ namespace Flare
                 virtual void destroy() = 0;
                 virtual const VertexDataLayout &getContentDescription() const = 0;
                 virtual RSuint getId() const = 0;
+                virtual std::string getAlias() const = 0;
                 virtual size_t getName() const = 0;
                 virtual size_t getSizeInBytes() const = 0;
                 virtual size_t getSizeInElements() const = 0;
