@@ -24,6 +24,8 @@ namespace Flare
             nodes = std::move(other.nodes);
             bufferManager = std::move(other.bufferManager);
             nextNameToAssign = std::exchange(other.nextNameToAssign, 0);
+
+            return *this;
         }
 
         Node *SceneGraph::createNode(Node *parent)
