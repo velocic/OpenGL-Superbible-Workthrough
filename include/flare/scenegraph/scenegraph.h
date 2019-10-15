@@ -4,6 +4,7 @@
 #include <unordered_map>
 
 #include <flare/rendersystem/buffermanager.h>
+#include <flare/rendersystem/shadermanager.h>
 #include <flare/scenegraph/model.h>
 #include <flare/utility/math.h>
 
@@ -19,10 +20,12 @@ namespace Flare
         {
             private:
                 std::unordered_map<size_t, std::unique_ptr<Node>> nodes;
+                Node *rootNode = nullptr;
                 RenderSystem::BufferManager bufferManager;
                 size_t nextNameToAssign = 0;
 
             public:
+                SceneGraph();
                 ~SceneGraph() {}
                 SceneGraph(SceneGraph &&other);
                 SceneGraph &operator=(SceneGraph &&other);
@@ -35,6 +38,9 @@ namespace Flare
                 Node *createNode(Node *parent, size_t instanceCountReserveSize, Model *model);
 
                 void destroyNode(Node *target);
+                Node *getRootNode() const;
+
+                void render();
 
                 //Used for fetching a unique numeric id for nodes on creation.
                 //Public so that nodes can request this in their copy constructor
@@ -63,6 +69,7 @@ namespace Flare
                 InstanceData instanceData;
                 std::vector<Node *> children;
                 size_t name = 0;
+                RenderSystem::ShaderData shaderData;
                 SceneGraph *sceneGraph = nullptr;
                 RenderSystem::BufferManager *bufferManager = nullptr;
                 RenderSystem::Buffer *modelMatrixBuffer = nullptr;
@@ -97,6 +104,7 @@ namespace Flare
 
                 void setParent(Node *newParent);
                 void setModel(Model *newModel);
+                void setShaderData(RenderSystem::ShaderData newShaderData);
 
                 void translateNode(const glm::vec3 &translation);
                 void rotateNode(float angleRadians, const glm::vec3 &axis);
@@ -112,6 +120,8 @@ namespace Flare
                 void removeAllInstances();
                 void removeChildNode(Node *child);
                 void removeAllChildren();
+
+                void render();
         };
     }
 }

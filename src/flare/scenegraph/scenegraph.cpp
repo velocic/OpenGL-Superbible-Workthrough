@@ -11,19 +11,29 @@ namespace Flare
             return nextNameToAssign++;
         }
 
+        SceneGraph::SceneGraph()
+        {
+            rootNode = createNode(nullptr);
+        }
+
         SceneGraph::SceneGraph(SceneGraph &&other)
         :
             nodes(std::move(other.nodes)),
+            rootNode(std::exchange(other.rootNode, nullptr)),
             bufferManager(std::move(other.bufferManager)),
             nextNameToAssign(std::exchange(other.nextNameToAssign, 0))
         {
+            other.rootNode = other.createNode(nullptr);
         }
 
         SceneGraph &SceneGraph::operator=(SceneGraph &&other)
         {
             nodes = std::move(other.nodes);
+            rootNode = std::exchange(other.rootNode, nullptr);
             bufferManager = std::move(other.bufferManager);
             nextNameToAssign = std::exchange(other.nextNameToAssign, 0);
+
+            other.rootNode = other.createNode(nullptr);
 
             return *this;
         }
@@ -67,6 +77,16 @@ namespace Flare
         void SceneGraph::destroyNode(Node *target)
         {
             nodes.erase(target->getName());
+        }
+
+        Node *SceneGraph::getRootNode() const
+        {
+            return rootNode;
+        }
+
+        void SceneGraph::render()
+        {
+            rootNode->render();
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent)
@@ -205,6 +225,11 @@ namespace Flare
             model = newModel;
         }
 
+        void Node::setShaderData(RenderSystem::ShaderData newShaderData)
+        {
+            shaderData = newShaderData;
+        }
+
         void Node::translateNode(const glm::vec3 &translation)
         {
             TRSData.translation = glm::translate(
@@ -324,6 +349,17 @@ namespace Flare
         void Node::removeAllChildren()
         {
             children.clear();
+        }
+
+        void Node::render()
+        {
+            if (model != nullptr && modelMatrixBuffer != nullptr && instanceData.numActive > 0) {
+                model->render(shaderData, *modelMatrixBuffer, instanceData.numActive);
+            }
+
+            for (auto child : children) {
+                child->render();
+            }
         }
 
         void Node::copyModelMatrixBufferOfOtherNode(const Node &other)

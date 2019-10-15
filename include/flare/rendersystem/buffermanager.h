@@ -17,6 +17,7 @@ namespace Flare
                 std::unordered_map<size_t, std::unique_ptr<Buffer>> buffers;
                 std::hash<std::string> stringHasher;
             public:
+                BufferManager() {}
                 ~BufferManager() {}
                 BufferManager(BufferManager &&other);
                 BufferManager &operator=(BufferManager &&other);
