@@ -63,7 +63,7 @@ namespace Flare
                 const std::string mvpMatrixBufferName = "mvpMatrix";
                 TranslateRotateScaleData TRSData;
                 InstanceData instanceData;
-                std::vector<Node *> children;
+                std::vector<std::unique_ptr<Node>> children;
                 size_t name = 0;
                 RenderSystem::ShaderData shaderData;
                 SceneGraph *sceneGraph = nullptr;
@@ -121,6 +121,7 @@ namespace Flare
                 void setInstanceScale(size_t instanceId, const glm::vec3 &scale);
 
                 size_t addInstance();
+                void addChildNode();
                 void addChildNode(Node *child);
                 void removeInstance(size_t instanceId);
                 void removeAllInstances();

@@ -420,13 +420,27 @@ namespace Flare
             return newInstanceId;
         }
 
+        void Node::addChildNode()
+        {
+            children.push_back(std::unique_ptr<Node>(new Node(*sceneGraph, *bufferManager, sceneGraph->requestName(), this)));
+        }
+
         void Node::addChildNode(Node *child)
         {
-            if (child->parent != nullptr) {
-                child->parent->notifyChildRemoved(child);
+            if (child->parent == nullptr) {
+                throw std::runtime_error("Attempted to re-parent the root scene node (which is disallowed) or the passed argument has no parent (which is only allowed for the root scene node)");
             }
+            auto &oldParentNode = *child->parent;
+            auto childOwningPointerIterator = std::find_if(
+                oldParentNode.children.begin(),
+                oldParentNode.children.end(),
+                [&](const auto &oldParentsChild){
+                    return oldParentsChild->getName() == child->getName();
+                }
+            );
 
-            children.push_back(child);
+            children.push_back(std::move(*childOwningPointerIterator));
+            oldParentNode.children.erase(childOwningPointerIterator);
         }
 
         void Node::removeInstance(size_t instanceId)
