@@ -19,8 +19,7 @@ namespace Flare
         class SceneGraph
         {
             private:
-                std::unordered_map<size_t, std::unique_ptr<Node>> nodes;
-                Node *rootNode = nullptr;
+                std::unique_ptr<Node> rootNode;
                 RenderSystem::BufferManager bufferManager;
                 size_t nextNameToAssign = 0;
 
@@ -32,14 +31,8 @@ namespace Flare
                 SceneGraph(const SceneGraph &other) = delete;
                 SceneGraph &operator=(const SceneGraph &other) = delete;
 
-                Node *createNode(Node *parent);
-                Node *createNode(Node *parent, Model *model);
-                Node *createNode(Node *parent, size_t instanceCountReserveSize);
-                Node *createNode(Node *parent, size_t instanceCountReserveSize, Model *model);
-
-                void destroyNode(Node *target);
+                void destroy();
                 Node *getRootNode() const;
-
                 void render();
 
                 //Used for fetching a unique numeric id for nodes on creation.

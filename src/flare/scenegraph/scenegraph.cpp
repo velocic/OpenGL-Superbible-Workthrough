@@ -13,75 +13,34 @@ namespace Flare
 
         SceneGraph::SceneGraph()
         {
-            rootNode = createNode(nullptr);
+            rootNode = std::unique_ptr<Node>(new Node(*this, bufferManager, requestName(), nullptr));
         }
 
         SceneGraph::SceneGraph(SceneGraph &&other)
         :
-            nodes(std::move(other.nodes)),
-            rootNode(std::exchange(other.rootNode, nullptr)),
+            rootNode(std::move(other.rootNode)),
             bufferManager(std::move(other.bufferManager)),
             nextNameToAssign(std::exchange(other.nextNameToAssign, 0))
         {
-            other.rootNode = other.createNode(nullptr);
         }
 
         SceneGraph &SceneGraph::operator=(SceneGraph &&other)
         {
-            nodes = std::move(other.nodes);
-            rootNode = std::exchange(other.rootNode, nullptr);
+            rootNode = std::move(other.rootNode);
             bufferManager = std::move(other.bufferManager);
             nextNameToAssign = std::exchange(other.nextNameToAssign, 0);
-
-            other.rootNode = other.createNode(nullptr);
 
             return *this;
         }
 
-        Node *SceneGraph::createNode(Node *parent)
+        void SceneGraph::destroy()
         {
-            auto newNodeName = requestName();
-            auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent));
-            auto result = newNode.get();
-            nodes.insert_or_assign(newNodeName, std::move(newNode));
-            return result;
-        }
-
-        Node *SceneGraph::createNode(Node *parent, Model *model)
-        {
-            auto newNodeName = requestName();
-            auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent, model));
-            auto result = newNode.get();
-            nodes.insert_or_assign(newNodeName, std::move(newNode));
-            return result;
-        }
-
-        Node *SceneGraph::createNode(Node *parent, size_t instanceCountReserveSize)
-        {
-            auto newNodeName = requestName();
-            auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent, instanceCountReserveSize));
-            auto result = newNode.get();
-            nodes.insert_or_assign(newNodeName, std::move(newNode));
-            return result;
-        }
-
-        Node *SceneGraph::createNode(Node *parent, size_t instanceCountReserveSize, Model *model)
-        {
-            auto newNodeName = requestName();
-            auto newNode = std::unique_ptr<Node>(new Node(*this, bufferManager, newNodeName, parent, instanceCountReserveSize, model));
-            auto result = newNode.get();
-            nodes.insert_or_assign(newNodeName, std::move(newNode));
-            return result;
-        }
-
-        void SceneGraph::destroyNode(Node *target)
-        {
-            nodes.erase(target->getName());
+            rootNode = nullptr;
         }
 
         Node *SceneGraph::getRootNode() const
         {
-            return rootNode;
+            return rootNode.get();
         }
 
         void SceneGraph::render()
