@@ -89,10 +89,10 @@ namespace Flare
                 void setParallelBufferSizes(size_t size);
             public:
                 ~Node();
-                Node(const Node &other);
                 Node(Node &&other);
-                Node &operator=(const Node &other);
                 Node &operator=(Node &&other);
+                Node(const Node &other) = delete;
+                Node &operator=(const Node &other) = delete;
 
                 void destroy();
 
@@ -123,6 +123,7 @@ namespace Flare
                 size_t addInstance();
                 void addChildNode();
                 void addChildNode(Node *child);
+                Node *copy();
                 void removeInstance(size_t instanceId);
                 void removeAllInstances();
                 void removeChildNode(Node *child);

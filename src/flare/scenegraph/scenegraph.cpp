@@ -119,24 +119,6 @@ namespace Flare
             destroy();
         }
 
-        Node::Node(const Node &other)
-        :
-            TRSData(other.TRSData),
-            instanceData(other.instanceData),
-            sceneGraph(other.sceneGraph),
-            bufferManager(other.bufferManager),
-            parent(other.parent),
-            model(other.model)
-        {
-            if (parent != nullptr) {
-                parent->addChildNode(this);
-            }
-
-            name = sceneGraph->requestName();
-            deepCopyChildrenOfOtherNode(children, other);
-            copyModelMatrixBufferOfOtherNode(other);
-        }
-
         Node::Node(Node &&other)
         :
             TRSData(std::move(other.TRSData)),
@@ -149,26 +131,6 @@ namespace Flare
             parent(std::exchange(other.parent, nullptr)),
             model(std::exchange(other.model, nullptr))
         {
-        }
-
-        Node &Node::operator=(const Node &other)
-        {
-            if (parent != nullptr) {
-                parent->addChildNode(this);
-            }
-
-            TRSData = other.TRSData;
-            instanceData = other.instanceData;
-            sceneGraph = other.sceneGraph;
-            bufferManager = other.bufferManager;
-            parent = other.parent;
-            model = other.model;
-
-            name = sceneGraph->requestName();
-            deepCopyChildrenOfOtherNode(children, other);
-            copyModelMatrixBufferOfOtherNode(other);
-
-            return *this;
         }
 
         Node &Node::operator=(Node &&other)
@@ -441,6 +403,26 @@ namespace Flare
 
             children.push_back(std::move(*childOwningPointerIterator));
             oldParentNode.children.erase(childOwningPointerIterator);
+        }
+
+        Node *Node::copy()
+        {
+            if (parent == nullptr) {
+                throw std::runtime_error("Attempted to copy the root scene node (which is disallowed)");
+            }
+
+            auto copyNode = std::unique_ptr<Node>(new Node(*sceneGraph, *bufferManager, sceneGraph->requestName(), parent));
+            copyNode->TRSData = TRSData;
+            copyNode->instanceData = instanceData;
+            copyNode->model = model;
+            copyNode->shaderData = shaderData;
+            copyNode->deepCopyChildrenOfOtherNode(copyNode->children, *this);
+            copyNode->copyModelMatrixBufferOfOtherNode(*this);
+
+            auto result = copyNode.get();
+            children.push_back(std::move(copyNode));
+
+            return result;
         }
 
         void Node::removeInstance(size_t instanceId)
