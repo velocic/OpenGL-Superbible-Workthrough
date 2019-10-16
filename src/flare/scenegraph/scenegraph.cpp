@@ -377,12 +377,15 @@ namespace Flare
 
         void Node::removeChildNode(Node *removedChild)
         {
-            std::remove_if(
-                children.begin(),
-                children.end(),
-                [=](const auto child){
-                    return child->getName() == removedChild->getName();
-                }
+            children.erase(
+                std::remove_if(
+                    children.begin(),
+                    children.end(),
+                    [&](const auto child){
+                        return child->getName() == removedChild->getName();
+                    }
+                ),
+                children.end()
             );
         }
 
