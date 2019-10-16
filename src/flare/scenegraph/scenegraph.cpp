@@ -313,6 +313,59 @@ namespace Flare
             );
         }
 
+        void Node::setNodePosition(const glm::vec3 &position)
+        {
+            TRSData.translation = glm::translate(
+                Math::identityMatrix,
+                position
+            );
+        }
+
+        void Node::setNodeRotation(float angleRadians, const glm::vec3 &axis)
+        {
+            TRSData.rotation = glm::rotate(
+                Math::identityMatrix,
+                angleRadians,
+                axis
+            );
+        }
+
+        void Node::setNodeScale(const glm::vec3 &scale)
+        {
+            TRSData.scale = glm::scale(
+                Math::identityMatrix,
+                scale
+            );
+        }
+
+        void Node::setInstancePosition(size_t instanceId, const glm::vec3 &position)
+        {
+            auto &instance = instanceData.TRSData[instanceId];
+            instance.translation = glm::translate(
+                Math::identityMatrix,
+                position
+            );
+        }
+
+        void Node::setInstanceRotation(size_t instanceId, float angleRadians, const glm::vec3 &axis)
+        {
+            auto &instance = instanceData.TRSData[instanceId];
+            instance.rotation = glm::rotate(
+                Math::identityMatrix,
+                angleRadians,
+                axis
+            );
+        }
+
+        void Node::setInstanceScale(size_t instanceId, const glm::vec3 &scale)
+        {
+            auto &instance = instanceData.TRSData[instanceId];
+            instance.scale = glm::scale(
+                Math::identityMatrix,
+                scale
+            );
+        }
+
         size_t Node::addInstance()
         {
             auto newInstanceId = instanceData.numActive;

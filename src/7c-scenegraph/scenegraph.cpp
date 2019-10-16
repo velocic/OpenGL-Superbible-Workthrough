@@ -1,5 +1,7 @@
 #include <7c-scenegraph/scenegraph.h>
 
+#include <cmath>
+
 #include <flare/gl/texturemanager.h>
 #include <flare/gl/sampler.h>
 #include <flare/gl/shaderprogram.h>
@@ -86,6 +88,7 @@ namespace Tutorial
     {
         elapsedTime += deltaTime;
         bunnyNodes[0]->rotateNode(elapsedTime * (0.15/60.0f) * Flare::Math::degreesToRadians(36/360.0f), glm::vec3(0, 0.5, 0.5));
+        lanternNodes[0]->setNodePosition(glm::vec3(std::sin(elapsedTime * (0.001)) * 15, 0, -200));
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
         sceneGraph->render();
@@ -114,6 +117,7 @@ namespace Tutorial
             }
         }
         testBunnyNode->translateNode(glm::vec3(-0.5, -0.5, -25));
+        testBunnyNode->scaleNode(glm::vec3(2, 2, 2));
         testBunnyNode->setShaderData(bunnyShaderData);
         bunnyNodes.push_back(testBunnyNode);
 
@@ -122,7 +126,7 @@ namespace Tutorial
         testLanternNode->setShaderData(lanternShaderData);
         // testLanternNode->scaleNode(glm::vec3(0.5, 0.5, 0.5));
         testLanternNode->addChildNode(testBunnyNode);
-        testLanternNode->translateNode(glm::vec3(0, 0, -100));
+        testLanternNode->translateNode(glm::vec3(0, 0, -200));
         lanternNodes.push_back(testLanternNode);
     }
 

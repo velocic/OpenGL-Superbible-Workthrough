@@ -116,6 +116,14 @@ namespace Flare
                 void rotateInstance(size_t instanceId, float angleRadians, const glm::vec3 &axis);
                 void scaleInstance(size_t instanceId, const glm::vec3 &scale);
 
+                void setNodePosition(const glm::vec3 &position);
+                void setNodeRotation(float angleRadians, const glm::vec3 &axis);
+                void setNodeScale(const glm::vec3 &scale);
+
+                void setInstancePosition(size_t instanceId, const glm::vec3 &position);
+                void setInstanceRotation(size_t instanceId, float angleRadians, const glm::vec3 &axis);
+                void setInstanceScale(size_t instanceId, const glm::vec3 &scale);
+
                 size_t addInstance();
                 void addChildNode(Node *child);
                 void removeInstance(size_t instanceId);
