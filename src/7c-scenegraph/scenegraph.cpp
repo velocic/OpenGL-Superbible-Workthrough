@@ -124,9 +124,7 @@ namespace Tutorial
         auto testLanternNode = sceneGraph->createNode(sceneGraph->getRootNode(), lanternModel);
         testLanternNode->addInstance();
         testLanternNode->setShaderData(lanternShaderData);
-        // testLanternNode->scaleNode(glm::vec3(0.5, 0.5, 0.5));
         testLanternNode->addChildNode(testBunnyNode);
-        testLanternNode->translateNode(glm::vec3(0, 0, -200));
         lanternNodes.push_back(testLanternNode);
     }
 

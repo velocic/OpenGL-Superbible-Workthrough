@@ -61,9 +61,11 @@ namespace Flare
                 struct InstanceData {
                     std::vector<glm::mat4> modelMatrices;
                     std::vector<TranslateRotateScaleData> TRSData;
+                    std::vector<size_t> instanceIds;
                     size_t numActive = 0;
                 };
 
+                size_t nextInstanceIdToAssign = 0;
                 const std::string nodeBaseName = "node";
                 const std::string mvpMatrixBufferName = "mvpMatrix";
                 TranslateRotateScaleData TRSData;
@@ -84,6 +86,7 @@ namespace Flare
 
                 void copyModelMatrixBufferOfOtherNode(const Node &other);
                 void deepCopyChildrenOfOtherNode(std::vector<Node *> &destination, const Node &other);
+                size_t getNextInstanceId();
                 void notifyChildRemoved(Node *child);
                 void updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix);
                 RenderSystem::VertexDataLayout getModelMatrixBufferLayout() const;

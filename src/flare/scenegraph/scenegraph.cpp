@@ -101,6 +101,7 @@ namespace Flare
             }
 
             setParallelBufferSizes(1);
+            instanceData.instanceIds[0] = getNextInstanceId();
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, Model *model)
@@ -116,6 +117,7 @@ namespace Flare
             }
 
             setParallelBufferSizes(1);
+            instanceData.instanceIds[0] = getNextInstanceId();
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize)
@@ -130,6 +132,9 @@ namespace Flare
             }
 
             setParallelBufferSizes(instanceCountReserveSize);
+            for (size_t i = 0; i < instanceCountReserveSize; ++i) {
+                instanceData.instanceIds[i] = getNextInstanceId();
+            }
         }
 
         Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize, Model *model)
@@ -145,6 +150,9 @@ namespace Flare
             }
 
             setParallelBufferSizes(instanceCountReserveSize);
+            for (size_t i = 0; i < instanceCountReserveSize; ++i) {
+                instanceData.instanceIds[i] = getNextInstanceId();
+            }
         }
 
         Node::~Node()
@@ -287,7 +295,16 @@ namespace Flare
 
         void Node::translateInstance(size_t instanceId, const glm::vec3 &translation)
         {
-            auto &instance = instanceData.TRSData[instanceId];
+            auto instanceIndexIterator = std::find(instanceData.instanceIds.begin(), instanceData.instanceIds.end(), instanceId);
+            if (instanceIndexIterator == instanceData.instanceIds.end()) {
+                throw std::runtime_error("Attempted to translate an invalid instanceId");
+            }
+            auto instanceIndex = std::distance(
+                instanceData.instanceIds.begin(),
+                instanceIndexIterator
+            );
+            auto &instance = instanceData.TRSData[instanceIndex];
+
             instance.translation = glm::translate(
                 instance.translation,
                 translation
@@ -296,7 +313,16 @@ namespace Flare
 
         void Node::rotateInstance(size_t instanceId, float angleRadians, const glm::vec3 &axis)
         {
-            auto &instance = instanceData.TRSData[instanceId];
+            auto instanceIndexIterator = std::find(instanceData.instanceIds.begin(), instanceData.instanceIds.end(), instanceId);
+            if (instanceIndexIterator == instanceData.instanceIds.end()) {
+                throw std::runtime_error("Attempted to rotate an invalid instanceId");
+            }
+            auto instanceIndex = std::distance(
+                instanceData.instanceIds.begin(),
+                instanceIndexIterator
+            );
+            auto &instance = instanceData.TRSData[instanceIndex];
+
             instance.rotation = glm::rotate(
                 instance.rotation,
                 angleRadians,
@@ -306,7 +332,16 @@ namespace Flare
 
         void Node::scaleInstance(size_t instanceId, const glm::vec3 &scale)
         {
-            auto &instance = instanceData.TRSData[instanceId];
+            auto instanceIndexIterator = std::find(instanceData.instanceIds.begin(), instanceData.instanceIds.end(), instanceId);
+            if (instanceIndexIterator == instanceData.instanceIds.end()) {
+                throw std::runtime_error("Attempted to scale an invalid instanceId");
+            }
+            auto instanceIndex = std::distance(
+                instanceData.instanceIds.begin(),
+                instanceIndexIterator
+            );
+            auto &instance = instanceData.TRSData[instanceIndex];
+
             instance.scale = glm::scale(
                 instance.scale,
                 scale
@@ -340,7 +375,16 @@ namespace Flare
 
         void Node::setInstancePosition(size_t instanceId, const glm::vec3 &position)
         {
-            auto &instance = instanceData.TRSData[instanceId];
+            auto instanceIndexIterator = std::find(instanceData.instanceIds.begin(), instanceData.instanceIds.end(), instanceId);
+            if (instanceIndexIterator == instanceData.instanceIds.end()) {
+                throw std::runtime_error("Attempted to set position on an invalid instanceId");
+            }
+            auto instanceIndex = std::distance(
+                instanceData.instanceIds.begin(),
+                instanceIndexIterator
+            );
+            auto &instance = instanceData.TRSData[instanceIndex];
+
             instance.translation = glm::translate(
                 Math::identityMatrix,
                 position
@@ -349,7 +393,16 @@ namespace Flare
 
         void Node::setInstanceRotation(size_t instanceId, float angleRadians, const glm::vec3 &axis)
         {
-            auto &instance = instanceData.TRSData[instanceId];
+            auto instanceIndexIterator = std::find(instanceData.instanceIds.begin(), instanceData.instanceIds.end(), instanceId);
+            if (instanceIndexIterator == instanceData.instanceIds.end()) {
+                throw std::runtime_error("Attempted to set rotation on an invalid instanceId");
+            }
+            auto instanceIndex = std::distance(
+                instanceData.instanceIds.begin(),
+                instanceIndexIterator
+            );
+            auto &instance = instanceData.TRSData[instanceIndex];
+
             instance.rotation = glm::rotate(
                 Math::identityMatrix,
                 angleRadians,
@@ -359,7 +412,16 @@ namespace Flare
 
         void Node::setInstanceScale(size_t instanceId, const glm::vec3 &scale)
         {
-            auto &instance = instanceData.TRSData[instanceId];
+            auto instanceIndexIterator = std::find(instanceData.instanceIds.begin(), instanceData.instanceIds.end(), instanceId);
+            if (instanceIndexIterator == instanceData.instanceIds.end()) {
+                throw std::runtime_error("Attempted to set scale on an invalid instanceId");
+            }
+            auto instanceIndex = std::distance(
+                instanceData.instanceIds.begin(),
+                instanceIndexIterator
+            );
+            auto &instance = instanceData.TRSData[instanceIndex];
+
             instance.scale = glm::scale(
                 Math::identityMatrix,
                 scale
@@ -368,23 +430,32 @@ namespace Flare
 
         size_t Node::addInstance()
         {
-            auto newInstanceId = instanceData.numActive;
+            auto newInstanceId = getNextInstanceId();
+
+            auto setInstanceToDefaultValues = [&](auto index){
+                instanceData.modelMatrices[index] = glm::mat4{};
+                instanceData.TRSData[index] = TranslateRotateScaleData{};
+                instanceData.instanceIds[index] = newInstanceId;
+            };
 
             if (modelMatrixBuffer == nullptr) {
                 setParallelBufferSizes(1);
                 instanceData.numActive = 1;
+                setInstanceToDefaultValues(0);
                 return newInstanceId;
             }
 
             const auto modelMatrixBufferSize = modelMatrixBuffer->getSizeInElements();
 
             if (instanceData.numActive < modelMatrixBufferSize) {
+                setInstanceToDefaultValues(instanceData.numActive);
                 ++instanceData.numActive;
                 return newInstanceId;
             }
 
             const auto newModelMatrixBufferSize = modelMatrixBufferSize * 2;
             setParallelBufferSizes(newModelMatrixBufferSize);
+            setInstanceToDefaultValues(instanceData.numActive);
             ++instanceData.numActive;
 
             return newInstanceId;
@@ -405,13 +476,24 @@ namespace Flare
                 return;
             }
 
+            auto removeIndex = std::distance(
+                instanceData.instanceIds.begin(),
+                std::find(instanceData.instanceIds.begin(), instanceData.instanceIds.end(), instanceId)
+            );
+            auto lastActiveInstanceDataIndex = std::min(instanceData.numActive - 1, static_cast<size_t>(0));
+
+            instanceData.instanceIds[removeIndex] = 0;
             std::iter_swap(
-                instanceData.modelMatrices.begin() + instanceId,
-                instanceData.modelMatrices.begin() + std::min(instanceData.numActive - 1, static_cast<size_t>(0))
+                instanceData.modelMatrices.begin() + removeIndex,
+                instanceData.modelMatrices.begin() + lastActiveInstanceDataIndex
             );
             std::iter_swap(
-                instanceData.TRSData.begin() + instanceId,
-                instanceData.TRSData.begin() + std::min(instanceData.numActive - 1, static_cast<size_t>(0))
+                instanceData.TRSData.begin() + removeIndex,
+                instanceData.TRSData.begin() + lastActiveInstanceDataIndex
+            );
+            std::iter_swap(
+                instanceData.instanceIds.begin() + removeIndex,
+                instanceData.instanceIds.begin() + lastActiveInstanceDataIndex
             );
             --instanceData.numActive;
 
@@ -501,6 +583,11 @@ namespace Flare
             }
         }
 
+        size_t Node::getNextInstanceId()
+        {
+            return nextInstanceIdToAssign++;
+        }
+
         void Node::notifyChildRemoved(Node *removedChild)
         {
             removeChildNode(removedChild);
@@ -540,6 +627,7 @@ namespace Flare
         {
             instanceData.modelMatrices.resize(size);
             instanceData.TRSData.resize(size);
+            instanceData.instanceIds.resize(size, 0);
             if (modelMatrixBuffer != nullptr) {
                 modelMatrixBuffer = bufferManager->resizeElements(nodeBaseName + std::to_string(name), size);
                 return;
