@@ -124,7 +124,6 @@ namespace Tutorial
                 }
             }
         }
-        testBunnyNode->translateNode(glm::vec3(-0.5, -0.5, -25));
         testBunnyNode->scaleNode(glm::vec3(2, 2, 2));
         testBunnyNode->setModel(bunnyModel);
         testBunnyNode->setShaderData(bunnyShaderData);
