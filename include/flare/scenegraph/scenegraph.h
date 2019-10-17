@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 
-#include <flare/rendersystem/buffermanager.h>
+#include <flare/rendersystem/resizablebuffer.h>
 #include <flare/rendersystem/shadermanager.h>
 #include <flare/scenegraph/model.h>
 #include <flare/utility/math.h>
@@ -20,7 +20,6 @@ namespace Flare
         {
             private:
                 std::unique_ptr<Node> rootNode;
-                RenderSystem::BufferManager bufferManager;
                 size_t nextNameToAssign = 0;
 
             public:
@@ -66,16 +65,15 @@ namespace Flare
                 std::vector<std::unique_ptr<Node>> children;
                 size_t name = 0;
                 RenderSystem::ShaderData shaderData;
+                RenderSystem::ResizableBuffer modelMatrixBuffer;
                 SceneGraph *sceneGraph = nullptr;
-                RenderSystem::BufferManager *bufferManager = nullptr;
-                RenderSystem::Buffer *modelMatrixBuffer = nullptr;
                 Node *parent = nullptr;
                 Model *model = nullptr;
 
-                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent);
-                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, Model *model);
-                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize);
-                Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize, Model *model);
+                Node(SceneGraph &sceneGraph, size_t name, Node *parent);
+                Node(SceneGraph &sceneGraph, size_t name, Node *parent, Model *model);
+                Node(SceneGraph &sceneGraph, size_t name, Node *parent, size_t instanceCountReserveSize);
+                Node(SceneGraph &sceneGraph, size_t name, Node *parent, size_t instanceCountReserveSize, Model *model);
 
                 void copyModelMatrixBufferOfOtherNode(const Node &other);
                 void deepCopyChildrenOfOtherNode(std::vector<std::unique_ptr<Node>> &destination, const Node &other);
@@ -88,7 +86,7 @@ namespace Flare
                 }
                 void setParallelBufferSizes(size_t size);
             public:
-                ~Node();
+                ~Node() {};
                 Node(Node &&other);
                 Node &operator=(Node &&other);
                 Node(const Node &other) = delete;

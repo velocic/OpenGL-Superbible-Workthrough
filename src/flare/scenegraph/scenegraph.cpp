@@ -13,13 +13,12 @@ namespace Flare
 
         SceneGraph::SceneGraph()
         {
-            rootNode = std::unique_ptr<Node>(new Node(*this, bufferManager, requestName(), nullptr));
+            rootNode = std::unique_ptr<Node>(new Node(*this, requestName(), nullptr));
         }
 
         SceneGraph::SceneGraph(SceneGraph &&other)
         :
             rootNode(std::move(other.rootNode)),
-            bufferManager(std::move(other.bufferManager)),
             nextNameToAssign(std::exchange(other.nextNameToAssign, 0))
         {
         }
@@ -27,7 +26,6 @@ namespace Flare
         SceneGraph &SceneGraph::operator=(SceneGraph &&other)
         {
             rootNode = std::move(other.rootNode);
-            bufferManager = std::move(other.bufferManager);
             nextNameToAssign = std::exchange(other.nextNameToAssign, 0);
 
             return *this;
@@ -48,22 +46,20 @@ namespace Flare
             rootNode->render(Math::identityMatrix);
         }
 
-        Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent)
+        Node::Node(SceneGraph &sceneGraph, size_t name, Node *parent)
         :
             name(name),
             sceneGraph(&sceneGraph),
-            bufferManager(&bufferManager),
             parent(parent)
         {
             setParallelBufferSizes(1);
             instanceData.instanceIds[0] = getNextInstanceId();
         }
 
-        Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, Model *model)
+        Node::Node(SceneGraph &sceneGraph, size_t name, Node *parent, Model *model)
         :
             name(name),
             sceneGraph(&sceneGraph),
-            bufferManager(&bufferManager),
             parent(parent),
             model(model)
         {
@@ -71,11 +67,10 @@ namespace Flare
             instanceData.instanceIds[0] = getNextInstanceId();
         }
 
-        Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize)
+        Node::Node(SceneGraph &sceneGraph, size_t name, Node *parent, size_t instanceCountReserveSize)
         :
             name(name),
             sceneGraph(&sceneGraph),
-            bufferManager(&bufferManager),
             parent(parent)
         {
             setParallelBufferSizes(instanceCountReserveSize);
@@ -84,11 +79,10 @@ namespace Flare
             }
         }
 
-        Node::Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize, Model *model)
+        Node::Node(SceneGraph &sceneGraph, size_t name, Node *parent, size_t instanceCountReserveSize, Model *model)
         :
             name(name),
             sceneGraph(&sceneGraph),
-            bufferManager(&bufferManager),
             parent(parent),
             model(model)
         {
@@ -96,11 +90,6 @@ namespace Flare
             for (size_t i = 0; i < instanceCountReserveSize; ++i) {
                 instanceData.instanceIds[i] = getNextInstanceId();
             }
-        }
-
-        Node::~Node()
-        {
-            bufferManager->destroy(nodeBaseName + std::to_string(name));
         }
 
         Node::Node(Node &&other)
@@ -109,9 +98,8 @@ namespace Flare
             instanceData(std::move(other.instanceData)),
             children(std::move(other.children)),
             name(std::exchange(other.name, 0)),
+            modelMatrixBuffer(std::move(other.modelMatrixBuffer)),
             sceneGraph(std::exchange(other.sceneGraph, nullptr)),
-            bufferManager(std::exchange(other.bufferManager, nullptr)),
-            modelMatrixBuffer(std::exchange(other.modelMatrixBuffer, nullptr)),
             parent(std::exchange(other.parent, nullptr)),
             model(std::exchange(other.model, nullptr))
         {
@@ -124,8 +112,7 @@ namespace Flare
             children = std::move(other.children);
             name = std::exchange(other.name, 0);
             sceneGraph = std::exchange(other.sceneGraph, nullptr);
-            bufferManager = std::exchange(other.bufferManager, nullptr);
-            modelMatrixBuffer = std::exchange(other.modelMatrixBuffer, nullptr);
+            modelMatrixBuffer = std::move(other.modelMatrixBuffer);
             parent = std::exchange(other.parent, nullptr);
             model = std::exchange(other.model, nullptr);
 
@@ -137,7 +124,6 @@ namespace Flare
             for (auto &child : children) {
                 child->destroy();
             }
-            bufferManager->destroy(nodeBaseName + std::to_string(name));
 
             //Delete this instance's backing data (which is owned by this instance's parent)
             if (parent != nullptr) {
@@ -357,14 +343,14 @@ namespace Flare
                 instanceData.instanceIds[index] = newInstanceId;
             };
 
-            if (modelMatrixBuffer == nullptr) {
+            if (modelMatrixBuffer.get() == nullptr) {
                 setParallelBufferSizes(1);
                 instanceData.numActive = 1;
                 setInstanceToDefaultValues(0);
                 return newInstanceId;
             }
 
-            const auto modelMatrixBufferSize = modelMatrixBuffer->getSizeInElements();
+            const auto modelMatrixBufferSize = modelMatrixBuffer.get()->getSizeInElements();
 
             if (instanceData.numActive < modelMatrixBufferSize) {
                 setInstanceToDefaultValues(instanceData.numActive);
@@ -382,7 +368,7 @@ namespace Flare
 
         Node *Node::createChildNode()
         {
-            auto newChild = std::unique_ptr<Node>(new Node(*sceneGraph, *bufferManager, sceneGraph->requestName(), this));
+            auto newChild = std::unique_ptr<Node>(new Node(*sceneGraph, sceneGraph->requestName(), this));
             auto result = newChild.get();
             children.push_back(std::move(newChild));
 
@@ -413,7 +399,7 @@ namespace Flare
                 throw std::runtime_error("Attempted to copy the root scene node (which is disallowed)");
             }
 
-            auto copyNode = std::unique_ptr<Node>(new Node(*sceneGraph, *bufferManager, sceneGraph->requestName(), parent));
+            auto copyNode = std::unique_ptr<Node>(new Node(*sceneGraph, sceneGraph->requestName(), parent));
             copyNode->TRSData = TRSData;
             copyNode->instanceData = instanceData;
             copyNode->model = model;
@@ -455,7 +441,7 @@ namespace Flare
             --instanceData.numActive;
 
             if (instanceData.numActive <= 0) {
-                modelMatrixBuffer->destroy();
+                modelMatrixBuffer.destroy();
             }
         }
 
@@ -464,7 +450,7 @@ namespace Flare
             instanceData.modelMatrices.clear();
             instanceData.TRSData.clear();
             instanceData.numActive = 0;
-            modelMatrixBuffer->destroy();
+            modelMatrixBuffer.destroy();
         }
 
         void Node::removeChildNode(Node *removedChild)
@@ -492,8 +478,8 @@ namespace Flare
 
             updateModelMatrixBuffer(localCoordinateSpace);
 
-            if (model != nullptr && modelMatrixBuffer != nullptr && instanceData.numActive > 0) {
-                model->render(shaderData, *modelMatrixBuffer, instanceData.numActive);
+            if (model != nullptr && modelMatrixBuffer.get() != nullptr && instanceData.numActive > 0) {
+                model->render(shaderData, *modelMatrixBuffer.get(), instanceData.numActive);
             }
 
             for (auto &child : children) {
@@ -503,33 +489,31 @@ namespace Flare
 
         void Node::copyModelMatrixBufferOfOtherNode(const Node &other)
         {
-            if (modelMatrixBuffer != nullptr) {
-                bufferManager->destroy(nodeBaseName + std::to_string(name));
+            if (modelMatrixBuffer.get() != nullptr) {
+                modelMatrixBuffer.destroy();
             }
 
-            const auto &otherModelMatrixBuffer = *other.modelMatrixBuffer;
-            modelMatrixBuffer = bufferManager->create(
-                nodeBaseName + std::to_string(name),
+            modelMatrixBuffer.create(
                 mvpMatrixBufferName,
-                otherModelMatrixBuffer.getContentDescription()
+                other.modelMatrixBuffer.get()->getContentDescription()
             );
-            modelMatrixBuffer->allocateBufferStorage(
-                otherModelMatrixBuffer.getSizeInBytes(),
+            modelMatrixBuffer.get()->allocateBufferStorage(
+                other.modelMatrixBuffer.get()->getSizeInBytes(),
                 nullptr,
-                otherModelMatrixBuffer.getUsageFlags()
+                other.modelMatrixBuffer.get()->getUsageFlags()
             );
-            modelMatrixBuffer->copyRange(
-                otherModelMatrixBuffer,
+            modelMatrixBuffer.get()->copyRange(
+                *other.modelMatrixBuffer.get(),
                 0,
                 0,
-                otherModelMatrixBuffer.getSizeInBytes()
+                other.modelMatrixBuffer.get()->getSizeInBytes()
             );
         }
 
         void Node::deepCopyChildrenOfOtherNode(std::vector<std::unique_ptr<Node>> &destination, const Node &other)
         {
             for (const auto &child : other.children) {
-                auto newNode = std::unique_ptr<Node>(new Node(*sceneGraph, *bufferManager, sceneGraph->requestName(), parent));
+                auto newNode = std::unique_ptr<Node>(new Node(*sceneGraph, sceneGraph->requestName(), parent));
                 newNode->TRSData = child->TRSData;
                 newNode->instanceData = child->instanceData;
                 newNode->model = child->model;
@@ -564,7 +548,7 @@ namespace Flare
                     * instanceData.TRSData[i].scale;
             }
 
-            modelMatrixBuffer->bufferRange(
+            modelMatrixBuffer.get()->bufferRange(
                 0,
                 sizeof(glm::mat4) * instanceData.numActive,
                 instanceData.modelMatrices.data()
@@ -585,17 +569,16 @@ namespace Flare
             instanceData.modelMatrices.resize(size);
             instanceData.TRSData.resize(size);
             instanceData.instanceIds.resize(size, 0);
-            if (modelMatrixBuffer != nullptr) {
-                modelMatrixBuffer = bufferManager->resizeElements(nodeBaseName + std::to_string(name), size);
+            if (modelMatrixBuffer.get() != nullptr) {
+                modelMatrixBuffer.resizeElements(size);
                 return;
             }
 
-            modelMatrixBuffer = bufferManager->create(
-                nodeBaseName + std::to_string(name),
+            modelMatrixBuffer.create(
                 mvpMatrixBufferName,
                 getModelMatrixBufferLayout()
             );
-            modelMatrixBuffer->allocateBufferStorage(
+            modelMatrixBuffer.get()->allocateBufferStorage(
                 sizeof(glm::mat4) * size,
                 nullptr,
                 getModelMatrixBufferUsageFlags()

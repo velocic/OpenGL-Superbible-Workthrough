@@ -25,6 +25,7 @@ namespace Flare
 
                 Buffer *create(const std::string &bufferName, const VertexDataLayout &bufferContentDescription);
                 void destroy();
+                Buffer *get() const { return buffer.get(); };
                 Buffer *resizeBytes(size_t sizeInBytes);
                 Buffer *resizeElements(size_t sizeInElements);
         };
