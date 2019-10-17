@@ -78,7 +78,6 @@ namespace Flare
                 void copyModelMatrixBufferOfOtherNode(const Node &other);
                 void deepCopyChildrenOfOtherNode(std::vector<std::unique_ptr<Node>> &destination, const Node &other);
                 size_t getNextInstanceId();
-                void notifyChildRemoved(Node *child);
                 void updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix);
                 RenderSystem::VertexDataLayout getModelMatrixBufferLayout() const;
                 constexpr RenderSystem::RSbitfield getModelMatrixBufferUsageFlags() const {
@@ -103,7 +102,6 @@ namespace Flare
                 glm::mat4 getNodeLocalTransform() const;
                 glm::mat4 getInstanceLocalTransform(size_t instanceId) const;
 
-                void setParent(Node *newParent);
                 void setModel(Model *newModel);
                 void setShaderData(RenderSystem::ShaderData newShaderData);
 
@@ -125,7 +123,6 @@ namespace Flare
 
                 void removeInstance(size_t instanceId);
                 void removeAllInstances();
-                void removeChildNode(Node *child);
                 void removeAllChildren();
 
                 void render(const glm::mat4 &parentModelMatrix);

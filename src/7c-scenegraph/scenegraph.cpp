@@ -88,8 +88,13 @@ namespace Tutorial
     {
         elapsedTime += deltaTime;
         bunnyNodes[0]->rotateNode(elapsedTime * (0.15/60.0f) * Flare::Math::degreesToRadians(36/360.0f), glm::vec3(0, 0.5, 0.5));
-        bunnyNodes[1]->setNodePosition(glm::vec3(0, std::sin(elapsedTime * (0.001)) * 5, -30));
+        bunnyNodes[2]->setNodePosition(glm::vec3(0, std::sin(elapsedTime * (0.001)) * 5, -30));
         lanternNodes[0]->setNodePosition(glm::vec3(std::sin(elapsedTime * (0.001)) * 15, 0, -200));
+
+        if (elapsedTime >= 10000) {
+            bunnyNodes[1]->addChildNode(bunnyNodes[2]);
+        }
+
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
         sceneGraph->render();
@@ -129,6 +134,7 @@ namespace Tutorial
         testChildOfChildNode->addInstance();
         testChildOfChildNode->translateNode(glm::vec3(0, 10, 0));
         testChildOfChildNode->scaleNode(glm::vec3(10, 10, 10));
+        bunnyNodes.push_back(testChildOfChildNode);
 
         auto testCopyNode = testBunnyNode->copy();
         bunnyNodes.push_back(testCopyNode);

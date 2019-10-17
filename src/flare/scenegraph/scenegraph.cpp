@@ -157,12 +157,6 @@ namespace Flare
                 * instance.translation * instance.rotation * instance.scale;
         }
 
-        void Node::setParent(Node *newParent)
-        {
-            parent->notifyChildRemoved(this);
-            parent = newParent;
-        }
-
         void Node::setModel(Model *newModel)
         {
             model = newModel;
@@ -399,6 +393,7 @@ namespace Flare
                 }
             );
 
+            child->parent = this;
             children.push_back(std::move(*childOwningPointerIterator));
             oldParentNode.children.erase(childOwningPointerIterator);
         }
@@ -463,20 +458,6 @@ namespace Flare
             modelMatrixBuffer.destroy();
         }
 
-        void Node::removeChildNode(Node *removedChild)
-        {
-            children.erase(
-                std::remove_if(
-                    children.begin(),
-                    children.end(),
-                    [&](const auto &child){
-                        return child->getName() == removedChild->getName();
-                    }
-                ),
-                children.end()
-            );
-        }
-
         void Node::removeAllChildren()
         {
             children.clear();
@@ -537,11 +518,6 @@ namespace Flare
         size_t Node::getNextInstanceId()
         {
             return nextInstanceIdToAssign++;
-        }
-
-        void Node::notifyChildRemoved(Node *removedChild)
-        {
-            removeChildNode(removedChild);
         }
 
         void Node::updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix)
