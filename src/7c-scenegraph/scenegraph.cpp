@@ -106,7 +106,7 @@ namespace Tutorial
         auto lanternShaderData = shaderManager->get("lanternShader");
         auto lanternModel = modelManager->get("lantern");
 
-        auto testBunnyNode = sceneGraph->createNode(sceneGraph->getRootNode(), bunnyModel);
+        auto testBunnyNode = sceneGraph->getRootNode()->createChildNode();
         auto bunnyCubeCenterToOriginVector = glm::vec3(9 * .25, 9 * .25, 9 * .25) * .5f;
         for (size_t x = 0; x < 10; ++x) {
             for (size_t y = 0; y < 10; ++y) {
@@ -118,12 +118,14 @@ namespace Tutorial
         }
         testBunnyNode->translateNode(glm::vec3(-0.5, -0.5, -25));
         testBunnyNode->scaleNode(glm::vec3(2, 2, 2));
+        testBunnyNode->setModel(bunnyModel);
         testBunnyNode->setShaderData(bunnyShaderData);
         bunnyNodes.push_back(testBunnyNode);
 
-        auto testLanternNode = sceneGraph->createNode(sceneGraph->getRootNode(), lanternModel);
+        auto testLanternNode = sceneGraph->getRootNode()->createChildNode();
         testLanternNode->addInstance();
         testLanternNode->setShaderData(lanternShaderData);
+        testLanternNode->setModel(lanternModel);
         testLanternNode->addChildNode(testBunnyNode);
         lanternNodes.push_back(testLanternNode);
     }

@@ -78,7 +78,7 @@ namespace Flare
                 Node(SceneGraph &sceneGraph, RenderSystem::BufferManager &bufferManager, size_t name, Node *parent, size_t instanceCountReserveSize, Model *model);
 
                 void copyModelMatrixBufferOfOtherNode(const Node &other);
-                void deepCopyChildrenOfOtherNode(std::vector<Node *> &destination, const Node &other);
+                void deepCopyChildrenOfOtherNode(std::vector<std::unique_ptr<Node>> &destination, const Node &other);
                 size_t getNextInstanceId();
                 void notifyChildRemoved(Node *child);
                 void updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix);
@@ -93,6 +93,11 @@ namespace Flare
                 Node &operator=(Node &&other);
                 Node(const Node &other) = delete;
                 Node &operator=(const Node &other) = delete;
+
+                size_t addInstance();
+                void addChildNode(Node *child);
+                Node *createChildNode();
+                Node *copy();
 
                 void destroy();
 
@@ -120,10 +125,6 @@ namespace Flare
                 void setInstanceRotation(size_t instanceId, float angleRadians, const glm::vec3 &axis);
                 void setInstanceScale(size_t instanceId, const glm::vec3 &scale);
 
-                size_t addInstance();
-                void addChildNode();
-                void addChildNode(Node *child);
-                Node *copy();
                 void removeInstance(size_t instanceId);
                 void removeAllInstances();
                 void removeChildNode(Node *child);

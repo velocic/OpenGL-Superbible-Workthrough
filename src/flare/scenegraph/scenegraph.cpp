@@ -55,10 +55,6 @@ namespace Flare
             bufferManager(&bufferManager),
             parent(parent)
         {
-            if (parent != nullptr) {
-                parent->addChildNode(this);
-            }
-
             setParallelBufferSizes(1);
             instanceData.instanceIds[0] = getNextInstanceId();
         }
@@ -71,10 +67,6 @@ namespace Flare
             parent(parent),
             model(model)
         {
-            if (parent != nullptr) {
-                parent->addChildNode(this);
-            }
-
             setParallelBufferSizes(1);
             instanceData.instanceIds[0] = getNextInstanceId();
         }
@@ -86,10 +78,6 @@ namespace Flare
             bufferManager(&bufferManager),
             parent(parent)
         {
-            if (parent != nullptr) {
-                parent->addChildNode(this);
-            }
-
             setParallelBufferSizes(instanceCountReserveSize);
             for (size_t i = 0; i < instanceCountReserveSize; ++i) {
                 instanceData.instanceIds[i] = getNextInstanceId();
@@ -104,10 +92,6 @@ namespace Flare
             parent(parent),
             model(model)
         {
-            if (parent != nullptr) {
-                parent->addChildNode(this);
-            }
-
             setParallelBufferSizes(instanceCountReserveSize);
             for (size_t i = 0; i < instanceCountReserveSize; ++i) {
                 instanceData.instanceIds[i] = getNextInstanceId();
@@ -116,7 +100,7 @@ namespace Flare
 
         Node::~Node()
         {
-            destroy();
+            bufferManager->destroy(nodeBaseName + std::to_string(name));
         }
 
         Node::Node(Node &&other)
@@ -150,10 +134,24 @@ namespace Flare
 
         void Node::destroy()
         {
-            for (auto child : children) {
+            for (auto &child : children) {
                 child->destroy();
             }
             bufferManager->destroy(nodeBaseName + std::to_string(name));
+
+            //Delete this instance's backing data (which is owned by this instance's parent)
+            if (parent != nullptr) {
+                auto thisInstancesOwningPointerIterator = std::find_if(
+                    parent->children.begin(),
+                    parent->children.end(),
+                    [&](const auto &parentsChild){
+                        return parentsChild->getName() == getName();
+                    }
+                );
+                if (thisInstancesOwningPointerIterator != parent->children.end()) {
+                    parent->children.erase(thisInstancesOwningPointerIterator);
+                }
+            }
         }
 
         size_t Node::getName() const
@@ -382,9 +380,13 @@ namespace Flare
             return newInstanceId;
         }
 
-        void Node::addChildNode()
+        Node *Node::createChildNode()
         {
-            children.push_back(std::unique_ptr<Node>(new Node(*sceneGraph, *bufferManager, sceneGraph->requestName(), this)));
+            auto newChild = std::unique_ptr<Node>(new Node(*sceneGraph, *bufferManager, sceneGraph->requestName(), this));
+            auto result = newChild.get();
+            children.push_back(std::move(newChild));
+
+            return result;
         }
 
         void Node::addChildNode(Node *child)
@@ -471,7 +473,7 @@ namespace Flare
                 std::remove_if(
                     children.begin(),
                     children.end(),
-                    [&](const auto child){
+                    [&](const auto &child){
                         return child->getName() == removedChild->getName();
                     }
                 ),
@@ -494,7 +496,7 @@ namespace Flare
                 model->render(shaderData, *modelMatrixBuffer, instanceData.numActive);
             }
 
-            for (auto child : children) {
+            for (auto &child : children) {
                 child->render(localCoordinateSpace);
             }
         }
@@ -524,16 +526,16 @@ namespace Flare
             );
         }
 
-        void Node::deepCopyChildrenOfOtherNode(std::vector<Node *> &destination, const Node &other)
+        void Node::deepCopyChildrenOfOtherNode(std::vector<std::unique_ptr<Node>> &destination, const Node &other)
         {
-            if (other.children.empty()) {
-                return;
-            }
-
-            for (const auto child : other.children) {
-                auto newNode = sceneGraph->createNode(nullptr);
-                *newNode = *child;
-                destination.push_back(newNode);
+            for (const auto &child : other.children) {
+                auto newNode = std::unique_ptr<Node>(new Node(*sceneGraph, *bufferManager, sceneGraph->requestName(), parent));
+                newNode->TRSData = child->TRSData;
+                newNode->instanceData = child->instanceData;
+                newNode->model = child->model;
+                newNode->shaderData = child->shaderData;
+                newNode->copyModelMatrixBufferOfOtherNode(*child);
+                destination.push_back(std::move(newNode));
                 deepCopyChildrenOfOtherNode(newNode->children, *child);
             }
         }
