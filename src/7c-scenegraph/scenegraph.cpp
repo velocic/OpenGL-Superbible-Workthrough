@@ -88,6 +88,7 @@ namespace Tutorial
     {
         elapsedTime += deltaTime;
         bunnyNodes[0]->rotateNode(elapsedTime * (0.15/60.0f) * Flare::Math::degreesToRadians(36/360.0f), glm::vec3(0, 0.5, 0.5));
+        bunnyNodes[1]->setNodePosition(glm::vec3(0, std::sin(elapsedTime * (0.001)) * 5, -30));
         lanternNodes[0]->setNodePosition(glm::vec3(std::sin(elapsedTime * (0.001)) * 15, 0, -200));
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
@@ -121,6 +122,16 @@ namespace Tutorial
         testBunnyNode->setModel(bunnyModel);
         testBunnyNode->setShaderData(bunnyShaderData);
         bunnyNodes.push_back(testBunnyNode);
+
+        auto testChildOfChildNode = testBunnyNode->createChildNode();
+        testChildOfChildNode->setShaderData(bunnyShaderData);
+        testChildOfChildNode->setModel(bunnyModel);
+        testChildOfChildNode->addInstance();
+        testChildOfChildNode->translateNode(glm::vec3(0, 10, 0));
+        testChildOfChildNode->scaleNode(glm::vec3(10, 10, 10));
+
+        auto testCopyNode = testBunnyNode->copy();
+        bunnyNodes.push_back(testCopyNode);
 
         auto testLanternNode = sceneGraph->getRootNode()->createChildNode();
         testLanternNode->addInstance();

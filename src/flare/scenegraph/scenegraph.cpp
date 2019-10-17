@@ -380,6 +380,16 @@ namespace Flare
             if (child->parent == nullptr) {
                 throw std::runtime_error("Attempted to re-parent the root scene node (which is disallowed) or the passed argument has no parent (which is only allowed for the root scene node)");
             }
+
+            if (child->getName() == getName()) {
+                throw std::runtime_error("Attempted to re-parent a scene node to itself");
+            }
+
+            if (child->parent->getName() == getName()) {
+                //Attempting to reparent to the same parent; nothing to do.
+                return;
+            }
+
             auto &oldParentNode = *child->parent;
             auto childOwningPointerIterator = std::find_if(
                 oldParentNode.children.begin(),
@@ -408,7 +418,7 @@ namespace Flare
             copyNode->copyModelMatrixBufferOfOtherNode(*this);
 
             auto result = copyNode.get();
-            children.push_back(std::move(copyNode));
+            parent->children.push_back(std::move(copyNode));
 
             return result;
         }
