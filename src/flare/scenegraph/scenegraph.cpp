@@ -396,7 +396,7 @@ namespace Flare
 
         void Node::removeInstance(size_t instanceId)
         {
-            if (instanceData.numActive <= 0) {
+            if (instanceData.numActive == 0) {
                 return;
             }
 
@@ -406,9 +406,8 @@ namespace Flare
             }
             auto removeIndex = removeIndexIterator->second;
 
-            auto lastActiveInstanceDataIndex = std::min(instanceData.numActive - 1, static_cast<size_t>(0));
+            auto lastActiveInstanceDataIndex = instanceData.numActive - 1;
 
-            instanceData.instanceIdLookupTable[removeIndex] = 0;
             std::iter_swap(
                 instanceData.modelMatrices.begin() + removeIndex,
                 instanceData.modelMatrices.begin() + lastActiveInstanceDataIndex
@@ -417,10 +416,10 @@ namespace Flare
                 instanceData.TRSData.begin() + removeIndex,
                 instanceData.TRSData.begin() + lastActiveInstanceDataIndex
             );
-            instanceData.instanceIdLookupTable.erase(removeIndex);
+            instanceData.instanceIdLookupTable.erase(instanceId);
             --instanceData.numActive;
 
-            if (instanceData.numActive <= 0) {
+            if (instanceData.numActive == 0) {
                 modelMatrixBuffer.destroy();
             }
         }

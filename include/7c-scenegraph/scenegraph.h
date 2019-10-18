@@ -27,6 +27,7 @@ namespace Tutorial
             const std::string lanternVertexShaderPath{"../src/7c-scenegraph/shaders/lantern-vertex.glsl"};
             const std::string lanternFragmentShaderPath{"../src/7c-scenegraph/shaders/lantern-fragment.glsl"};
             unsigned long long elapsedTime = 0;
+            size_t instanceIdToRemove = 1000;
 
             std::vector<Flare::SceneGraph::Node *> bunnyNodes;
             std::vector<Flare::SceneGraph::Node *> lanternNodes;

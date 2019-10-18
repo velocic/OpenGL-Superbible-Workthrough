@@ -97,6 +97,10 @@ namespace Tutorial
             bunnyNodes[2]->setNodePosition(glm::vec3(0, std::sin(elapsedTime * (0.001)) * 5, -30));
         }
 
+        if (instanceIdToRemove > 0) {
+            bunnyNodes[2]->removeInstance(instanceIdToRemove--);
+        }
+
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
         sceneGraph->render();
