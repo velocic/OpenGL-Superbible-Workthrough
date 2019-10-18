@@ -53,7 +53,7 @@ namespace Flare
                 struct InstanceData {
                     std::vector<glm::mat4> modelMatrices;
                     std::vector<TranslateRotateScaleData> TRSData;
-                    std::vector<size_t> instanceIds;
+                    std::unordered_map<size_t, size_t> instanceIdLookupTable;
                     size_t numActive = 0;
                 };
 

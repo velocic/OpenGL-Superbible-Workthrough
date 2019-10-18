@@ -90,7 +90,7 @@ namespace Tutorial
         bunnyNodes[0]->rotateNode(elapsedTime * (0.15/60.0f) * Flare::Math::degreesToRadians(36/360.0f), glm::vec3(0, 0.5, 0.5));
         lanternNodes[0]->setNodePosition(glm::vec3(std::sin(elapsedTime * (0.001)) * 15, 0, -200));
 
-        if (elapsedTime >= 10000) {
+        if (elapsedTime >= 5000) {
             bunnyNodes[1]->addChildNode(bunnyNodes[2]);
             bunnyNodes[2]->setNodePosition(glm::vec3(0, 0, 0));
         } else {
