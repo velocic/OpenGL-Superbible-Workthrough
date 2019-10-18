@@ -6,6 +6,7 @@
 #include <flare/rendersystem/resizablebuffer.h>
 #include <flare/rendersystem/shadermanager.h>
 #include <flare/scenegraph/model.h>
+#include <flare/utility/datatypes.h>
 #include <flare/utility/math.h>
 
 #include <glm-0.9.9/glm.hpp>
@@ -94,8 +95,10 @@ namespace Flare
                 size_t addInstance();
                 void addChildNode(Node *child);
                 Node *createChildNode();
-                Node *copy();
+                Node *copy() const;
 
+                DataTypes::DecomposedModelMatrix decomposeInstance(size_t instanceId) const;
+                DataTypes::DecomposedModelMatrix decomposeNode() const;
                 void destroy();
 
                 size_t getName() const;

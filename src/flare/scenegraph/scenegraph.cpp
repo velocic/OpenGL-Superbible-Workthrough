@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <glm-0.9.9/gtx/matrix_decompose.hpp>
+
 namespace Flare
 {
     namespace SceneGraph
@@ -117,6 +119,43 @@ namespace Flare
             model = std::exchange(other.model, nullptr);
 
             return *this;
+        }
+
+        DataTypes::DecomposedModelMatrix Node::decomposeInstance(size_t instanceId) const
+        {
+            auto instanceIndexIterator = instanceData.instanceIdLookupTable.find(instanceId);
+            if (instanceIndexIterator == instanceData.instanceIdLookupTable.end()) {
+                throw std::runtime_error("Attempted to decompose an invalid instanceId");
+            }
+            auto &instance = instanceData.TRSData[instanceIndexIterator->second];
+
+            auto result = DataTypes::DecomposedModelMatrix{};
+            glm::decompose(
+                getInstanceLocalTransform(instanceId),
+                result.scale,
+                result.orientation,
+                result.translation,
+                result.skew,
+                result.perspective
+            );
+
+            return result;
+        }
+
+        DataTypes::DecomposedModelMatrix Node::decomposeNode() const
+        {
+            auto result = DataTypes::DecomposedModelMatrix{};
+
+            glm::decompose(
+                getNodeLocalTransform(),
+                result.scale,
+                result.orientation,
+                result.translation,
+                result.skew,
+                result.perspective
+            );
+
+            return result;
         }
 
         void Node::destroy()
@@ -374,7 +413,7 @@ namespace Flare
             oldParentNode.children.erase(childOwningPointerIterator);
         }
 
-        Node *Node::copy()
+        Node *Node::copy() const
         {
             if (parent == nullptr) {
                 throw std::runtime_error("Attempted to copy the root scene node (which is disallowed)");

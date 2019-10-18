@@ -6,7 +6,7 @@ set(SAMPLE_RUNNER_NAME sample-browser)
 
 set(FLARE_RENDERSYSTEM_TYPE RENDERSYSTEM_GL4 CACHE EXTERNAL STRING)
 
-add_compile_options(-std=c++17 -Wall -Wextra -ggdb3 -D${FLARE_RENDERSYSTEM_TYPE})
+add_compile_options(-std=c++17 -Wall -Wextra -ggdb3 -D${FLARE_RENDERSYSTEM_TYPE} -DGLM_ENABLE_EXPERIMENTAL)
 set(PROJECT_SOURCE_DIR "${PROJECT_BINARY_DIR}/src")
 
 add_executable(
