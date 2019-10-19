@@ -125,6 +125,8 @@ namespace Flare
                     subMeshEntry.baseVertex,
                     0
                 };
+
+                result.push_back(std::move(drawCommand));
             }
 
             return result;

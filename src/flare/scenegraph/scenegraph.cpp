@@ -48,6 +48,36 @@ namespace Flare
             rootNode->render(Math::identityMatrix);
         }
 
+        void SceneGraph::renderIndirect()
+        {
+            using MaterialIdToDrawCommandMap = std::unordered_map<size_t, std::vector<Mesh::SortableDrawElementsIndirectCommand>>;
+            using ShaderIdToMaterialMap = std::unordered_map<size_t, MaterialIdToDrawCommandMap>;
+
+            auto unsortedDrawCommands = rootNode->getIndirectDrawCommands(Math::identityMatrix);
+            auto sortedDrawCommands = ShaderIdToMaterialMap{};
+
+            for (const auto &unsortedDrawCommand : unsortedDrawCommands) {
+                auto materialId = size_t{0};
+                if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(unsortedDrawCommand.textures)) {
+                    materialId = std::get<RenderSystem::PhongMaterialTextures>(unsortedDrawCommand.textures).materialId;
+                } else if (std::holds_alternative<RenderSystem::PBRMaterialTextures>(unsortedDrawCommand.textures)) {
+                    materialId = std::get<RenderSystem::PBRMaterialTextures>(unsortedDrawCommand.textures).materialId;
+                } else {
+                    materialId = -1;
+                }
+
+                sortedDrawCommands[unsortedDrawCommand.shaderData.hashedAlias][materialId].push_back(unsortedDrawCommand);
+            }
+
+            for (auto &shaderEntry : sortedDrawCommands) {
+                //bind shader, vao
+                for (auto &materialEntry : shaderEntry.second) {
+                    //bind textures
+                    //render every mesh
+                }
+            }
+        }
+
         Node::Node(SceneGraph &sceneGraph, size_t name, Node *parent)
         :
             name(name),
@@ -127,7 +157,6 @@ namespace Flare
             if (instanceIndexIterator == instanceData.instanceIdLookupTable.end()) {
                 throw std::runtime_error("Attempted to decompose an invalid instanceId");
             }
-            auto &instance = instanceData.TRSData[instanceIndexIterator->second];
 
             auto result = DataTypes::DecomposedModelMatrix{};
             glm::decompose(
@@ -507,6 +536,8 @@ namespace Flare
                 auto childAccumulatedDrawCommands = child->getIndirectDrawCommands(localCoordinateSpace);
                 std::move(childAccumulatedDrawCommands.begin(), childAccumulatedDrawCommands.end(), std::back_inserter(accumulatedResults));
             }
+
+            return accumulatedResults;
         }
 
         void Node::copyModelMatrixBufferOfOtherNode(const Node &other)

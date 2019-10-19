@@ -34,6 +34,7 @@ namespace Flare
                 void destroy();
                 Node *getRootNode() const;
                 void render();
+                void renderIndirect();
 
                 //Used for fetching a unique numeric id for nodes on creation.
                 //Public so that nodes can request this in their copy constructor
