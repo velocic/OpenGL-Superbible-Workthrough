@@ -36,5 +36,18 @@ namespace Flare
                 mesh->render(instanceCount);
             }
         }
+
+        std::vector<Mesh::SortableDrawElementsIndirectCommand> Model::getIndirectDrawCommands(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount) const
+        {
+            auto result = std::vector<Mesh::SortableDrawElementsIndirectCommand>{};
+
+            for (auto &mesh : meshes) {
+                mesh->bind(shaderData, mvpMatrixBuffer);
+                auto meshDrawCommands = mesh->getIndirectDrawCommands(instanceCount);
+                std::move(meshDrawCommands.begin(), meshDrawCommands.end(), std::back_inserter(result));
+            }
+
+            return result;
+        }
     }
 }
