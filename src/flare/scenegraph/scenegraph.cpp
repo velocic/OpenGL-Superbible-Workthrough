@@ -491,6 +491,24 @@ namespace Flare
             }
         }
 
+        std::vector<Mesh::SortableDrawElementsIndirectCommand> Node::getIndirectDrawCommands(const glm::mat4 &parentModelMatrix)
+        {
+            const auto localCoordinateSpace = parentModelMatrix * TRSData.translation * TRSData.rotation * TRSData.scale;
+            updateModelMatrixBuffer(localCoordinateSpace);
+
+            auto accumulatedResults = std::vector<Mesh::SortableDrawElementsIndirectCommand>{};
+
+            if (model != nullptr && modelMatrixBuffer.get() != nullptr && instanceData.numActive > 0) {
+                auto modelDrawCommands = model->getIndirectDrawCommands(shaderData, *modelMatrixBuffer.get(), instanceData.numActive);
+                std::move(modelDrawCommands.begin(), modelDrawCommands.end(), std::back_inserter(accumulatedResults));
+            }
+
+            for (auto &child : children) {
+                auto childAccumulatedDrawCommands = child->getIndirectDrawCommands(localCoordinateSpace);
+                std::move(childAccumulatedDrawCommands.begin(), childAccumulatedDrawCommands.end(), std::back_inserter(accumulatedResults));
+            }
+        }
+
         void Node::copyModelMatrixBufferOfOtherNode(const Node &other)
         {
             if (modelMatrixBuffer.get() != nullptr) {

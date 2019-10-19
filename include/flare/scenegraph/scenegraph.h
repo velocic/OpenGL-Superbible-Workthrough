@@ -129,6 +129,7 @@ namespace Flare
                 void removeAllChildren();
 
                 void render(const glm::mat4 &parentModelMatrix);
+                std::vector<Mesh::SortableDrawElementsIndirectCommand> getIndirectDrawCommands(const glm::mat4 &parentModelMatrix);
         };
     }
 }
