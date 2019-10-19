@@ -101,6 +101,9 @@ namespace Flare
 
         void BasicMesh::bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer)
         {
+            boundData.shaderData = shaderData;
+            boundData.mvpMatrixBuffer = &mvpMatrixBuffer;
+
             if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(textures)) {
                 const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(textures);
                 for (size_t i = 0; i < phongTextures.diffuse.size(); ++i) {
@@ -147,6 +150,26 @@ namespace Flare
                 0, //offset into buffer containing elements (this buffer is elements only, so no offset necessary)
                 instanceCount //size of MVP matrix buffer, handed down from SceneNode -> Model -> BasicMesh
             );
+        }
+
+        std::vector<Mesh::SortableDrawElementsIndirectCommand> BasicMesh::getIndirectDrawCommands(size_t instanceCount) const
+        {
+            auto result = std::vector<Mesh::SortableDrawElementsIndirectCommand>{};
+            auto drawCommand = Mesh::SortableDrawElementsIndirectCommand{};
+            drawCommand.textures = textures;
+            drawCommand.shaderData = boundData.shaderData;
+            drawCommand.mvpMatrixBuffer = boundData.mvpMatrixBuffer;
+            drawCommand.drawElementsIndirectCommand = RenderSystem::DrawElementsIndirectCommand{
+                elementCount,
+                instanceCount,
+                0,
+                0,
+                0
+            };
+
+            result.push_back(std::move(drawCommand));
+
+            return result;
         }
     }
 }

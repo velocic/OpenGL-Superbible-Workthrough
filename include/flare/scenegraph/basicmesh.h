@@ -21,6 +21,7 @@ namespace Flare
                 std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, std::nullptr_t> textures;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
+                BoundData boundData;
                 size_t elementCount = 0;
 
                 void populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
@@ -37,6 +38,7 @@ namespace Flare
                 virtual void destroy() override;
                 virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer) override;
                 virtual void render(size_t instanceCount) override;
+                virtual std::vector<SortableDrawElementsIndirectCommand> getIndirectDrawCommands(size_t instanceCount) const override;
         };
     }
 }

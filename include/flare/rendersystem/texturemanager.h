@@ -17,12 +17,14 @@ namespace Flare
             std::vector<Texture *> normal;
             std::vector<Texture *> metallic;
             std::vector<Texture *> roughness;
+            size_t materialId = 0;
         };
 
         struct PhongMaterialTextures {
             std::vector<Texture *> diffuse;
             std::vector<Texture *> specular;
             std::vector<Texture *> normal;
+            size_t materialId = 0;
         };
 
         class TextureManager
@@ -33,12 +35,14 @@ namespace Flare
                     std::vector<std::unique_ptr<Texture>> normal;
                     std::vector<std::unique_ptr<Texture>> metallic;
                     std::vector<std::unique_ptr<Texture>> roughness;
+                    size_t materialId = 0;
                 };
 
                 struct PhongMaterialTextures {
                     std::vector<std::unique_ptr<Texture>> diffuse;
                     std::vector<std::unique_ptr<Texture>> specular;
                     std::vector<std::unique_ptr<Texture>> normal;
+                    size_t materialId = 0;
                 };
             public:
                 static constexpr RSsizei DEFAULT_NUM_MIPMAP_LEVELS = 4;

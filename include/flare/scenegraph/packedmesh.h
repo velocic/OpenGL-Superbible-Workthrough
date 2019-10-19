@@ -21,11 +21,6 @@ namespace Flare
             public:
                 struct SubMeshEntry;
             private:
-                struct BoundData {
-                    RenderSystem::ShaderData shaderData;
-                    const RenderSystem::Buffer *mvpMatrixBuffer = nullptr;
-                };
-
                 std::vector<SubMeshEntry> subMeshEntries;
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
@@ -37,7 +32,7 @@ namespace Flare
                     std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, std::nullptr_t> textures;
                     RenderSystem::RSsizei elementCount;
                     RenderSystem::RSint baseVertex;
-                    void *elementBufferOffset = nullptr;
+                    size_t elementBufferOffset = 0;
                 };
 
                 PackedMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<SubMeshEntry> &&subMeshEntries);
@@ -50,6 +45,7 @@ namespace Flare
                 virtual void destroy() override;
                 virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer) override;
                 virtual void render(size_t instanceCount) override;
+                virtual std::vector<SortableDrawElementsIndirectCommand> getIndirectDrawCommands(size_t instanceCount) const override;
         };
     }
 }

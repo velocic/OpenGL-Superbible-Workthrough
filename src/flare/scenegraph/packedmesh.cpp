@@ -95,12 +95,39 @@ namespace Flare
                     GL_TRIANGLES,
                     subMeshEntry.elementCount,
                     GL_UNSIGNED_INT,
-                    subMeshEntry.elementBufferOffset,
+                    reinterpret_cast<void *>(subMeshEntry.elementBufferOffset),
                     instanceCount,
                     subMeshEntry.baseVertex,
                     0
                 );
             }
+        }
+
+        std::vector<Mesh::SortableDrawElementsIndirectCommand> PackedMesh::getIndirectDrawCommands(size_t instanceCount) const
+        {
+            if (boundData.shaderData.shader == nullptr
+                || boundData.shaderData.vertexArray == nullptr
+                || boundData.mvpMatrixBuffer == nullptr) {
+                throw std::runtime_error("Packed mesh has not been bound; Invalid render operation.");
+            }
+
+            auto result = std::vector<Mesh::SortableDrawElementsIndirectCommand>{};
+
+            for (const auto &subMeshEntry : subMeshEntries) {
+                auto drawCommand = Mesh::SortableDrawElementsIndirectCommand{};
+                drawCommand.textures = subMeshEntry.textures;
+                drawCommand.shaderData = boundData.shaderData;
+                drawCommand.mvpMatrixBuffer = boundData.mvpMatrixBuffer;
+                drawCommand.drawElementsIndirectCommand = RenderSystem::DrawElementsIndirectCommand{
+                    subMeshEntry.elementCount,
+                    instanceCount,
+                    subMeshEntry.elementBufferOffset,
+                    subMeshEntry.baseVertex,
+                    0
+                };
+            }
+
+            return result;
         }
 
         void PackedMesh::populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices)

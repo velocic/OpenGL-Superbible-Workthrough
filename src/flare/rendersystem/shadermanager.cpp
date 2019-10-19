@@ -29,7 +29,8 @@ namespace Flare
             if (result != shaders.end()) {
                 return RenderSystem::ShaderData{
                     result->second.shader.get(),
-                    result->second.vertexArray.get()
+                    result->second.vertexArray.get(),
+                    result->second.hashedAlias
                 };
             }
 
@@ -38,11 +39,13 @@ namespace Flare
 
         void ShaderManager::insert(std::unique_ptr<Flare::RenderSystem::ShaderProgram> &&shader, std::unique_ptr<Flare::RenderSystem::VertexArray> &&vertexArray, const std::string &alias)
         {
+            auto hashedAlias = stringHasher(alias);
             shaders.insert_or_assign(
-                stringHasher(alias),
+                hashedAlias,
                 ShaderData{
                     std::move(shader),
-                    std::move(vertexArray)
+                    std::move(vertexArray),
+                    hashedAlias
                 }
             );
         }

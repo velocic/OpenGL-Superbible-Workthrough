@@ -15,6 +15,7 @@ namespace Flare
         {
             Flare::RenderSystem::ShaderProgram *shader = nullptr;
             Flare::RenderSystem::VertexArray *vertexArray = nullptr;
+            size_t hashedAlias = 0;
         };
 
         class ShaderManager
@@ -24,6 +25,7 @@ namespace Flare
                 {
                     std::unique_ptr<Flare::RenderSystem::ShaderProgram> shader = nullptr;
                     std::unique_ptr<Flare::RenderSystem::VertexArray> vertexArray = nullptr;
+                    size_t hashedAlias = 0;
                 };
 
                 std::unordered_map<size_t, ShaderData> shaders;

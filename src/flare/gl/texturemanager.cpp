@@ -112,7 +112,9 @@ namespace Flare
 
             auto entryExists = PBRTextures.find(lookupKey) != PBRTextures.end();
             if (!entryExists) {
-                PBRTextures.insert_or_assign(lookupKey, PBRMaterialTextures{});
+                auto newEntry = PBRMaterialTextures{};
+                newEntry.materialId = lookupKey;
+                PBRTextures.insert_or_assign(lookupKey, std::move(newEntry));
             }
             auto &entry = PBRTextures.find(lookupKey)->second;
 
@@ -148,7 +150,9 @@ namespace Flare
 
             auto entryExists = phongTextures.find(lookupKey) != phongTextures.end();
             if (!entryExists) {
-                phongTextures.insert_or_assign(lookupKey, PhongMaterialTextures{});
+                auto newEntry = PhongMaterialTextures{};
+                newEntry.materialId = lookupKey;
+                phongTextures.insert_or_assign(lookupKey, std::move(newEntry));
             }
             auto &entry = phongTextures.find(lookupKey)->second;
 
@@ -340,6 +344,8 @@ namespace Flare
                 nonOwningPointers.roughness.push_back(texture.get());
             }
 
+            nonOwningPointers.materialId = owningPointers.materialId;
+
             return nonOwningPointers;
         }
 
@@ -362,6 +368,8 @@ namespace Flare
             for (const auto &texture : owningPointers.normal) {
                 nonOwningPointers.normal.push_back(texture.get());
             }
+
+            nonOwningPointers.materialId = owningPointers.materialId;
 
             return nonOwningPointers;
         }
