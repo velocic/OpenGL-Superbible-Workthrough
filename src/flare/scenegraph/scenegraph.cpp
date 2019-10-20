@@ -69,11 +69,52 @@ namespace Flare
                 sortedDrawCommands[unsortedDrawCommand.shaderData.hashedAlias][materialId].push_back(unsortedDrawCommand);
             }
 
+            //TODO: buffer draw commands
+            //TODO: call glMultiDrawElementsIndirect
+
             for (auto &shaderEntry : sortedDrawCommands) {
-                //bind shader, vao
+                auto shaderBound = false;
                 for (auto &materialEntry : shaderEntry.second) {
-                    //bind textures
-                    //render every mesh
+                    auto materialTexturesBound = false;
+
+                    for (auto &drawCommand : materialEntry.second) {
+                        if (!shaderBound) {
+                            drawCommand.shaderData.shader->bind();
+                            drawCommand.shaderData.vertexArray->bind();
+                            shaderBound = true;
+                        }
+
+                        if (!materialTexturesBound) {
+                            if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(materialEntry.textures)) {
+                                const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(materialEntry.textures);
+                                for (size_t i = 0; i < phongTextures.diffuse.size(); ++i) {
+                                    drawCommand.shaderData.shader->setTexture("textureDiffuse" + std::to_string(i), phongTextures.diffuse[i]);
+                                }
+                                for (size_t i = 0; i < phongTextures.specular.size(); ++i) {
+                                    drawCommand.shaderData.shader->setTexture("textureSpecular" + std::to_string(i), phongTextures.specular[i]);
+                                }
+                                for (size_t i = 0; i < phongTextures.normal.size(); ++i) {
+                                    drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(i), phongTextures.normal[i]);
+                                }
+                            } else if (std::holds_alternative<RenderSystem::PBRMaterialTextures>(materialEntry.textures)) {
+                                const auto &PBRTextures = std::get<RenderSystem::PBRMaterialTextures>(materialEntry.textures);
+
+                                for (size_t i = 0; i < PBRTextures.baseColor.size(); ++i) {
+                                    drawCommand.shaderData.shader->setTexture("textureBaseColor" + std::to_string(i), PBRTextures.baseColor[i]);
+                                }
+                                for (size_t i = 0; i < PBRTextures.normal.size(); ++i) {
+                                    drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(i), PBRTextures.normal[i]);
+                                }
+                                for (size_t i = 0; i < PBRTextures.metallic.size(); ++i) {
+                                    drawCommand.shaderData.shader->setTexture("textureMetallic" + std::to_string(i), PBRTextures.metallic[i]);
+                                }
+                                for (size_t i = 0; i < PBRTextures.roughness.size(); ++i) {
+                                    drawCommand.shaderData.shader->setTexture("textureRoughness" + std::to_string(i), PBRTextures.roughness[i]);
+                                }
+                            }
+                            materialTexturesBound = true;
+                        }
+                    }
                 }
             }
         }
