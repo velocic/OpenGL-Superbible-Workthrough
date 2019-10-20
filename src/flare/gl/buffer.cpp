@@ -187,6 +187,7 @@ namespace Flare
             //needs to update. It will be destroyed completely at the next call to
             //mapNamedBufferRange();
             mappedBuffer->valid = false;
+            isCurrentlyMapped = false;
         }
 
         void Buffer::clearRange(RenderSystem::RSenum internalFormat, RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr size, RenderSystem::RSenum format, RenderSystem::RSenum type, const void *data)

@@ -90,8 +90,6 @@ namespace Flare
                 sortedDrawCommands[unsortedDrawCommand.shaderData.hashedAlias][materialId].push_back(unsortedDrawCommand);
             }
 
-            //TODO: buffer draw commands
-            //TODO: call glMultiDrawElementsIndirect
             for (auto &shaderEntry : sortedDrawCommands) {
                 auto shaderBound = false;
                 for (auto &materialEntry : shaderEntry.second) {
@@ -107,33 +105,43 @@ namespace Flare
                         if (!materialTexturesBound) {
                             if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(materialEntry.second[0].textures)) {
                                 const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(materialEntry.second[0].textures);
-                                for (size_t i = 0; i < phongTextures.diffuse.size(); ++i) {
-                                    drawCommand.shaderData.shader->setTexture("textureDiffuse" + std::to_string(i), phongTextures.diffuse[i]);
+                                for (size_t materialTextureIndex = 0; materialTextureIndex < phongTextures.diffuse.size(); ++materialTextureIndex) {
+                                    drawCommand.shaderData.shader->setTexture("textureDiffuse" + std::to_string(materialTextureIndex), phongTextures.diffuse[materialTextureIndex]);
                                 }
-                                for (size_t i = 0; i < phongTextures.specular.size(); ++i) {
-                                    drawCommand.shaderData.shader->setTexture("textureSpecular" + std::to_string(i), phongTextures.specular[i]);
+                                for (size_t materialTextureIndex = 0; materialTextureIndex < phongTextures.specular.size(); ++materialTextureIndex) {
+                                    drawCommand.shaderData.shader->setTexture("textureSpecular" + std::to_string(materialTextureIndex), phongTextures.specular[materialTextureIndex]);
                                 }
-                                for (size_t i = 0; i < phongTextures.normal.size(); ++i) {
-                                    drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(i), phongTextures.normal[i]);
+                                for (size_t materialTextureIndex = 0; materialTextureIndex < phongTextures.normal.size(); ++materialTextureIndex) {
+                                    drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(materialTextureIndex), phongTextures.normal[materialTextureIndex]);
                                 }
                             } else if (std::holds_alternative<RenderSystem::PBRMaterialTextures>(materialEntry.second[0].textures)) {
                                 const auto &PBRTextures = std::get<RenderSystem::PBRMaterialTextures>(materialEntry.second[0].textures);
 
-                                for (size_t i = 0; i < PBRTextures.baseColor.size(); ++i) {
-                                    drawCommand.shaderData.shader->setTexture("textureBaseColor" + std::to_string(i), PBRTextures.baseColor[i]);
+                                for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.baseColor.size(); ++materialTextureIndex) {
+                                    drawCommand.shaderData.shader->setTexture("textureBaseColor" + std::to_string(materialTextureIndex), PBRTextures.baseColor[materialTextureIndex]);
                                 }
-                                for (size_t i = 0; i < PBRTextures.normal.size(); ++i) {
-                                    drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(i), PBRTextures.normal[i]);
+                                for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.normal.size(); ++materialTextureIndex) {
+                                    drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(materialTextureIndex), PBRTextures.normal[materialTextureIndex]);
                                 }
-                                for (size_t i = 0; i < PBRTextures.metallic.size(); ++i) {
-                                    drawCommand.shaderData.shader->setTexture("textureMetallic" + std::to_string(i), PBRTextures.metallic[i]);
+                                for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.metallic.size(); ++materialTextureIndex) {
+                                    drawCommand.shaderData.shader->setTexture("textureMetallic" + std::to_string(materialTextureIndex), PBRTextures.metallic[materialTextureIndex]);
                                 }
-                                for (size_t i = 0; i < PBRTextures.roughness.size(); ++i) {
-                                    drawCommand.shaderData.shader->setTexture("textureRoughness" + std::to_string(i), PBRTextures.roughness[i]);
+                                for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.roughness.size(); ++materialTextureIndex) {
+                                    drawCommand.shaderData.shader->setTexture("textureRoughness" + std::to_string(materialTextureIndex), PBRTextures.roughness[materialTextureIndex]);
                                 }
                             }
                             materialTexturesBound = true;
                         }
+
+                        if (indirectRenderCommandsBuffer.get()->getSizeInElements() < materialEntry.second.size()) {
+                            indirectRenderCommandsBuffer.resizeElements(indirectRenderCommandsBuffer.get()->getSizeInElements() * 2);
+                        }
+
+                        auto &underlyingBuffer = *indirectRenderCommandsBuffer.get() ;
+                        auto bufferMapping = reinterpret_cast<RenderSystem::DrawElementsIndirectCommand *>(underlyingBuffer.mapRange(0, underlyingBuffer.getSizeInBytes()));
+                        //write to buffer
+                        underlyingBuffer.unmap();
+                        //render
                     }
                 }
             }
