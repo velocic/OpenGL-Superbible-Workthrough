@@ -16,10 +16,30 @@ namespace Flare
         SceneGraph::SceneGraph()
         {
             rootNode = std::unique_ptr<Node>(new Node(*this, requestName(), nullptr));
+            auto commandBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+                .addAttribute("count", 1, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, 0)
+                .addAttribute("instanceCount", 1, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(RenderSystem::RSuint))
+                .addAttribute("firstIndex", 1, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(RenderSystem::RSuint) * 2)
+                .addAttribute("baseVertex", 1, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(RenderSystem::RSuint) * 3)
+                .addAttribute("baseInstance", 1, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(RenderSystem::RSuint) * 4)
+                .setStride(sizeof(RenderSystem::DrawElementsIndirectCommand))
+                .build();
+            indirectRenderCommandsBuffer.create(
+                "indirectRenderCommands",
+                commandBufferLayout
+            );
+            indirectRenderCommandsBuffer.get()->allocateBufferStorage(
+                32 * sizeof(RenderSystem::DrawElementsIndirectCommand),
+                nullptr,
+                RenderSystem::RSbitfield{} |
+                    RenderSystem::RS_DYNAMIC_STORAGE_BIT |
+                    RenderSystem::RS_MAP_WRITE_BIT
+            );
         }
 
         SceneGraph::SceneGraph(SceneGraph &&other)
         :
+            indirectRenderCommandsBuffer(std::move(other.indirectRenderCommandsBuffer)),
             rootNode(std::move(other.rootNode)),
             nextNameToAssign(std::exchange(other.nextNameToAssign, 0))
         {
@@ -27,6 +47,7 @@ namespace Flare
 
         SceneGraph &SceneGraph::operator=(SceneGraph &&other)
         {
+            indirectRenderCommandsBuffer = (std::move(other.indirectRenderCommandsBuffer));
             rootNode = std::move(other.rootNode);
             nextNameToAssign = std::exchange(other.nextNameToAssign, 0);
 
@@ -71,7 +92,6 @@ namespace Flare
 
             //TODO: buffer draw commands
             //TODO: call glMultiDrawElementsIndirect
-
             for (auto &shaderEntry : sortedDrawCommands) {
                 auto shaderBound = false;
                 for (auto &materialEntry : shaderEntry.second) {
@@ -85,8 +105,8 @@ namespace Flare
                         }
 
                         if (!materialTexturesBound) {
-                            if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(materialEntry.textures)) {
-                                const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(materialEntry.textures);
+                            if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(materialEntry.second[0].textures)) {
+                                const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(materialEntry.second[0].textures);
                                 for (size_t i = 0; i < phongTextures.diffuse.size(); ++i) {
                                     drawCommand.shaderData.shader->setTexture("textureDiffuse" + std::to_string(i), phongTextures.diffuse[i]);
                                 }
@@ -96,8 +116,8 @@ namespace Flare
                                 for (size_t i = 0; i < phongTextures.normal.size(); ++i) {
                                     drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(i), phongTextures.normal[i]);
                                 }
-                            } else if (std::holds_alternative<RenderSystem::PBRMaterialTextures>(materialEntry.textures)) {
-                                const auto &PBRTextures = std::get<RenderSystem::PBRMaterialTextures>(materialEntry.textures);
+                            } else if (std::holds_alternative<RenderSystem::PBRMaterialTextures>(materialEntry.second[0].textures)) {
+                                const auto &PBRTextures = std::get<RenderSystem::PBRMaterialTextures>(materialEntry.second[0].textures);
 
                                 for (size_t i = 0; i < PBRTextures.baseColor.size(); ++i) {
                                     drawCommand.shaderData.shader->setTexture("textureBaseColor" + std::to_string(i), PBRTextures.baseColor[i]);

@@ -20,6 +20,7 @@ namespace Flare
         class SceneGraph
         {
             private:
+                RenderSystem::ResizableBuffer indirectRenderCommandsBuffer;
                 std::unique_ptr<Node> rootNode;
                 size_t nextNameToAssign = 0;
 
