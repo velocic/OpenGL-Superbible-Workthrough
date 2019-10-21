@@ -127,6 +127,7 @@ namespace Flare
                 drawCommand.shaderData = boundData.shaderData;
                 drawCommand.mvpMatrixBuffer = boundData.mvpMatrixBuffer;
                 drawCommand.elementBuffer = EBO.get();
+                drawCommand.meshId = getName();
                 drawCommand.drawElementsIndirectCommand = RenderSystem::DrawElementsIndirectCommand{
                     static_cast<RenderSystem::RSuint>(subMeshEntry.elementCount),
                     static_cast<RenderSystem::RSuint>(instanceCount),

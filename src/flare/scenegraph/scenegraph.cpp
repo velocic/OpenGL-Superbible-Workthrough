@@ -71,8 +71,9 @@ namespace Flare
 
         void SceneGraph::renderIndirect()
         {
-            using MaterialIdToDrawCommandMap = std::unordered_map<size_t, std::vector<Mesh::SortableDrawElementsIndirectCommand>>;
-            using ShaderIdToMaterialMap = std::unordered_map<size_t, MaterialIdToDrawCommandMap>;
+            using MeshIdToDrawCommandsMap = std::unordered_map<size_t, std::vector<Mesh::SortableDrawElementsIndirectCommand>>;
+            using MaterialIdToMeshMap = std::unordered_map<size_t, MeshIdToDrawCommandsMap>;
+            using ShaderIdToMaterialMap = std::unordered_map<size_t, MaterialIdToMeshMap>;
 
             auto unsortedDrawCommands = rootNode->getIndirectDrawCommands(Math::identityMatrix);
             auto sortedDrawCommands = ShaderIdToMaterialMap{};
@@ -89,75 +90,75 @@ namespace Flare
                     materialId = -1;
                 }
 
-                sortedDrawCommands[unsortedDrawCommand.shaderData.hashedAlias][materialId].push_back(unsortedDrawCommand);
+                sortedDrawCommands[unsortedDrawCommand.shaderData.hashedAlias][materialId][unsortedDrawCommand.meshId].push_back(unsortedDrawCommand);
             }
 
-            for (auto &shaderEntry : sortedDrawCommands) {
-                auto shaderBound = false;
-                for (auto &materialEntry : shaderEntry.second) {
-                    auto materialTexturesBound = false;
-
-                    //Map the GPU buffer to receive draw commands, making sure it large enough to fit the command count
-                    auto totalDrawCommandsForShaderAndMaterial = materialEntry.second.size();
-                    if (indirectRenderCommandsBuffer.get()->getSizeInElements() < totalDrawCommandsForShaderAndMaterial) {
-                        indirectRenderCommandsBuffer.resizeElements(indirectRenderCommandsBuffer.get()->getSizeInElements() * 2);
-                    }
-
-                    auto drawCommandIndex = size_t{0};
-                    indirectRenderCommandsBuffer.get()->bind(RenderSystem::RS_DRAW_INDIRECT_BUFFER);
-
-                    for (auto &drawCommand : materialEntry.second) {
-                        if (!shaderBound) {
-                            drawCommand.shaderData.shader->bind();
-                            drawCommand.shaderData.vertexArray->bind();
-                            shaderBound = true;
-                        }
-
-                        if (!materialTexturesBound) {
-                            if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(materialEntry.second[0].textures)) {
-                                const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(materialEntry.second[0].textures);
-                                for (size_t materialTextureIndex = 0; materialTextureIndex < phongTextures.diffuse.size(); ++materialTextureIndex) {
-                                    drawCommand.shaderData.shader->setTexture("textureDiffuse" + std::to_string(materialTextureIndex), phongTextures.diffuse[materialTextureIndex]);
-                                }
-                                for (size_t materialTextureIndex = 0; materialTextureIndex < phongTextures.specular.size(); ++materialTextureIndex) {
-                                    drawCommand.shaderData.shader->setTexture("textureSpecular" + std::to_string(materialTextureIndex), phongTextures.specular[materialTextureIndex]);
-                                }
-                                for (size_t materialTextureIndex = 0; materialTextureIndex < phongTextures.normal.size(); ++materialTextureIndex) {
-                                    drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(materialTextureIndex), phongTextures.normal[materialTextureIndex]);
-                                }
-                            } else if (std::holds_alternative<RenderSystem::PBRMaterialTextures>(materialEntry.second[0].textures)) {
-                                const auto &PBRTextures = std::get<RenderSystem::PBRMaterialTextures>(materialEntry.second[0].textures);
-
-                                for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.baseColor.size(); ++materialTextureIndex) {
-                                    drawCommand.shaderData.shader->setTexture("textureBaseColor" + std::to_string(materialTextureIndex), PBRTextures.baseColor[materialTextureIndex]);
-                                }
-                                for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.normal.size(); ++materialTextureIndex) {
-                                    drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(materialTextureIndex), PBRTextures.normal[materialTextureIndex]);
-                                }
-                                for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.metallic.size(); ++materialTextureIndex) {
-                                    drawCommand.shaderData.shader->setTexture("textureMetallic" + std::to_string(materialTextureIndex), PBRTextures.metallic[materialTextureIndex]);
-                                }
-                                for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.roughness.size(); ++materialTextureIndex) {
-                                    drawCommand.shaderData.shader->setTexture("textureRoughness" + std::to_string(materialTextureIndex), PBRTextures.roughness[materialTextureIndex]);
-                                }
-                            }
-                            materialTexturesBound = true;
-                        }
-
-                        indirectRenderCommands[drawCommandIndex++] = drawCommand.drawElementsIndirectCommand;
-                    }
-
-                    indirectRenderCommandsBuffer.get()->bufferRange(0, totalDrawCommandsForShaderAndMaterial, indirectRenderCommands.data());
-                    //TODO: abstract the GL call here into a platform-independent wrapper
-                    glMultiDrawElementsIndirect(
-                        RenderSystem::RS_TRIANGLES,
-                        RenderSystem::RS_UNSIGNED_INT,
-                        0,
-                        totalDrawCommandsForShaderAndMaterial,
-                        0
-                    );
-                }
-            }
+            // for (auto &shaderEntry : sortedDrawCommands) {
+            //     auto shaderBound = false;
+            //     for (auto &materialEntry : shaderEntry.second) {
+            //         auto materialTexturesBound = false;
+            //
+            //         //Map the GPU buffer to receive draw commands, making sure it large enough to fit the command count
+            //         auto totalDrawCommandsForShaderAndMaterial = materialEntry.second.size();
+            //         if (indirectRenderCommandsBuffer.get()->getSizeInElements() < totalDrawCommandsForShaderAndMaterial) {
+            //             indirectRenderCommandsBuffer.resizeElements(indirectRenderCommandsBuffer.get()->getSizeInElements() * 2);
+            //         }
+            //
+            //         auto drawCommandIndex = size_t{0};
+            //         indirectRenderCommandsBuffer.get()->bind(RenderSystem::RS_DRAW_INDIRECT_BUFFER);
+            //
+            //         for (auto &drawCommand : materialEntry.second) {
+            //             if (!shaderBound) {
+            //                 drawCommand.shaderData.shader->bind();
+            //                 drawCommand.shaderData.vertexArray->bind();
+            //                 shaderBound = true;
+            //             }
+            //
+            //             if (!materialTexturesBound) {
+            //                 if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(materialEntry.second[0].textures)) {
+            //                     const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(materialEntry.second[0].textures);
+            //                     for (size_t materialTextureIndex = 0; materialTextureIndex < phongTextures.diffuse.size(); ++materialTextureIndex) {
+            //                         drawCommand.shaderData.shader->setTexture("textureDiffuse" + std::to_string(materialTextureIndex), phongTextures.diffuse[materialTextureIndex]);
+            //                     }
+            //                     for (size_t materialTextureIndex = 0; materialTextureIndex < phongTextures.specular.size(); ++materialTextureIndex) {
+            //                         drawCommand.shaderData.shader->setTexture("textureSpecular" + std::to_string(materialTextureIndex), phongTextures.specular[materialTextureIndex]);
+            //                     }
+            //                     for (size_t materialTextureIndex = 0; materialTextureIndex < phongTextures.normal.size(); ++materialTextureIndex) {
+            //                         drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(materialTextureIndex), phongTextures.normal[materialTextureIndex]);
+            //                     }
+            //                 } else if (std::holds_alternative<RenderSystem::PBRMaterialTextures>(materialEntry.second[0].textures)) {
+            //                     const auto &PBRTextures = std::get<RenderSystem::PBRMaterialTextures>(materialEntry.second[0].textures);
+            //
+            //                     for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.baseColor.size(); ++materialTextureIndex) {
+            //                         drawCommand.shaderData.shader->setTexture("textureBaseColor" + std::to_string(materialTextureIndex), PBRTextures.baseColor[materialTextureIndex]);
+            //                     }
+            //                     for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.normal.size(); ++materialTextureIndex) {
+            //                         drawCommand.shaderData.shader->setTexture("textureNormal" + std::to_string(materialTextureIndex), PBRTextures.normal[materialTextureIndex]);
+            //                     }
+            //                     for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.metallic.size(); ++materialTextureIndex) {
+            //                         drawCommand.shaderData.shader->setTexture("textureMetallic" + std::to_string(materialTextureIndex), PBRTextures.metallic[materialTextureIndex]);
+            //                     }
+            //                     for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.roughness.size(); ++materialTextureIndex) {
+            //                         drawCommand.shaderData.shader->setTexture("textureRoughness" + std::to_string(materialTextureIndex), PBRTextures.roughness[materialTextureIndex]);
+            //                     }
+            //                 }
+            //                 materialTexturesBound = true;
+            //             }
+            //
+            //             indirectRenderCommands[drawCommandIndex++] = drawCommand.drawElementsIndirectCommand;
+            //         }
+            //
+            //         indirectRenderCommandsBuffer.get()->bufferRange(0, totalDrawCommandsForShaderAndMaterial, indirectRenderCommands.data());
+            //         //TODO: abstract the GL call here into a platform-independent wrapper
+            //         glMultiDrawElementsIndirect(
+            //             RenderSystem::RS_TRIANGLES,
+            //             RenderSystem::RS_UNSIGNED_INT,
+            //             0,
+            //             totalDrawCommandsForShaderAndMaterial,
+            //             0
+            //         );
+            //     }
+            // }
         }
 
         Node::Node(SceneGraph &sceneGraph, size_t name, Node *parent)

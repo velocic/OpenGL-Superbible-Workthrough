@@ -23,6 +23,7 @@ namespace Flare
                     RenderSystem::ShaderData shaderData;
                     const RenderSystem::Buffer *mvpMatrixBuffer;
                     const RenderSystem::Buffer *elementBuffer;
+                    size_t meshId = 0;
                 };
 
                 virtual ~Mesh() {}
