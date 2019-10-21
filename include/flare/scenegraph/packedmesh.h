@@ -25,6 +25,7 @@ namespace Flare
                 std::unique_ptr<RenderSystem::Buffer> VBO;
                 std::unique_ptr<RenderSystem::Buffer> EBO;
                 BoundData boundData;
+                size_t name = 0;
 
                 void populateBuffers(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices);
             public:
@@ -35,7 +36,7 @@ namespace Flare
                     size_t elementBufferOffset = 0;
                 };
 
-                PackedMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<SubMeshEntry> &&subMeshEntries);
+                PackedMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<SubMeshEntry> &&subMeshEntries);
                 virtual ~PackedMesh();
                 PackedMesh(PackedMesh &&other);
                 PackedMesh &operator=(PackedMesh &&other);
@@ -44,6 +45,7 @@ namespace Flare
 
                 virtual void destroy() override;
                 virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer) override;
+                virtual size_t getName() const override;
                 virtual void render(size_t instanceCount) override;
                 virtual std::vector<SortableDrawElementsIndirectCommand> getIndirectDrawCommands(size_t instanceCount) const override;
         };

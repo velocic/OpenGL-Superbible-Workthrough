@@ -76,6 +76,8 @@ namespace Flare
 
             auto unsortedDrawCommands = rootNode->getIndirectDrawCommands(Math::identityMatrix);
             auto sortedDrawCommands = ShaderIdToMaterialMap{};
+            auto indirectRenderCommands = std::vector<RenderSystem::DrawElementsIndirectCommand>{};
+            indirectRenderCommands.resize(unsortedDrawCommands.size());
 
             for (const auto &unsortedDrawCommand : unsortedDrawCommands) {
                 auto materialId = size_t{0};
@@ -102,9 +104,6 @@ namespace Flare
                     }
 
                     auto drawCommandIndex = size_t{0};
-                    auto &underlyingBuffer = *indirectRenderCommandsBuffer.get() ;
-                    auto bufferMapping = underlyingBuffer.mapRange(0, underlyingBuffer.getSizeInBytes());
-                    auto drawCommandBuffer = reinterpret_cast<RenderSystem::DrawElementsIndirectCommand *>(bufferMapping->get());
                     indirectRenderCommandsBuffer.get()->bind(RenderSystem::RS_DRAW_INDIRECT_BUFFER);
 
                     for (auto &drawCommand : materialEntry.second) {
@@ -145,11 +144,10 @@ namespace Flare
                             materialTexturesBound = true;
                         }
 
-                        drawCommandBuffer[drawCommandIndex++] = drawCommand.drawElementsIndirectCommand;
+                        indirectRenderCommands[drawCommandIndex++] = drawCommand.drawElementsIndirectCommand;
                     }
 
-                    underlyingBuffer.unmap();
-
+                    indirectRenderCommandsBuffer.get()->bufferRange(0, totalDrawCommandsForShaderAndMaterial, indirectRenderCommands.data());
                     //TODO: abstract the GL call here into a platform-independent wrapper
                     glMultiDrawElementsIndirect(
                         RenderSystem::RS_TRIANGLES,

@@ -74,7 +74,7 @@ namespace Flare
             }
 
             auto modelMeshes = std::vector<std::unique_ptr<Mesh>>{};
-            modelMeshes.emplace_back(std::make_unique<BasicMesh>(std::move(vertices), std::move(indices), textures));
+            modelMeshes.emplace_back(std::make_unique<BasicMesh>(stringHasher(alias), std::move(vertices), std::move(indices), textures));
 
             auto model = std::make_unique<Model>(std::move(modelMeshes));
             auto result = model.get();
@@ -92,7 +92,7 @@ namespace Flare
             }
 
             auto modelMeshes = std::vector<std::unique_ptr<Mesh>>{};
-            modelMeshes.emplace_back(std::make_unique<BasicMesh>(std::move(vertices), std::move(indices)));
+            modelMeshes.emplace_back(std::make_unique<BasicMesh>(stringHasher(alias), std::move(vertices), std::move(indices)));
 
             auto model = std::make_unique<Model>(std::move(modelMeshes));
             auto result = model.get();
@@ -126,6 +126,7 @@ namespace Flare
             auto meshForModel = std::vector<std::unique_ptr<Mesh>>{};
             meshForModel.push_back(
                 std::make_unique<PackedMesh>(
+                    stringHasher(file.path),
                     std::move(packedSubMeshData.vertices),
                     std::move(packedSubMeshData.indices),
                     std::move(packedSubMeshData.subMeshEntries)
@@ -197,6 +198,7 @@ namespace Flare
             auto material = scene->mMaterials[mesh->mMaterialIndex];
 
             return std::make_unique<BasicMesh>(
+                stringHasher(modelDirectory + modelName),
                 std::move(vertices),
                 std::move(indices),
                 loadPhongMaterialTextures(material, modelDirectory, modelName)

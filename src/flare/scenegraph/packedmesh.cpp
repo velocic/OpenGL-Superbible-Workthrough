@@ -6,7 +6,7 @@ namespace Flare
 {
     namespace SceneGraph
     {
-        PackedMesh::PackedMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<SubMeshEntry> &&subMeshEntries)
+        PackedMesh::PackedMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, std::vector<SubMeshEntry> &&subMeshEntries)
         :
             subMeshEntries(std::move(subMeshEntries))
         {
@@ -22,7 +22,8 @@ namespace Flare
         :
             subMeshEntries(std::move(other.subMeshEntries)),
             VBO(std::move(other.VBO)),
-            EBO(std::move(other.EBO))
+            EBO(std::move(other.EBO)),
+            name(std::exchange(other.name, 0))
         {
         }
 
@@ -31,6 +32,7 @@ namespace Flare
             subMeshEntries = std::move(other.subMeshEntries);
             VBO = std::move(other.VBO);
             EBO = std::move(other.EBO);
+            name = std::exchange(other.name, 0);
 
             return *this;
         }
@@ -46,6 +48,11 @@ namespace Flare
         {
             boundData.shaderData = shaderData;
             boundData.mvpMatrixBuffer = &mvpMatrixBuffer;
+        }
+
+        size_t PackedMesh::getName() const
+        {
+            return name;
         }
 
         void PackedMesh::render(size_t instanceCount)
@@ -119,6 +126,7 @@ namespace Flare
                 drawCommand.textures = subMeshEntry.textures;
                 drawCommand.shaderData = boundData.shaderData;
                 drawCommand.mvpMatrixBuffer = boundData.mvpMatrixBuffer;
+                drawCommand.elementBuffer = EBO.get();
                 drawCommand.drawElementsIndirectCommand = RenderSystem::DrawElementsIndirectCommand{
                     static_cast<RenderSystem::RSuint>(subMeshEntry.elementCount),
                     static_cast<RenderSystem::RSuint>(instanceCount),

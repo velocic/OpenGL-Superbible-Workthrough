@@ -7,10 +7,11 @@ namespace Flare
 {
     namespace SceneGraph
     {
-        BasicMesh::BasicMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures)
+        BasicMesh::BasicMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures)
         :
             textures(textures),
-            elementCount(indices.size())
+            elementCount(indices.size()),
+            name(name)
         {
             populateBuffers(
                 std::move(vertices),
@@ -18,10 +19,11 @@ namespace Flare
             );
         }
 
-        BasicMesh::BasicMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PBRMaterialTextures &textures)
+        BasicMesh::BasicMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PBRMaterialTextures &textures)
         :
             textures(textures),
-            elementCount(indices.size())
+            elementCount(indices.size()),
+            name(name)
         {
             populateBuffers(
                 std::move(vertices),
@@ -29,10 +31,11 @@ namespace Flare
             );
         }
 
-        BasicMesh::BasicMesh(std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices)
+        BasicMesh::BasicMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices)
         :
             textures(nullptr),
-            elementCount(indices.size())
+            elementCount(indices.size()),
+            name(name)
         {
             populateBuffers(
                 std::move(vertices),
@@ -50,6 +53,7 @@ namespace Flare
             textures(std::move(other.textures)),
             VBO(std::move(other.VBO)),
             EBO(std::move(other.EBO)),
+            name(std::exchange(other.name, 0)),
             elementCount(std::exchange(other.elementCount, 0))
         {
         }
@@ -59,6 +63,7 @@ namespace Flare
             textures = std::move(other.textures);
             VBO = std::move(other.VBO);
             EBO = std::move(other.EBO);
+            name = std::exchange(other.name, 0);
             elementCount = std::exchange(other.elementCount, 0);
 
             return *this;
@@ -139,6 +144,11 @@ namespace Flare
             EBO->bind(GL_ELEMENT_ARRAY_BUFFER);
         }
 
+        size_t BasicMesh::getName() const
+        {
+            return name;
+        }
+
         void BasicMesh::render(size_t instanceCount)
         {
             //TODO: abstract the GL call here into a platform-independent wrapper
@@ -158,6 +168,7 @@ namespace Flare
             drawCommand.textures = textures;
             drawCommand.shaderData = boundData.shaderData;
             drawCommand.mvpMatrixBuffer = boundData.mvpMatrixBuffer;
+            drawCommand.elementBuffer = EBO.get();
             drawCommand.drawElementsIndirectCommand = RenderSystem::DrawElementsIndirectCommand{
                 static_cast<RenderSystem::RSuint>(elementCount),
                 static_cast<RenderSystem::RSuint>(instanceCount),
