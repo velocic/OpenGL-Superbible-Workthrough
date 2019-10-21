@@ -95,6 +95,18 @@ namespace Flare
                 for (auto &materialEntry : shaderEntry.second) {
                     auto materialTexturesBound = false;
 
+                    //Map the GPU buffer to receive draw commands, making sure it large enough to fit the command count
+                    auto totalDrawCommandsForShaderAndMaterial = materialEntry.second.size();
+                    if (indirectRenderCommandsBuffer.get()->getSizeInElements() < totalDrawCommandsForShaderAndMaterial) {
+                        indirectRenderCommandsBuffer.resizeElements(indirectRenderCommandsBuffer.get()->getSizeInElements() * 2);
+                    }
+
+                    auto drawCommandIndex = size_t{0};
+                    auto &underlyingBuffer = *indirectRenderCommandsBuffer.get() ;
+                    auto bufferMapping = underlyingBuffer.mapRange(0, underlyingBuffer.getSizeInBytes());
+                    auto drawCommandBuffer = reinterpret_cast<RenderSystem::DrawElementsIndirectCommand *>(bufferMapping->get());
+                    indirectRenderCommandsBuffer.get()->bind(RenderSystem::RS_DRAW_INDIRECT_BUFFER);
+
                     for (auto &drawCommand : materialEntry.second) {
                         if (!shaderBound) {
                             drawCommand.shaderData.shader->bind();
@@ -133,16 +145,19 @@ namespace Flare
                             materialTexturesBound = true;
                         }
 
-                        if (indirectRenderCommandsBuffer.get()->getSizeInElements() < materialEntry.second.size()) {
-                            indirectRenderCommandsBuffer.resizeElements(indirectRenderCommandsBuffer.get()->getSizeInElements() * 2);
-                        }
-
-                        auto &underlyingBuffer = *indirectRenderCommandsBuffer.get() ;
-                        auto bufferMapping = reinterpret_cast<RenderSystem::DrawElementsIndirectCommand *>(underlyingBuffer.mapRange(0, underlyingBuffer.getSizeInBytes()));
-                        //write to buffer
-                        underlyingBuffer.unmap();
-                        //render
+                        drawCommandBuffer[drawCommandIndex++] = drawCommand.drawElementsIndirectCommand;
                     }
+
+                    underlyingBuffer.unmap();
+
+                    //TODO: abstract the GL call here into a platform-independent wrapper
+                    glMultiDrawElementsIndirect(
+                        RenderSystem::RS_TRIANGLES,
+                        RenderSystem::RS_UNSIGNED_INT,
+                        0,
+                        totalDrawCommandsForShaderAndMaterial,
+                        0
+                    );
                 }
             }
         }

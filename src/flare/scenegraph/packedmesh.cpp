@@ -91,6 +91,7 @@ namespace Flare
                     }
                 }
 
+                //TODO: abstract the GL call here into a platform-independent wrapper
                 glDrawElementsInstancedBaseVertexBaseInstance(
                     GL_TRIANGLES,
                     subMeshEntry.elementCount,
@@ -119,10 +120,10 @@ namespace Flare
                 drawCommand.shaderData = boundData.shaderData;
                 drawCommand.mvpMatrixBuffer = boundData.mvpMatrixBuffer;
                 drawCommand.drawElementsIndirectCommand = RenderSystem::DrawElementsIndirectCommand{
-                    subMeshEntry.elementCount,
-                    instanceCount,
-                    subMeshEntry.elementBufferOffset,
-                    subMeshEntry.baseVertex,
+                    static_cast<RenderSystem::RSuint>(subMeshEntry.elementCount),
+                    static_cast<RenderSystem::RSuint>(instanceCount),
+                    static_cast<RenderSystem::RSuint>(subMeshEntry.elementBufferOffset),
+                    static_cast<RenderSystem::RSuint>(subMeshEntry.baseVertex),
                     0
                 };
 

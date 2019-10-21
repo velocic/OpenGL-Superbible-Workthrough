@@ -42,6 +42,13 @@ namespace Flare
         constexpr auto RS_UNSIGNED_INT_2_10_10_10_REV = GL_UNSIGNED_INT_2_10_10_10_REV;
         constexpr auto RS_UNSIGNED_SHORT = GL_UNSIGNED_SHORT;
 
+        //GLenum bind targets
+        constexpr auto RS_DRAW_INDIRECT_BUFFER = GL_DRAW_INDIRECT_BUFFER;
+
+        //GLenum primitive types
+        constexpr auto RS_POINTS = GL_POINTS;
+        constexpr auto RS_TRIANGLES = GL_TRIANGLES;
+
         //Buffer usage flags
         constexpr auto RS_DYNAMIC_STORAGE_BIT = GL_DYNAMIC_STORAGE_BIT;
         constexpr auto RS_MAP_READ_BIT = GL_MAP_READ_BIT;
@@ -55,11 +62,11 @@ namespace Flare
         constexpr auto RS_RGBA8 = GL_RGBA8;
 
         struct DrawElementsIndirectCommand {
-            GLuint count;
-            GLuint instanceCount;
-            GLuint firstIndex;
-            GLuint baseVertex;
-            GLuint baseInstance;
+            GLuint count = 0;
+            GLuint instanceCount = 0;
+            GLuint firstIndex = 0;
+            GLuint baseVertex = 0;
+            GLuint baseInstance = 0;
         };
 #endif
     }

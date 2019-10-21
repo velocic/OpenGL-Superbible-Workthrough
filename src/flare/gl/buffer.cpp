@@ -103,8 +103,9 @@ namespace Flare
             if (usageFlags.mapPersistent) { mapFlags |= GL_MAP_PERSISTENT_BIT; }
             if (usageFlags.mapCoherent) { mapFlags |= GL_MAP_COHERENT_BIT; }
 
+            mappedBuffer = nullptr;
             auto mappedData = glMapNamedBufferRange(glBuffer, offset, length, mapFlags);
-            mappedBuffer = std::unique_ptr<MappedBufferRange>(new MappedBufferRange(*this, offset, length, mappedData));
+            mappedBuffer = std::unique_ptr<MappedBufferRange>(new MappedBufferRange(this, offset, length, mappedData));
 
             isCurrentlyMapped = true;
 
@@ -253,7 +254,7 @@ namespace Flare
             namedBufferStorage(size, data, flags);
         }
 
-        MappedBufferRange::MappedBufferRange(const Buffer& sourceBuffer, GLintptr offset, GLsizeiptr length, void* mappedData)
+        MappedBufferRange::MappedBufferRange(const Buffer *sourceBuffer, GLintptr offset, GLsizeiptr length, void* mappedData)
         :
             sourceBuffer(sourceBuffer),
             offset(offset),
@@ -268,27 +269,47 @@ namespace Flare
 
         void *MappedBufferRange::get() const
         {
+            if (valid == false) {
+                return nullptr;
+            }
+
             return mappedData;
         }
 
         bool MappedBufferRange::hasReadAccess() const
         {
-            return sourceBuffer.getInternalUsageFlags().mapRead;
+            if (valid == false) {
+                return false;
+            }
+
+            return sourceBuffer->getInternalUsageFlags().mapRead;
         }
 
         bool MappedBufferRange::hasWriteAccess() const
         {
-            return sourceBuffer.getInternalUsageFlags().mapWrite;
+            if (valid == false) {
+                return false;
+            }
+
+            return sourceBuffer->getInternalUsageFlags().mapWrite;
         }
 
         bool MappedBufferRange::isPersistent() const
         {
-            return sourceBuffer.getInternalUsageFlags().mapPersistent;
+            if (valid == false) {
+                return false;
+            }
+
+            return sourceBuffer->getInternalUsageFlags().mapPersistent;
         }
 
         bool MappedBufferRange::isCoherent() const
         {
-            return sourceBuffer.getInternalUsageFlags().mapCoherent;
+            if (valid == false) {
+                return false;
+            }
+
+            return sourceBuffer->getInternalUsageFlags().mapCoherent;
         }
 
         bool MappedBufferRange::isValid() const

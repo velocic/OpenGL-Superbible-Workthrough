@@ -103,7 +103,7 @@ namespace Tutorial
 
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
-        sceneGraph->render();
+        // sceneGraph->render();
         sceneGraph->renderIndirect();
         renderWindow->swapWindow();
     }

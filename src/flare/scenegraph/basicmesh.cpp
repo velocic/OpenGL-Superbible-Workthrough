@@ -141,8 +141,7 @@ namespace Flare
 
         void BasicMesh::render(size_t instanceCount)
         {
-            //TODO: abstract the GL call here into a platform-independent mechanism of
-            //some kind
+            //TODO: abstract the GL call here into a platform-independent wrapper
             glDrawElementsInstanced(
                 GL_TRIANGLES,
                 elementCount,
@@ -160,8 +159,8 @@ namespace Flare
             drawCommand.shaderData = boundData.shaderData;
             drawCommand.mvpMatrixBuffer = boundData.mvpMatrixBuffer;
             drawCommand.drawElementsIndirectCommand = RenderSystem::DrawElementsIndirectCommand{
-                elementCount,
-                instanceCount,
+                static_cast<RenderSystem::RSuint>(elementCount),
+                static_cast<RenderSystem::RSuint>(instanceCount),
                 0,
                 0,
                 0

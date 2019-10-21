@@ -75,7 +75,7 @@ namespace Flare
                 virtual size_t getName() const override { return std::hash<std::string>{}(name); };
                 virtual size_t getSizeInBytes() const override;
                 virtual size_t getSizeInElements() const override;
-                virtual RenderSystem::RSbitfield getUsageFlags() const;
+                virtual RenderSystem::RSbitfield getUsageFlags() const override;
                 virtual RenderSystem::MappedBufferRange *mapRange(RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr length) override;
                 virtual void bufferData(RenderSystem::RSsizei size, const void *data, RenderSystem::RSenum usage) override;
                 virtual void bufferRange(RenderSystem::RSintptr offset, RenderSystem::RSsizeiptr size, const void *data) override;
@@ -86,16 +86,16 @@ namespace Flare
         {
             friend class Buffer;
             private:
-                const Buffer& sourceBuffer;
+                const Buffer *sourceBuffer = nullptr;
                 GLintptr offset = 0;
                 GLsizeiptr length = 0;
                 bool valid = true;
 
-                MappedBufferRange(const Buffer& sourceBuffer, GLintptr offset, GLsizeiptr length, void* mappedData);
+                MappedBufferRange(const Buffer *sourceBuffer, GLintptr offset, GLsizeiptr length, void* mappedData);
             public:
-                void* mappedData = nullptr;
+                void *mappedData = nullptr;
 
-                virtual ~MappedBufferRange();
+                virtual ~MappedBufferRange() override;
                 MappedBufferRange(MappedBufferRange&& other) = delete;
                 MappedBufferRange& operator=(MappedBufferRange&& other) = delete;
                 MappedBufferRange(const MappedBufferRange& other) = delete;
