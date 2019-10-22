@@ -44,6 +44,7 @@ namespace Flare
 
         //GLenum bind targets
         constexpr auto RS_DRAW_INDIRECT_BUFFER = GL_DRAW_INDIRECT_BUFFER;
+        constexpr auto RS_ELEMENT_ARRAY_BUFFER =  GL_ELEMENT_ARRAY_BUFFER;
 
         //GLenum primitive types
         constexpr auto RS_POINTS = GL_POINTS;

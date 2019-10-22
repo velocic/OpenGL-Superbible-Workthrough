@@ -125,15 +125,18 @@ namespace Flare
                 auto drawCommand = Mesh::SortableDrawElementsIndirectCommand{};
                 drawCommand.textures = subMeshEntry.textures;
                 drawCommand.shaderData = boundData.shaderData;
-                drawCommand.mvpMatrixBuffer = boundData.mvpMatrixBuffer;
-                drawCommand.elementBuffer = EBO.get();
-                drawCommand.meshId = getName();
                 drawCommand.drawElementsIndirectCommand = RenderSystem::DrawElementsIndirectCommand{
                     static_cast<RenderSystem::RSuint>(subMeshEntry.elementCount),
                     static_cast<RenderSystem::RSuint>(instanceCount),
                     static_cast<RenderSystem::RSuint>(subMeshEntry.elementBufferOffset),
                     static_cast<RenderSystem::RSuint>(subMeshEntry.baseVertex),
                     0
+                };
+                drawCommand.meshData = MeshRenderData{
+                    boundData.mvpMatrixBuffer,
+                    VBO.get(),
+                    EBO.get(),
+                    getName()
                 };
 
                 result.push_back(std::move(drawCommand));

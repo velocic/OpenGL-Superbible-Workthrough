@@ -17,13 +17,18 @@ namespace Flare
                     const RenderSystem::Buffer *mvpMatrixBuffer = nullptr;
                 };
 
+                struct MeshRenderData {
+                    const RenderSystem::Buffer *mvpMatrixBuffer = nullptr;
+                    const RenderSystem::Buffer *vertexBuffer = nullptr;
+                    RenderSystem::Buffer *elementBuffer = nullptr;
+                    size_t meshId = 0;
+                };
+
                 struct SortableDrawElementsIndirectCommand {
                     std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, std::nullptr_t> textures;
                     RenderSystem::DrawElementsIndirectCommand drawElementsIndirectCommand;
                     RenderSystem::ShaderData shaderData;
-                    const RenderSystem::Buffer *mvpMatrixBuffer;
-                    const RenderSystem::Buffer *elementBuffer;
-                    size_t meshId = 0;
+                    MeshRenderData meshData;
                 };
 
                 virtual ~Mesh() {}
