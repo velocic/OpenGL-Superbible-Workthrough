@@ -125,10 +125,14 @@ namespace Flare
                 auto drawCommand = Mesh::SortableDrawElementsIndirectCommand{};
                 drawCommand.textures = subMeshEntry.textures;
                 drawCommand.shaderData = boundData.shaderData;
+
+                //Note: DrawElementsIndirectCommand.firstIndex is calculated differently than elementBufferOffset
+                //used in the direct render draw path. elementBufferOffset is numIndices * sizeof(RenderSystem::RSsizei), but
+                //firstIndex is simply numIndices (which is why the division by sizeof(RenderSystem::RSsizei) happens below.
                 drawCommand.drawElementsIndirectCommand = RenderSystem::DrawElementsIndirectCommand{
                     static_cast<RenderSystem::RSuint>(subMeshEntry.elementCount),
                     static_cast<RenderSystem::RSuint>(instanceCount),
-                    static_cast<RenderSystem::RSuint>(subMeshEntry.elementBufferOffset),
+                    static_cast<RenderSystem::RSuint>(subMeshEntry.elementBufferOffset / sizeof(RenderSystem::RSsizei)),
                     static_cast<RenderSystem::RSuint>(subMeshEntry.baseVertex),
                     0
                 };
