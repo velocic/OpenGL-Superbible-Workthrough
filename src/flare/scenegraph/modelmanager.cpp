@@ -30,6 +30,19 @@ namespace Flare
             return *this;
         }
 
+        glm::mat4 aiMatrix4x4ToGlmMat4(const aiMatrix4x4 &aiMatrix)
+        {
+            auto result = glm::mat4{};
+
+            for (size_t rows = 0; rows < 4; ++rows) {
+                for (size_t cols = 0; cols < 4; ++cols) {
+                    result[rows][cols] = aiMatrix[rows][cols];
+                }
+            }
+
+            return result;
+        }
+
         void ModelManager::load(const ModelFile &file, std::function<void(Model *)> onLoadComplete)
         {
             auto alreadyLoadedModel = get(file.alias);
@@ -50,7 +63,7 @@ namespace Flare
             auto modelName = file.path.substr(lastSlashIndex + 1, file.path.rfind('.') - lastSlashIndex - 1);
             auto meshes = std::vector<std::unique_ptr<Mesh>>{};
 
-            processNode(scene->mRootNode, scene, modelDirectory, modelName, meshes);
+            processNode(scene->mRootNode, scene, Math::identityMatrix, modelDirectory, modelName, meshes);
 
             auto loadedModel = std::make_unique<Model>(std::move(meshes));
             auto resultForCallback = loadedModel.get();
@@ -74,7 +87,7 @@ namespace Flare
             }
 
             auto modelMeshes = std::vector<std::unique_ptr<Mesh>>{};
-            modelMeshes.emplace_back(std::make_unique<BasicMesh>(stringHasher(alias), std::move(vertices), std::move(indices), textures));
+            modelMeshes.emplace_back(std::make_unique<BasicMesh>(stringHasher(alias), std::move(vertices), std::move(indices), textures, Math::identityMatrix));
 
             auto model = std::make_unique<Model>(std::move(modelMeshes));
             auto result = model.get();
@@ -92,7 +105,7 @@ namespace Flare
             }
 
             auto modelMeshes = std::vector<std::unique_ptr<Mesh>>{};
-            modelMeshes.emplace_back(std::make_unique<BasicMesh>(stringHasher(alias), std::move(vertices), std::move(indices)));
+            modelMeshes.emplace_back(std::make_unique<BasicMesh>(stringHasher(alias), std::move(vertices), std::move(indices), Math::identityMatrix));
 
             auto model = std::make_unique<Model>(std::move(modelMeshes));
             auto result = model.get();
@@ -121,7 +134,7 @@ namespace Flare
             auto modelName = file.path.substr(lastSlashIndex + 1, file.path.rfind('.') - lastSlashIndex - 1);
 
             auto packedSubMeshData = PackedSubMeshes{};
-            processNode(scene->mRootNode, scene, modelDirectory, modelName, packedSubMeshData);
+            processNode(scene->mRootNode, scene, Math::identityMatrix, modelDirectory, modelName, packedSubMeshData);
 
             auto meshForModel = std::vector<std::unique_ptr<Mesh>>{};
             meshForModel.push_back(
@@ -140,21 +153,23 @@ namespace Flare
             onLoadComplete(resultForCallback);
         }
 
-        void ModelManager::processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes)
+        void ModelManager::processNode(aiNode *node, const aiScene *scene, glm::mat4 parentNodeTransform, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes)
         {
+            auto currentNodeTransform = parentNodeTransform * aiMatrix4x4ToGlmMat4(node->mTransformation);
+
             for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
                 auto mesh = scene->mMeshes[node->mMeshes[i]];
                 meshes.push_back(
-                    processMesh(mesh, scene, modelDirectory, modelName)
+                    processMesh(mesh, scene, currentNodeTransform, modelDirectory, modelName)
                 );
             }
 
             for (unsigned int i = 0; i < node->mNumChildren; ++i) {
-                processNode(node->mChildren[i], scene, modelDirectory, modelName, meshes);
+                processNode(node->mChildren[i], scene, currentNodeTransform, modelDirectory, modelName, meshes);
             }
         }
 
-        std::unique_ptr<Mesh> ModelManager::processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName)
+        std::unique_ptr<Mesh> ModelManager::processMesh(aiMesh *mesh, const aiScene *scene, glm::mat4 localTransform, const std::string &modelDirectory, const std::string &modelName)
         {
             std::vector<DataTypes::Vertex> vertices;
             std::vector<unsigned int> indices;
@@ -201,23 +216,26 @@ namespace Flare
                 stringHasher(modelDirectory + modelName),
                 std::move(vertices),
                 std::move(indices),
-                loadPhongMaterialTextures(material, modelDirectory, modelName)
+                loadPhongMaterialTextures(material, modelDirectory, modelName),
+                localTransform
             );
         }
 
-        void ModelManager::processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes)
+        void ModelManager::processNode(aiNode *node, const aiScene *scene, glm::mat4 parentNodeTransform, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes)
         {
+            auto currentNodeTransform = parentNodeTransform * aiMatrix4x4ToGlmMat4(node->mTransformation);
+
             for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
                 auto mesh = scene->mMeshes[node->mMeshes[i]];
-                processMesh(mesh, scene, modelDirectory, modelName, packedMeshes);
+                processMesh(mesh, scene, currentNodeTransform, modelDirectory, modelName, packedMeshes);
             }
 
             for (unsigned int i = 0; i < node->mNumChildren; ++i) {
-                processNode(node->mChildren[i], scene, modelDirectory, modelName, packedMeshes);
+                processNode(node->mChildren[i], scene, currentNodeTransform, modelDirectory, modelName, packedMeshes);
             }
         }
 
-        void ModelManager::processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes)
+        void ModelManager::processMesh(aiMesh *mesh, const aiScene *scene, glm::mat4 localTransform, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes)
         {
             std::vector<DataTypes::Vertex> vertices;
             std::vector<unsigned int> indices;
@@ -261,6 +279,7 @@ namespace Flare
             auto material = scene->mMaterials[mesh->mMaterialIndex];
 
             auto subMeshEntry = PackedMesh::SubMeshEntry{};
+            subMeshEntry.localTransform = localTransform;
             subMeshEntry.elementCount = indices.size();
             subMeshEntry.elementBufferOffset = packedMeshes.indices.size() * sizeof(RenderSystem::RSsizei);
             subMeshEntry.baseVertex = packedMeshes.vertices.size();

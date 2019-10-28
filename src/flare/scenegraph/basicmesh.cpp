@@ -7,11 +7,12 @@ namespace Flare
 {
     namespace SceneGraph
     {
-        BasicMesh::BasicMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures)
+        BasicMesh::BasicMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PhongMaterialTextures &textures, const glm::mat4 &localTransform)
         :
             textures(textures),
-            elementCount(indices.size()),
-            name(name)
+            localTransform(localTransform),
+            name(name),
+            elementCount(indices.size())
         {
             populateBuffers(
                 std::move(vertices),
@@ -19,11 +20,12 @@ namespace Flare
             );
         }
 
-        BasicMesh::BasicMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PBRMaterialTextures &textures)
+        BasicMesh::BasicMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const RenderSystem::PBRMaterialTextures &textures, const glm::mat4 &localTransform)
         :
             textures(textures),
-            elementCount(indices.size()),
-            name(name)
+            localTransform(localTransform),
+            name(name),
+            elementCount(indices.size())
         {
             populateBuffers(
                 std::move(vertices),
@@ -31,11 +33,12 @@ namespace Flare
             );
         }
 
-        BasicMesh::BasicMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices)
+        BasicMesh::BasicMesh(size_t name, std::vector<DataTypes::Vertex> &&vertices, std::vector<unsigned int> &&indices, const glm::mat4 &localTransform)
         :
             textures(nullptr),
-            elementCount(indices.size()),
-            name(name)
+            localTransform(localTransform),
+            name(name),
+            elementCount(indices.size())
         {
             populateBuffers(
                 std::move(vertices),
@@ -53,6 +56,7 @@ namespace Flare
             textures(std::move(other.textures)),
             VBO(std::move(other.VBO)),
             EBO(std::move(other.EBO)),
+            localTransform(std::move(other.localTransform)),
             name(std::exchange(other.name, 0)),
             elementCount(std::exchange(other.elementCount, 0))
         {
@@ -63,6 +67,7 @@ namespace Flare
             textures = std::move(other.textures);
             VBO = std::move(other.VBO);
             EBO = std::move(other.EBO);
+            localTransform = std::move(other.localTransform);
             name = std::exchange(other.name, 0);
             elementCount = std::exchange(other.elementCount, 0);
 

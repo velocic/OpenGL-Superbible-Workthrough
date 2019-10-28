@@ -14,6 +14,7 @@
 #include <flare/scenegraph/model.h>
 #include <flare/rendersystem/texturemanager.h>
 #include <flare/utility/datatypes.h>
+#include <flare/utility/math.h>
 
 namespace Flare
 {
@@ -32,10 +33,10 @@ namespace Flare
                 std::unordered_map<size_t, std::unique_ptr<Model>> models;
                 std::hash<std::string> stringHasher;
 
-                void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes);
-                void processNode(aiNode *node, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes);
-                std::unique_ptr<Mesh> processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName);
-                void processMesh(aiMesh *mesh, const aiScene *scene, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes);
+                void processNode(aiNode *node, const aiScene *scene, glm::mat4 parentNodeTransform, const std::string &modelDirectory, const std::string &modelName, std::vector<std::unique_ptr<Mesh>> &meshes);
+                void processNode(aiNode *node, const aiScene *scene, glm::mat4 parentNodeTransform, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes);
+                std::unique_ptr<Mesh> processMesh(aiMesh *mesh, const aiScene *scene, glm::mat4 localTransform, const std::string &modelDirectory, const std::string &modelName);
+                void processMesh(aiMesh *mesh, const aiScene *scene, glm::mat4 localTransform, const std::string &modelDirectory, const std::string &modelName, PackedSubMeshes &packedMeshes);
 
                 RenderSystem::PhongMaterialTextures loadPhongMaterialTextures(aiMaterial *mat, const std::string &modelDirectory, const std::string &modelName);
                 RenderSystem::TextureManager::PhongMaterialTextureType aiTexTypeToPhongTexType(aiTextureType aiTexType);

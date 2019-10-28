@@ -31,6 +31,7 @@ namespace Flare
             public:
                 struct SubMeshEntry {
                     std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, std::nullptr_t> textures;
+                    glm::mat4 localTransform;
                     RenderSystem::RSsizei elementCount;
                     RenderSystem::RSint baseVertex;
                     size_t elementBufferOffset = 0;
