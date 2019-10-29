@@ -35,6 +35,7 @@ namespace Flare
                 virtual void destroy() = 0;
                 virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer) = 0;
                 virtual size_t getName() const = 0;
+                virtual size_t getPackedMeshCount() const = 0;
                 virtual void render(size_t instanceCount) = 0;
                 virtual std::vector<SortableDrawElementsIndirectCommand> getIndirectDrawCommands(size_t instanceCount) const = 0;
         };

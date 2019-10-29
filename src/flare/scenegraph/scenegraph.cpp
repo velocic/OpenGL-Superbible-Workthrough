@@ -114,6 +114,7 @@ namespace Flare
                 }
             };
 
+            //TODO: also sort by a modelId to reduce draw calls for things that share the same mvpMatrixBuffer
             //Sort draw commands into groups that share the same material and shader
             std::sort(
                 sortedDrawCommands.begin(),
@@ -338,6 +339,11 @@ namespace Flare
         void Node::setModel(Model *newModel)
         {
             model = newModel;
+
+            //Resize the modelMatrix buffer if the new model contains more than 1 mesh
+            if (model->getMeshCount() != 1) {
+                setParallelBufferSizes(std::max(instanceData.numActive, size_t{1}));
+            }
         }
 
         void Node::setShaderData(RenderSystem::ShaderData newShaderData)
@@ -486,7 +492,6 @@ namespace Flare
             auto newInstanceId = getNextInstanceId();
 
             auto setInstanceToDefaultValues = [&](auto index){
-                instanceData.modelMatrices[index] = glm::mat4{};
                 instanceData.TRSData[index] = TranslateRotateScaleData{};
                 instanceData.instanceIdLookupTable[newInstanceId] = index;
             };
@@ -586,10 +591,6 @@ namespace Flare
 
             auto lastActiveInstanceDataIndex = instanceData.numActive - 1;
 
-            std::iter_swap(
-                instanceData.modelMatrices.begin() + removeIndex,
-                instanceData.modelMatrices.begin() + lastActiveInstanceDataIndex
-            );
             std::iter_swap(
                 instanceData.TRSData.begin() + removeIndex,
                 instanceData.TRSData.begin() + lastActiveInstanceDataIndex
@@ -724,19 +725,27 @@ namespace Flare
 
         void Node::setParallelBufferSizes(size_t size)
         {
-            instanceData.modelMatrices.resize(size);
             instanceData.TRSData.resize(size);
+
+            //Create room for the model matrices for all submeshes in a model (which probably have their own local transforms
+            //relative to the model's origin)
+            auto modelMatrixBufferSize = size;
+            if (model != nullptr) {
+                modelMatrixBufferSize = size * model->getMeshCount();
+            }
+
+            instanceData.modelMatrices.resize(modelMatrixBufferSize);
+
             if (modelMatrixBuffer.get() != nullptr) {
-                modelMatrixBuffer.resizeElements(size);
+                modelMatrixBuffer.resizeElements(modelMatrixBufferSize);
                 return;
             }
 
             modelMatrixBuffer.create(
                 mvpMatrixBufferName,
                 getModelMatrixBufferLayout()
-            );
-            modelMatrixBuffer.get()->allocateBufferStorage(
-                sizeof(glm::mat4) * size,
+            )->allocateBufferStorage(
+                sizeof(glm::mat4) * modelMatrixBufferSize,
                 nullptr,
                 getModelMatrixBufferUsageFlags()
             );

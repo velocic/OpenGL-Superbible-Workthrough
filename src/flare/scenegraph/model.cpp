@@ -29,6 +29,17 @@ namespace Flare
             return *this;
         }
 
+        size_t Model::getMeshCount() const
+        {
+            auto result = size_t{0};
+
+            for (const auto &mesh : meshes) {
+                result += mesh->getPackedMeshCount();
+            }
+
+            return result;
+        }
+
         void Model::render(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount)
         {
             for (auto &mesh : meshes) {

@@ -29,6 +29,7 @@ namespace Flare
                 Model(const Model &other) = delete;
                 Model &operator=(const Model &other) = delete;
 
+                size_t getMeshCount() const;
                 void render(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount);
                 std::vector<Mesh::SortableDrawElementsIndirectCommand> getIndirectDrawCommands(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount) const;
         };
