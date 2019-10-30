@@ -149,6 +149,11 @@ namespace Flare
             EBO->bind(GL_ELEMENT_ARRAY_BUFFER);
         }
 
+        std::vector<glm::mat4> BasicMesh::getLocalTransforms() const
+        {
+            return std::vector<glm::mat4>{localTransform};
+        }
+
         size_t BasicMesh::getName() const
         {
             return name;

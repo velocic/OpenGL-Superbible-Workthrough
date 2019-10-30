@@ -1,9 +1,13 @@
 #ifndef FLARE_SCENEGRAPH_MESH_H
 #define FLARE_SCENEGRAPH_MESH_H
 
+#include <vector>
+
 #include <flare/rendersystem/texturemanager.h>
 #include <flare/rendersystem/shadermanager.h>
 #include <flare/rendersystem/buffer.h>
+
+#include <glm-0.9.9/glm.hpp>
 
 namespace Flare
 {
@@ -34,6 +38,7 @@ namespace Flare
                 virtual ~Mesh() {}
                 virtual void destroy() = 0;
                 virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer) = 0;
+                virtual std::vector<glm::mat4> getLocalTransforms() const = 0;
                 virtual size_t getName() const = 0;
                 virtual size_t getPackedMeshCount() const = 0;
                 virtual void render(size_t instanceCount) = 0;

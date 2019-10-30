@@ -50,6 +50,17 @@ namespace Flare
             boundData.mvpMatrixBuffer = &mvpMatrixBuffer;
         }
 
+        std::vector<glm::mat4> PackedMesh::getLocalTransforms() const
+        {
+            auto result = std::vector<glm::mat4>{};
+
+            for (const auto &subMeshEntry : subMeshEntries) {
+                result.push_back(subMeshEntry.localTransform);
+            }
+
+            return result;
+        }
+
         size_t PackedMesh::getName() const
         {
             return name;

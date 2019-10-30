@@ -46,6 +46,7 @@ namespace Flare
 
                 virtual void destroy() override;
                 virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer) override;
+                virtual std::vector<glm::mat4> getLocalTransforms() const override;
                 virtual size_t getName() const override;
                 virtual size_t getPackedMeshCount() const override { return subMeshEntries.size(); }
                 virtual void render(size_t instanceCount) override;
