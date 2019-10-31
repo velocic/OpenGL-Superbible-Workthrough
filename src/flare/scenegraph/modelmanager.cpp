@@ -36,7 +36,7 @@ namespace Flare
 
             for (size_t rows = 0; rows < 4; ++rows) {
                 for (size_t cols = 0; cols < 4; ++cols) {
-                    result[rows][cols] = aiMatrix[rows][cols];
+                    result[rows][cols] = aiMatrix[cols][rows];
                 }
             }
 

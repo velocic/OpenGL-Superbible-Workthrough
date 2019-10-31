@@ -620,9 +620,9 @@ namespace Flare
         {
             const auto localCoordinateSpace = parentModelMatrix * TRSData.translation * TRSData.rotation * TRSData.scale;
 
-            updateModelMatrixBuffer(localCoordinateSpace);
-
             if (model != nullptr && modelMatrixBuffer.get() != nullptr && instanceData.numActive > 0) {
+                updateModelMatrixBuffer(localCoordinateSpace, model->getMeshLocalTransforms());
+
                 model->render(shaderData, *modelMatrixBuffer.get(), instanceData.numActive);
             }
 
@@ -634,11 +634,11 @@ namespace Flare
         std::vector<Mesh::SortableDrawElementsIndirectCommand> Node::getIndirectDrawCommands(const glm::mat4 &parentModelMatrix)
         {
             const auto localCoordinateSpace = parentModelMatrix * TRSData.translation * TRSData.rotation * TRSData.scale;
-            updateModelMatrixBuffer(localCoordinateSpace);
 
             auto accumulatedResults = std::vector<Mesh::SortableDrawElementsIndirectCommand>{};
 
             if (model != nullptr && modelMatrixBuffer.get() != nullptr && instanceData.numActive > 0) {
+                updateModelMatrixBuffer(localCoordinateSpace, model->getMeshLocalTransforms());
                 auto modelDrawCommands = model->getIndirectDrawCommands(shaderData, *modelMatrixBuffer.get(), instanceData.numActive);
                 std::move(modelDrawCommands.begin(), modelDrawCommands.end(), std::back_inserter(accumulatedResults));
             }
@@ -693,23 +693,30 @@ namespace Flare
             return nextInstanceIdToAssign++;
         }
 
-        void Node::updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix)
+        void Node::updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix, const std::vector<glm::mat4> &submeshLocalTransforms)
         {
             if (instanceData.numActive <= 0) {
                 return;
             }
 
-            for (size_t i = 0; i < instanceData.numActive; ++i) {
-                instanceData.modelMatrices[i] =
-                    parentModelMatrix
-                    * instanceData.TRSData[i].translation
-                    * instanceData.TRSData[i].rotation
-                    * instanceData.TRSData[i].scale;
+            for (size_t submeshIndex = 0; submeshIndex < submeshLocalTransforms.size(); ++submeshIndex) {
+                const auto &submeshLocalTransform = submeshLocalTransforms[submeshIndex];
+
+                for (size_t instanceDataBaseIndex = 0; instanceDataBaseIndex < instanceData.numActive; ++instanceDataBaseIndex) {
+                    auto bufferOutputIndex = instanceDataBaseIndex + instanceData.numActive * submeshIndex;
+
+                    instanceData.modelMatrices[bufferOutputIndex] =
+                        parentModelMatrix
+                        * instanceData.TRSData[instanceDataBaseIndex].translation
+                        * instanceData.TRSData[instanceDataBaseIndex].rotation
+                        * instanceData.TRSData[instanceDataBaseIndex].scale
+                        * submeshLocalTransform;
+                }
             }
 
             modelMatrixBuffer.get()->bufferRange(
                 0,
-                sizeof(glm::mat4) * instanceData.numActive,
+                sizeof(glm::mat4) * instanceData.modelMatrices.size(),
                 instanceData.modelMatrices.data()
             );
         }

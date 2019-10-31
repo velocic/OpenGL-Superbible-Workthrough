@@ -29,6 +29,18 @@ namespace Flare
             return *this;
         }
 
+        std::vector<glm::mat4> Model::getMeshLocalTransforms() const
+        {
+            auto result = std::vector<glm::mat4>{};
+
+            for (const auto &mesh : meshes) {
+                auto meshLocalTransforms = mesh->getLocalTransforms();
+                std::move(meshLocalTransforms.begin(), meshLocalTransforms.end(), std::back_inserter(result));
+            }
+
+            return result;
+        }
+
         size_t Model::getMeshCount() const
         {
             auto result = size_t{0};
