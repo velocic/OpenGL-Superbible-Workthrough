@@ -54,9 +54,10 @@ namespace Flare
 
         void Model::render(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount)
         {
-            for (auto &mesh : meshes) {
+            for (size_t meshIndex = 0; meshIndex < meshes.size(); ++meshIndex) {
+                auto &mesh = meshes[meshIndex];
                 mesh->bind(shaderData, mvpMatrixBuffer);
-                mesh->render(instanceCount);
+                mesh->render(instanceCount, meshIndex);
             }
         }
 
@@ -64,9 +65,10 @@ namespace Flare
         {
             auto result = std::vector<Mesh::SortableDrawElementsIndirectCommand>{};
 
-            for (auto &mesh : meshes) {
+            for (size_t meshIndex = 0; meshIndex < meshes.size(); ++meshIndex) {
+                auto &mesh = meshes[meshIndex];
                 mesh->bind(shaderData, mvpMatrixBuffer);
-                auto meshDrawCommands = mesh->getIndirectDrawCommands(instanceCount);
+                auto meshDrawCommands = mesh->getIndirectDrawCommands(instanceCount, meshIndex);
                 std::move(meshDrawCommands.begin(), meshDrawCommands.end(), std::back_inserter(result));
             }
 

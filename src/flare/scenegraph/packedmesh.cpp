@@ -66,7 +66,7 @@ namespace Flare
             return name;
         }
 
-        void PackedMesh::render(size_t instanceCount)
+        void PackedMesh::render(size_t instanceCount, size_t)
         {
             if (boundData.shaderData.shader == nullptr
                 || boundData.shaderData.vertexArray == nullptr
@@ -81,7 +81,9 @@ namespace Flare
             boundData.shaderData.vertexArray->bind();
             EBO->bind(GL_ELEMENT_ARRAY_BUFFER);
 
-            for (auto &subMeshEntry : subMeshEntries) {
+            for (size_t subMeshIndex = 0; subMeshIndex < subMeshEntries.size(); ++subMeshIndex) {
+                auto &subMeshEntry = subMeshEntries[subMeshIndex];
+
                 if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(subMeshEntry.textures)) {
                     const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(subMeshEntry.textures);
                     for (size_t i = 0; i < phongTextures.diffuse.size(); ++i) {
@@ -117,12 +119,12 @@ namespace Flare
                     reinterpret_cast<void *>(subMeshEntry.elementBufferOffset),
                     instanceCount,
                     subMeshEntry.baseVertex,
-                    0
+                    instanceCount * subMeshIndex
                 );
             }
         }
 
-        std::vector<Mesh::SortableDrawElementsIndirectCommand> PackedMesh::getIndirectDrawCommands(size_t instanceCount) const
+        std::vector<Mesh::SortableDrawElementsIndirectCommand> PackedMesh::getIndirectDrawCommands(size_t instanceCount, size_t) const
         {
             if (boundData.shaderData.shader == nullptr
                 || boundData.shaderData.vertexArray == nullptr
@@ -132,7 +134,9 @@ namespace Flare
 
             auto result = std::vector<Mesh::SortableDrawElementsIndirectCommand>{};
 
-            for (const auto &subMeshEntry : subMeshEntries) {
+            for (size_t subMeshIndex = 0; subMeshIndex < subMeshEntries.size(); ++subMeshIndex) {
+                const auto &subMeshEntry = subMeshEntries[subMeshIndex];
+
                 auto drawCommand = Mesh::SortableDrawElementsIndirectCommand{};
                 drawCommand.textures = subMeshEntry.textures;
                 drawCommand.shaderData = boundData.shaderData;
@@ -145,7 +149,7 @@ namespace Flare
                     static_cast<RenderSystem::RSuint>(instanceCount),
                     static_cast<RenderSystem::RSuint>(subMeshEntry.elementBufferOffset / sizeof(RenderSystem::RSsizei)),
                     static_cast<RenderSystem::RSuint>(subMeshEntry.baseVertex),
-                    0
+                    static_cast<RenderSystem::RSuint>(instanceCount * subMeshIndex)
                 };
                 drawCommand.meshData = MeshRenderData{
                     boundData.mvpMatrixBuffer,

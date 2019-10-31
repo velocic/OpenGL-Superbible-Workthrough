@@ -159,19 +159,19 @@ namespace Flare
             return name;
         }
 
-        void BasicMesh::render(size_t instanceCount)
+        void BasicMesh::render(size_t instanceCount, size_t subMeshIndex)
         {
-            //TODO: abstract the GL call here into a platform-independent wrapper
-            glDrawElementsInstanced(
+            glDrawElementsInstancedBaseInstance(
                 GL_TRIANGLES,
                 elementCount,
                 GL_UNSIGNED_INT,
                 0, //offset into buffer containing elements (this buffer is elements only, so no offset necessary)
-                instanceCount //size of MVP matrix buffer, handed down from SceneNode -> Model -> BasicMesh
+                instanceCount, //size of MVP matrix buffer, handed down from SceneNode -> Model -> BasicMesh
+                instanceCount * subMeshIndex
             );
         }
 
-        std::vector<Mesh::SortableDrawElementsIndirectCommand> BasicMesh::getIndirectDrawCommands(size_t instanceCount) const
+        std::vector<Mesh::SortableDrawElementsIndirectCommand> BasicMesh::getIndirectDrawCommands(size_t instanceCount, size_t subMeshIndex) const
         {
             auto result = std::vector<Mesh::SortableDrawElementsIndirectCommand>{};
             auto drawCommand = Mesh::SortableDrawElementsIndirectCommand{};
@@ -182,7 +182,7 @@ namespace Flare
                 static_cast<RenderSystem::RSuint>(instanceCount),
                 0,
                 0,
-                0
+                static_cast<RenderSystem::RSuint>(instanceCount * subMeshIndex)
             };
             drawCommand.meshData = MeshRenderData{
                 boundData.mvpMatrixBuffer,

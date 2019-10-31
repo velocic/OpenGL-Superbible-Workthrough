@@ -693,24 +693,24 @@ namespace Flare
             return nextInstanceIdToAssign++;
         }
 
-        void Node::updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix, const std::vector<glm::mat4> &submeshLocalTransforms)
+        void Node::updateModelMatrixBuffer(const glm::mat4 &parentModelMatrix, const std::vector<glm::mat4> &subMeshLocalTransforms)
         {
             if (instanceData.numActive <= 0) {
                 return;
             }
 
-            for (size_t submeshIndex = 0; submeshIndex < submeshLocalTransforms.size(); ++submeshIndex) {
-                const auto &submeshLocalTransform = submeshLocalTransforms[submeshIndex];
+            for (size_t subMeshIndex = 0; subMeshIndex < subMeshLocalTransforms.size(); ++subMeshIndex) {
+                const auto &subMeshLocalTransform = subMeshLocalTransforms[subMeshIndex];
 
                 for (size_t instanceDataBaseIndex = 0; instanceDataBaseIndex < instanceData.numActive; ++instanceDataBaseIndex) {
-                    auto bufferOutputIndex = instanceDataBaseIndex + instanceData.numActive * submeshIndex;
+                    auto bufferOutputIndex = instanceDataBaseIndex + instanceData.numActive * subMeshIndex;
 
                     instanceData.modelMatrices[bufferOutputIndex] =
                         parentModelMatrix
                         * instanceData.TRSData[instanceDataBaseIndex].translation
                         * instanceData.TRSData[instanceDataBaseIndex].rotation
                         * instanceData.TRSData[instanceDataBaseIndex].scale
-                        * submeshLocalTransform;
+                        * subMeshLocalTransform;
                 }
             }
 

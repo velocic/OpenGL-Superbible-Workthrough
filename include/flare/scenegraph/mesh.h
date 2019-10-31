@@ -41,8 +41,8 @@ namespace Flare
                 virtual std::vector<glm::mat4> getLocalTransforms() const = 0;
                 virtual size_t getName() const = 0;
                 virtual size_t getPackedMeshCount() const = 0;
-                virtual void render(size_t instanceCount) = 0;
-                virtual std::vector<SortableDrawElementsIndirectCommand> getIndirectDrawCommands(size_t instanceCount) const = 0;
+                virtual void render(size_t instanceCount, size_t subMeshIndex) = 0;
+                virtual std::vector<SortableDrawElementsIndirectCommand> getIndirectDrawCommands(size_t instanceCount, size_t subMeshIndex) const = 0;
         };
     }
 }

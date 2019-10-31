@@ -79,16 +79,22 @@ namespace Tutorial
             Flare::SceneGraph::ModelManager::ModelFile{"lantern", "../src/common-resources/models/Lantern/Lantern.gltf"},
             [](auto){}
         );
+        modelManager->load(
+            Flare::SceneGraph::ModelManager::ModelFile{"lantern-unpacked", "../src/common-resources/models/Lantern/Lantern.gltf"},
+            [](auto){}
+        );
 
         initScene();
         initNodes();
+
+        glEnable(GL_DEPTH_TEST);
     }
 
     void SceneGraph::render(unsigned int deltaTime)
     {
         elapsedTime += deltaTime;
         bunnyNodes[0]->rotateNode(elapsedTime * (0.15/60.0f) * Flare::Math::degreesToRadians(36/360.0f), glm::vec3(0, 0.5, 0.5));
-        lanternNodes[0]->setNodePosition(glm::vec3(std::sin(elapsedTime * (0.001)) * 15, 0, -200));
+        lanternNodes[0]->setNodePosition(glm::vec3(std::sin(elapsedTime * (0.001)) * 15, 10, -200));
 
         if (elapsedTime >= 5000) {
             bunnyNodes[1]->addChildNode(bunnyNodes[2]);
@@ -103,6 +109,7 @@ namespace Tutorial
 
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
+        glClear(GL_DEPTH_BUFFER_BIT);
         // sceneGraph->render();
         sceneGraph->renderIndirect();
         renderWindow->swapWindow();
@@ -118,6 +125,7 @@ namespace Tutorial
         auto bunnyModel = modelManager->get("bunny");
         auto lanternShaderData = shaderManager->get("lanternShader");
         auto lanternModel = modelManager->get("lantern");
+        auto unpackedLanternModel = modelManager->get("lantern-unpacked");
 
         auto testBunnyNode = sceneGraph->getRootNode()->createChildNode();
         auto bunnyCubeCenterToOriginVector = glm::vec3(9 * .25, 9 * .25, 9 * .25) * .5f;
@@ -152,7 +160,16 @@ namespace Tutorial
         testLanternNode->setShaderData(lanternShaderData);
         testLanternNode->setModel(lanternModel);
         testLanternNode->addChildNode(testBunnyNode);
+        testLanternNode->rotateNode(Flare::Math::PI, glm::vec3(0, 0, 1));
         lanternNodes.push_back(testLanternNode);
+
+        auto testUnpackedLanternNode = sceneGraph->getRootNode()->createChildNode();
+        testUnpackedLanternNode->addInstance();
+        testUnpackedLanternNode->setShaderData(lanternShaderData);
+        testUnpackedLanternNode->setModel(unpackedLanternModel);
+        testUnpackedLanternNode->setNodePosition(glm::vec3(-35, 10, -200));
+        testUnpackedLanternNode->rotateNode(Flare::Math::PI, glm::vec3(0, 0, 1));
+        lanternNodes.push_back(testUnpackedLanternNode);
     }
 
     void SceneGraph::initScene()
