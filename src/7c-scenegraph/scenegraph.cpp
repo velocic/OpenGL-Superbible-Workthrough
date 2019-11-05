@@ -86,6 +86,9 @@ namespace Tutorial
 
         initScene();
         initNodes();
+        glEnable(GL_CULL_FACE);
+        glFrontFace(GL_CCW);
+        glCullFace(GL_BACK);
 
         glEnable(GL_DEPTH_TEST);
     }

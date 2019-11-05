@@ -72,9 +72,6 @@ namespace Flare
 
         void SceneGraph::renderIndirect()
         {
-            auto sortedDrawCommands = rootNode->getIndirectDrawCommands(Math::identityMatrix);
-            auto indicesWhereCommandGroupsChange = std::queue<size_t>{};
-
             auto getMaterialId = [](const auto &textures) -> size_t {
                 if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(textures)) {
                     return std::get<RenderSystem::PhongMaterialTextures>(textures).materialId;
@@ -114,19 +111,67 @@ namespace Flare
                 }
             };
 
-            //TODO: also sort by a modelId to reduce draw calls for things that share the same mvpMatrixBuffer
-            //Sort draw commands into groups that share the same material and shader
-            std::sort(
-                sortedDrawCommands.begin(),
-                sortedDrawCommands.end(),
-                [&getMaterialId](const auto &command1, const auto &command2){
-                    auto command1MaterialId = getMaterialId(command1.textures);
-                    auto command2MaterialId = getMaterialId(command2.textures);
+            auto sortDrawCommandsByMaterial = [](auto &unsortedDrawCommands, const auto &getMaterialId){
+                std::sort(
+                    unsortedDrawCommands.begin(),
+                    unsortedDrawCommands.end(),
+                    [&getMaterialId](const auto &command1, const auto &command2){
+                        auto command1MaterialId = getMaterialId(command1.textures);
+                        auto command2MaterialId = getMaterialId(command2.textures);
 
-                    return (command1.shaderData.hashedAlias == command2.shaderData.hashedAlias)
-                        && (command1MaterialId == command2MaterialId);
+                        return (command1.shaderData.hashedAlias == command2.shaderData.hashedAlias)
+                            && (command1MaterialId == command2MaterialId);
+                    }
+                );
+            };
+
+            auto sortDrawCommandRangeByMVPMatrixBuffer = [](auto beginIterator, auto endIterator){
+                std::sort(
+                    beginIterator,
+                    endIterator,
+                    [](const auto &command1, const auto &command2){
+                        return command1.meshData.mvpMatrixBuffer->getName() == command2.meshData.mvpMatrixBuffer->getName();
+                    }
+                );
+            };
+
+            auto getCommandGroupRangeIndices = [](const auto &drawCommandsSortedByMaterial, const auto &getMaterialId){
+                auto lastCommandGroupIndexStart = size_t{0};
+                auto commandGroupRangeIndices = std::vector<std::pair<size_t, size_t>>{};
+
+                for (size_t i = 1; i < drawCommandsSortedByMaterial.size(); ++i) {
+                    const auto &startOfRangeDrawCommand = drawCommandsSortedByMaterial[lastCommandGroupIndexStart];
+                    const auto &currentDrawCommand = drawCommandsSortedByMaterial[i];
+                    auto isLastIteration = i == drawCommandsSortedByMaterial.size() - 1;
+
+                    if ((currentDrawCommand.shaderData.hashedAlias != startOfRangeDrawCommand.shaderData.hashedAlias)
+                        || (getMaterialId(currentDrawCommand.textures) != getMaterialId(startOfRangeDrawCommand.textures))
+                        || isLastIteration) {
+                        commandGroupRangeIndices.emplace_back(lastCommandGroupIndexStart, i);
+                        lastCommandGroupIndexStart = i;
+                    }
                 }
-            );
+
+                return commandGroupRangeIndices;
+            };
+
+            auto sortedDrawCommands = rootNode->getIndirectDrawCommands(Math::identityMatrix);
+            auto indicesWhereCommandGroupsChange = std::queue<size_t>{};
+
+            sortDrawCommandsByMaterial(sortedDrawCommands, getMaterialId);
+            auto commandGroupRanges = getCommandGroupRangeIndices(sortedDrawCommands, getMaterialId);
+
+            //Sort each group of related render commands so that each command that shares a set of buffers is adjacent
+            for (size_t currentRange = 0; currentRange < commandGroupRanges.size(); ++currentRange) {
+                const auto &range = commandGroupRanges[currentRange];
+                auto isLastIteration = currentRange == commandGroupRanges.size() - 1;
+
+                if (!isLastIteration) {
+                    sortDrawCommandRangeByMVPMatrixBuffer(sortedDrawCommands.begin() + range.first, sortedDrawCommands.begin() + range.second);
+                } else {
+                    sortDrawCommandRangeByMVPMatrixBuffer(sortedDrawCommands.begin() + range.first, sortedDrawCommands.begin() + range.second + 1);
+                }
+            }
 
             //Store the indices where shader & material bindings need to switch
             auto lastCommandGroupIndexStart = 0;
@@ -152,7 +197,7 @@ namespace Flare
             }
             indirectRenderCommandsBuffer.get()->bufferRange(
                 0,
-                indirectRenderCommands.size() * sizeof(RenderSystem::DrawElementsIndirectCommand), 
+                indirectRenderCommands.size() * sizeof(RenderSystem::DrawElementsIndirectCommand),
                 indirectRenderCommands.data()
             );
             indirectRenderCommandsBuffer.get()->bind(RenderSystem::RS_DRAW_INDIRECT_BUFFER);
