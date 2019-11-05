@@ -72,6 +72,8 @@ namespace Flare
 
         void SceneGraph::renderIndirect()
         {
+            using CommandGroupRange = std::pair<size_t, size_t>;
+
             auto getMaterialId = [](const auto &textures) -> size_t {
                 if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(textures)) {
                     return std::get<RenderSystem::PhongMaterialTextures>(textures).materialId;
@@ -156,10 +158,9 @@ namespace Flare
             };
 
             auto sortedDrawCommands = rootNode->getIndirectDrawCommands(Math::identityMatrix);
-            auto indicesWhereCommandGroupsChange = std::queue<size_t>{};
-
             sortDrawCommandsByMaterial(sortedDrawCommands, getMaterialId);
             auto commandGroupRanges = getCommandGroupRangeIndices(sortedDrawCommands, getMaterialId);
+            auto commandGroupQueue = std::queue<CommandGroupRange>(std::deque<CommandGroupRange>(commandGroupRanges.begin(), commandGroupRanges.end()));
 
             //Sort each group of related render commands so that each command that shares a set of buffers is adjacent
             for (size_t currentRange = 0; currentRange < commandGroupRanges.size(); ++currentRange) {
@@ -173,16 +174,19 @@ namespace Flare
                 }
             }
 
-            //Store the indices where shader & material bindings need to switch
-            auto lastCommandGroupIndexStart = 0;
-            indicesWhereCommandGroupsChange.push(lastCommandGroupIndexStart);
-            for (size_t i = 1; i < sortedDrawCommands.size(); ++i) {
-                if ((sortedDrawCommands[i].shaderData.hashedAlias != sortedDrawCommands[lastCommandGroupIndexStart].shaderData.hashedAlias)
-                    || (getMaterialId(sortedDrawCommands[i].textures) != getMaterialId(sortedDrawCommands[lastCommandGroupIndexStart].textures))) {
-                    lastCommandGroupIndexStart = i;
-                    indicesWhereCommandGroupsChange.push(i);
-                }
-            }
+            /*TODO:
+             * Create 3 buffers; 1 mvpMatrixBuffer, 1 vertex buffer, 1 element buffer
+             * Copy all mvpMatrixBuffers from the current command group into the new mvpMatrixBuffer
+             * Copy all vertex buffers from the current command group into the new vertex buffer
+             * Copy all element buffers from the current command group into the new element buffer
+             *
+             * Traverse all commands in the command group, updating their baseInstance and baseVertex to align
+             *  with their position in the new, much larger mvpMatrix & vertex buffers
+             *
+             * Fill the indirect command GPU buffer with the updated commands (should be the same code as before, left intact below)
+             *
+             * Update the draw loop to iterate 1 command group at a time, rather than 1 command at a time
+             */
 
             //Guarantee the indirect commands GPU buffer is at least large enough to fit the current command set
             if (indirectRenderCommandsBuffer.get()->getSizeInElements() < sortedDrawCommands.size()) {
@@ -207,8 +211,8 @@ namespace Flare
                 const auto &drawCommand = sortedDrawCommands[drawCommandIndex];
 
                 //Bind shader & material for draw command group
-                if (drawCommandIndex == indicesWhereCommandGroupsChange.front()) {
-                    indicesWhereCommandGroupsChange.pop();
+                if (drawCommandIndex == commandGroupQueue.front().first) {
+                    commandGroupQueue.pop();
 
                     drawCommand.shaderData.shader->bind();
                     drawCommand.shaderData.vertexArray->bind();
