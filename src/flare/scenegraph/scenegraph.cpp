@@ -171,20 +171,29 @@ namespace Flare
                 auto combinedElementBufferSize = size_t{0};
 
                 {
-                    auto renderDataBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+                    auto mvpMatrixBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+                    auto vertexBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+                    auto elementBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
 
                     for (const auto &drawCommand : sortedDrawCommands) {
-                        auto hasAlreadyCountedTheseBuffers = renderDataBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer) != renderDataBuffersEncountered.end();
+                        auto hasCountedThisMVPMatrixBuffer = mvpMatrixBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer) != mvpMatrixBuffersEncountered.end();
+                        auto hasCountedThisVertexBuffer = vertexBuffersEncountered.find(drawCommand.meshData.vertexBuffer) != vertexBuffersEncountered.end();
+                        auto hasCountedThisElementBuffer = elementBuffersEncountered.find(drawCommand.meshData.elementBuffer) != elementBuffersEncountered.end();
 
-                        //NOTE: these buffers are always grouped, so only need to check one of them for uniqueness.
-                        if (hasAlreadyCountedTheseBuffers) {
-                            continue;
+                        if (!hasCountedThisMVPMatrixBuffer) {
+                            combinedMVPMatrixBufferSize += drawCommand.meshData.mvpMatrixBuffer->getSizeInBytes();
+                            mvpMatrixBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
                         }
-                        renderDataBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
 
-                        combinedMVPMatrixBufferSize += drawCommand.meshData.mvpMatrixBuffer->getSizeInBytes();
-                        combinedVertexBufferSize += drawCommand.meshData.vertexBuffer->getSizeInBytes();
-                        combinedElementBufferSize += drawCommand.meshData.elementBuffer->getSizeInBytes();
+                        if (!hasCountedThisVertexBuffer) {
+                            combinedVertexBufferSize += drawCommand.meshData.vertexBuffer->getSizeInBytes();
+                            vertexBuffersEncountered.insert(drawCommand.meshData.vertexBuffer);
+                        }
+
+                        if (!hasCountedThisElementBuffer) {
+                            combinedElementBufferSize += drawCommand.meshData.elementBuffer->getSizeInBytes();
+                            elementBuffersEncountered.insert(drawCommand.meshData.elementBuffer);
+                        }
                     }
                 }
 
@@ -201,11 +210,13 @@ namespace Flare
                 auto baseVertexWithinNewBuffer = size_t{0};
                 auto firstIndexWithinNewBuffer = size_t{0};
 
-                auto renderDataBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+                auto mvpMatrixBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+                auto vertexBufferToBaseVertex = std::unordered_map<const RenderSystem::Buffer *, size_t>{};
+                auto elementBufferToFirstIndex = std::unordered_map<const RenderSystem::Buffer *, size_t>{};
 
                 for (size_t currentRange = 0; currentRange < commandGroupRanges.size(); ++currentRange) {
                     const auto &commandGroupRange = commandGroupRanges[currentRange];
-                    auto baseInstanceWithinNewBuffer = size_t{0};
+                    auto baseInstanceWithinCommandGroup = size_t{0};
                     auto isLastRange = currentRange == commandGroupRanges.size() - 1;
                     auto lastCommandIndexInRange = isLastRange ? commandGroupRange.second + 1 : commandGroupRange.second;
 
@@ -216,26 +227,46 @@ namespace Flare
                         const auto &sourceVertexBuffer = *drawCommand.meshData.vertexBuffer;
                         const auto &sourceElementBuffer = *drawCommand.meshData.elementBuffer;
 
-                        auto hasNotCopiedTheseBuffers = renderDataBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer) == renderDataBuffersEncountered.end();
-                        if (hasNotCopiedTheseBuffers) {
-                            renderDataBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
+                        auto mvpMatrixBufferSearchIterator = mvpMatrixBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer);
+                        auto vertexBufferSearchIterator = vertexBufferToBaseVertex.find(drawCommand.meshData.vertexBuffer);
+                        auto elementBufferSearchIterator = elementBufferToFirstIndex.find(drawCommand.meshData.elementBuffer);
 
+                        auto hasNotCopiedThisMVPMatrixBuffer = mvpMatrixBufferSearchIterator == mvpMatrixBuffersEncountered.end();
+                        auto hasNotCopiedThisVertexBuffer = vertexBufferSearchIterator == vertexBufferToBaseVertex.end();
+                        auto hasNotCopiedThisElementBuffer = elementBufferSearchIterator == elementBufferToFirstIndex.end();
+
+                        if (hasNotCopiedThisMVPMatrixBuffer) {
+                            mvpMatrixBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
                             mvpMatrixBuffer->copyRange(sourceMVPMatrixBuffer, 0, mvpMatrixBufferBytesCopiedSoFar, sourceMVPMatrixBuffer.getSizeInBytes());
-                            vertexBuffer->copyRange(sourceVertexBuffer, 0, vertexBufferBytesCopiedSoFar, sourceVertexBuffer.getSizeInBytes());
-                            elementBuffer->copyRange(sourceElementBuffer, 0, elementBufferBytesCopiedSoFar, sourceElementBuffer.getSizeInBytes());
-
                             mvpMatrixBufferBytesCopiedSoFar += sourceMVPMatrixBuffer.getSizeInBytes();
-                            vertexBufferBytesCopiedSoFar += sourceVertexBuffer.getSizeInBytes();
-                            elementBufferBytesCopiedSoFar += sourceElementBuffer.getSizeInBytes();
                         }
 
-                        drawCommand.drawElementsIndirectCommand.baseInstance = baseInstanceWithinNewBuffer;
-                        drawCommand.drawElementsIndirectCommand.baseVertex = baseVertexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.baseVertex;
-                        drawCommand.drawElementsIndirectCommand.firstIndex = firstIndexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
+                        if (hasNotCopiedThisVertexBuffer) {
+                            vertexBufferToBaseVertex.insert_or_assign(drawCommand.meshData.vertexBuffer, baseVertexWithinNewBuffer);
+                            vertexBuffer->copyRange(sourceVertexBuffer, 0, vertexBufferBytesCopiedSoFar, sourceVertexBuffer.getSizeInBytes());
+                            drawCommand.drawElementsIndirectCommand.baseVertex = baseVertexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.baseVertex;
 
-                        baseInstanceWithinNewBuffer += drawCommand.drawElementsIndirectCommand.instanceCount;
-                        baseVertexWithinNewBuffer += drawCommand.drawElementsIndirectCommand.baseVertex;
-                        firstIndexWithinNewBuffer += drawCommand.drawElementsIndirectCommand.firstIndex;
+                            vertexBufferBytesCopiedSoFar += sourceVertexBuffer.getSizeInBytes();
+                            baseVertexWithinNewBuffer += sourceVertexBuffer.getSizeInElements();
+                        } else {
+                            auto meshStartWithinCombinedBuffer = vertexBufferSearchIterator->second;
+                            drawCommand.drawElementsIndirectCommand.baseVertex = meshStartWithinCombinedBuffer + drawCommand.drawElementsIndirectCommand.baseVertex;
+                        }
+
+                        if (hasNotCopiedThisElementBuffer) {
+                            elementBufferToFirstIndex.insert_or_assign(drawCommand.meshData.elementBuffer, firstIndexWithinNewBuffer);
+                            elementBuffer->copyRange(sourceElementBuffer, 0, elementBufferBytesCopiedSoFar, sourceElementBuffer.getSizeInBytes());
+                            drawCommand.drawElementsIndirectCommand.firstIndex = firstIndexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
+
+                            elementBufferBytesCopiedSoFar += sourceElementBuffer.getSizeInBytes();
+                            firstIndexWithinNewBuffer += sourceElementBuffer.getSizeInElements();
+                        } else {
+                            auto indicesStartWithinCombinedBuffer = elementBufferSearchIterator->second;
+                            drawCommand.drawElementsIndirectCommand.firstIndex = indicesStartWithinCombinedBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
+                        }
+
+                        drawCommand.drawElementsIndirectCommand.baseInstance = baseInstanceWithinCommandGroup;
+                        baseInstanceWithinCommandGroup += drawCommand.drawElementsIndirectCommand.instanceCount;
                     }
                 }
 
