@@ -160,7 +160,7 @@ namespace Flare
                 return commandGroupRangeIndices;
             };
 
-            auto getCombinedRenderDataBuffers = [](auto &sortedDrawCommands){
+            auto getCombinedRenderDataBuffers = [](auto &sortedDrawCommands, const auto &commandGroupRanges){
                 auto mvpMatrixBuffer = RenderSystem::createBuffer("mvpMatrix", sortedDrawCommands[0].meshData.mvpMatrixBuffer->getContentDescription());
                 auto vertexBuffer = RenderSystem::createBuffer("vertexBuffer", sortedDrawCommands[0].meshData.vertexBuffer->getContentDescription());
                 auto elementBuffer = RenderSystem::createBuffer("elementBuffer", sortedDrawCommands[0].meshData.elementBuffer->getContentDescription());
@@ -198,52 +198,45 @@ namespace Flare
                 auto vertexBufferBytesCopiedSoFar = size_t{0};
                 auto elementBufferBytesCopiedSoFar = size_t{0};
 
-                auto baseInstanceWithinNewBuffer = size_t{0};
                 auto baseVertexWithinNewBuffer = size_t{0};
                 auto firstIndexWithinNewBuffer = size_t{0};
 
                 auto renderDataBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
 
-                for (auto &drawCommand : sortedDrawCommands) {
-                    const auto &sourceMVPMatrixBuffer = *drawCommand.meshData.mvpMatrixBuffer;
-                    const auto &sourceVertexBuffer = *drawCommand.meshData.vertexBuffer;
-                    const auto &sourceElementBuffer = *drawCommand.meshData.elementBuffer;
+                for (size_t currentRange = 0; currentRange < commandGroupRanges.size(); ++currentRange) {
+                    const auto &commandGroupRange = commandGroupRanges[currentRange];
+                    auto baseInstanceWithinNewBuffer = size_t{0};
+                    auto isLastRange = currentRange == commandGroupRanges.size() - 1;
+                    auto lastCommandIndexInRange = isLastRange ? commandGroupRange.second + 1 : commandGroupRange.second;
 
-                    auto hasNotCopiedTheseBuffers = renderDataBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer) == renderDataBuffersEncountered.end();
-                    if (hasNotCopiedTheseBuffers) {
-                        renderDataBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
+                    for (size_t drawCommandIndex = commandGroupRange.first; drawCommandIndex < lastCommandIndexInRange; ++drawCommandIndex) {
+                        auto &drawCommand = sortedDrawCommands[drawCommandIndex];
 
-                        mvpMatrixBuffer->copyRange(
-                            sourceMVPMatrixBuffer,
-                            0,
-                            mvpMatrixBufferBytesCopiedSoFar,
-                            sourceMVPMatrixBuffer.getSizeInBytes()
-                        );
-                        vertexBuffer->copyRange(
-                            sourceVertexBuffer,
-                            0,
-                            vertexBufferBytesCopiedSoFar,
-                            sourceVertexBuffer.getSizeInBytes()
-                        );
-                        elementBuffer->copyRange(
-                            sourceElementBuffer,
-                            0,
-                            elementBufferBytesCopiedSoFar,
-                            sourceElementBuffer.getSizeInBytes()
-                        );
+                        const auto &sourceMVPMatrixBuffer = *drawCommand.meshData.mvpMatrixBuffer;
+                        const auto &sourceVertexBuffer = *drawCommand.meshData.vertexBuffer;
+                        const auto &sourceElementBuffer = *drawCommand.meshData.elementBuffer;
 
-                        mvpMatrixBufferBytesCopiedSoFar += sourceMVPMatrixBuffer.getSizeInBytes();
-                        vertexBufferBytesCopiedSoFar += sourceVertexBuffer.getSizeInBytes();
-                        elementBufferBytesCopiedSoFar += sourceElementBuffer.getSizeInBytes();
+                        auto hasNotCopiedTheseBuffers = renderDataBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer) == renderDataBuffersEncountered.end();
+                        if (hasNotCopiedTheseBuffers) {
+                            renderDataBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
+
+                            mvpMatrixBuffer->copyRange(sourceMVPMatrixBuffer, 0, mvpMatrixBufferBytesCopiedSoFar, sourceMVPMatrixBuffer.getSizeInBytes());
+                            vertexBuffer->copyRange(sourceVertexBuffer, 0, vertexBufferBytesCopiedSoFar, sourceVertexBuffer.getSizeInBytes());
+                            elementBuffer->copyRange(sourceElementBuffer, 0, elementBufferBytesCopiedSoFar, sourceElementBuffer.getSizeInBytes());
+
+                            mvpMatrixBufferBytesCopiedSoFar += sourceMVPMatrixBuffer.getSizeInBytes();
+                            vertexBufferBytesCopiedSoFar += sourceVertexBuffer.getSizeInBytes();
+                            elementBufferBytesCopiedSoFar += sourceElementBuffer.getSizeInBytes();
+                        }
+
+                        drawCommand.drawElementsIndirectCommand.baseInstance = baseInstanceWithinNewBuffer;
+                        drawCommand.drawElementsIndirectCommand.baseVertex = baseVertexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.baseVertex;
+                        drawCommand.drawElementsIndirectCommand.firstIndex = firstIndexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
+
+                        baseInstanceWithinNewBuffer += drawCommand.drawElementsIndirectCommand.instanceCount;
+                        baseVertexWithinNewBuffer += drawCommand.drawElementsIndirectCommand.baseVertex;
+                        firstIndexWithinNewBuffer += drawCommand.drawElementsIndirectCommand.firstIndex;
                     }
-
-                    drawCommand.drawElementsIndirectCommand.baseInstance = baseInstanceWithinNewBuffer + drawCommand.drawElementsIndirectCommand.baseInstance;
-                    drawCommand.drawElementsIndirectCommand.baseVertex = baseVertexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.baseVertex;
-                    drawCommand.drawElementsIndirectCommand.firstIndex = firstIndexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
-
-                    baseInstanceWithinNewBuffer += drawCommand.drawElementsIndirectCommand.instanceCount;
-                    // baseVertexWithinNewBuffer += drawCommand.drawElementsIndirectCommand.baseVertex;
-                    // firstIndexWithinNewBuffer += drawCommand.drawElementsIndirectCommand.firstIndex;
                 }
 
                 return std::make_tuple(std::move(mvpMatrixBuffer), std::move(vertexBuffer), std::move(elementBuffer));
@@ -270,21 +263,7 @@ namespace Flare
                 }
             }
 
-            auto [combinedMVPMatrixBuffer, combinedVertexBuffer, combinedElementBuffer] = getCombinedRenderDataBuffers(sortedDrawCommands);
-
-            /*TODO:
-             * Create 3 buffers; 1 mvpMatrixBuffer, 1 vertex buffer, 1 element buffer
-             * Copy all mvpMatrixBuffers from the current command group into the new mvpMatrixBuffer
-             * Copy all vertex buffers from the current command group into the new vertex buffer
-             * Copy all element buffers from the current command group into the new element buffer
-             *
-             * Traverse all commands in the command group, updating their baseInstance and baseVertex to align
-             *  with their position in the new, much larger mvpMatrix & vertex buffers
-             *
-             * Fill the indirect command GPU buffer with the updated commands (should be the same code as before, left intact below)
-             *
-             * Update the draw loop to iterate 1 command group at a time, rather than 1 command at a time
-             */
+            auto [combinedMVPMatrixBuffer, combinedVertexBuffer, combinedElementBuffer] = getCombinedRenderDataBuffers(sortedDrawCommands, commandGroupRanges);
 
             //Guarantee the indirect commands GPU buffer is at least large enough to fit the current command set
             if (indirectRenderCommandsBuffer.get()->getSizeInElements() < sortedDrawCommands.size()) {
