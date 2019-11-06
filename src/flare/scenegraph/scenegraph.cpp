@@ -1,7 +1,10 @@
 #include <flare/scenegraph/scenegraph.h>
 
 #include <algorithm>
+#include <unordered_set>
 #include <queue>
+
+#include <flare/rendersystem/factory.h>
 
 #include <glm-0.9.9/gtx/matrix_decompose.hpp>
 
@@ -157,7 +160,100 @@ namespace Flare
                 return commandGroupRangeIndices;
             };
 
+            auto getCombinedRenderDataBuffers = [](auto &sortedDrawCommands){
+                auto mvpMatrixBuffer = RenderSystem::createBuffer("mvpMatrix", sortedDrawCommands[0].meshData.mvpMatrixBuffer->getContentDescription());
+                auto vertexBuffer = RenderSystem::createBuffer("vertexBuffer", sortedDrawCommands[0].meshData.vertexBuffer->getContentDescription());
+                auto elementBuffer = RenderSystem::createBuffer("elementBuffer", sortedDrawCommands[0].meshData.elementBuffer->getContentDescription());
+
+                //calc required size for each buffer, then allocate storage
+                auto combinedMVPMatrixBufferSize = size_t{0};
+                auto combinedVertexBufferSize = size_t{0};
+                auto combinedElementBufferSize = size_t{0};
+
+                {
+                    auto renderDataBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+
+                    for (const auto &drawCommand : sortedDrawCommands) {
+                        auto hasAlreadyCountedTheseBuffers = renderDataBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer) != renderDataBuffersEncountered.end();
+
+                        //NOTE: these buffers are always grouped, so only need to check one of them for uniqueness.
+                        if (hasAlreadyCountedTheseBuffers) {
+                            continue;
+                        }
+                        renderDataBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
+
+                        combinedMVPMatrixBufferSize += drawCommand.meshData.mvpMatrixBuffer->getSizeInBytes();
+                        combinedVertexBufferSize += drawCommand.meshData.vertexBuffer->getSizeInBytes();
+                        combinedElementBufferSize += drawCommand.meshData.elementBuffer->getSizeInBytes();
+                    }
+                }
+
+                mvpMatrixBuffer->allocateBufferStorage(combinedMVPMatrixBufferSize, nullptr, RenderSystem::RS_DYNAMIC_STORAGE_BIT);
+                vertexBuffer->allocateBufferStorage(combinedVertexBufferSize, nullptr, RenderSystem::RS_DYNAMIC_STORAGE_BIT);
+                elementBuffer->allocateBufferStorage(combinedElementBufferSize, nullptr, RenderSystem::RS_DYNAMIC_STORAGE_BIT);
+
+                //copy separated buffers into combined buffers, and update DrawElementsIndirectCommand(s) to point to the
+                //correct offsets within the new buffers
+                auto mvpMatrixBufferBytesCopiedSoFar = size_t{0};
+                auto vertexBufferBytesCopiedSoFar = size_t{0};
+                auto elementBufferBytesCopiedSoFar = size_t{0};
+
+                auto baseInstanceWithinNewBuffer = size_t{0};
+                auto baseVertexWithinNewBuffer = size_t{0};
+                auto firstIndexWithinNewBuffer = size_t{0};
+
+                auto renderDataBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+
+                for (auto &drawCommand : sortedDrawCommands) {
+                    const auto &sourceMVPMatrixBuffer = *drawCommand.meshData.mvpMatrixBuffer;
+                    const auto &sourceVertexBuffer = *drawCommand.meshData.vertexBuffer;
+                    const auto &sourceElementBuffer = *drawCommand.meshData.elementBuffer;
+
+                    auto hasNotCopiedTheseBuffers = renderDataBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer) == renderDataBuffersEncountered.end();
+                    if (hasNotCopiedTheseBuffers) {
+                        renderDataBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
+
+                        mvpMatrixBuffer->copyRange(
+                            sourceMVPMatrixBuffer,
+                            0,
+                            mvpMatrixBufferBytesCopiedSoFar,
+                            sourceMVPMatrixBuffer.getSizeInBytes()
+                        );
+                        vertexBuffer->copyRange(
+                            sourceVertexBuffer,
+                            0,
+                            vertexBufferBytesCopiedSoFar,
+                            sourceVertexBuffer.getSizeInBytes()
+                        );
+                        elementBuffer->copyRange(
+                            sourceElementBuffer,
+                            0,
+                            elementBufferBytesCopiedSoFar,
+                            sourceElementBuffer.getSizeInBytes()
+                        );
+
+                        mvpMatrixBufferBytesCopiedSoFar += sourceMVPMatrixBuffer.getSizeInBytes();
+                        vertexBufferBytesCopiedSoFar += sourceVertexBuffer.getSizeInBytes();
+                        elementBufferBytesCopiedSoFar += sourceElementBuffer.getSizeInBytes();
+                    }
+
+                    drawCommand.drawElementsIndirectCommand.baseInstance = baseInstanceWithinNewBuffer + drawCommand.drawElementsIndirectCommand.baseInstance;
+                    drawCommand.drawElementsIndirectCommand.baseVertex = baseVertexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.baseVertex;
+                    drawCommand.drawElementsIndirectCommand.firstIndex = firstIndexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
+
+                    baseInstanceWithinNewBuffer += drawCommand.drawElementsIndirectCommand.instanceCount;
+                    // baseVertexWithinNewBuffer += drawCommand.drawElementsIndirectCommand.baseVertex;
+                    // firstIndexWithinNewBuffer += drawCommand.drawElementsIndirectCommand.firstIndex;
+                }
+
+                return std::make_tuple(std::move(mvpMatrixBuffer), std::move(vertexBuffer), std::move(elementBuffer));
+            };
+
             auto sortedDrawCommands = rootNode->getIndirectDrawCommands(Math::identityMatrix);
+            if (sortedDrawCommands.size() == 0) {
+                return;
+            }
+
             sortDrawCommandsByMaterial(sortedDrawCommands, getMaterialId);
             auto commandGroupRanges = getCommandGroupRangeIndices(sortedDrawCommands, getMaterialId);
             auto commandGroupQueue = std::queue<CommandGroupRange>(std::deque<CommandGroupRange>(commandGroupRanges.begin(), commandGroupRanges.end()));
@@ -173,6 +269,8 @@ namespace Flare
                     sortDrawCommandRangeByMVPMatrixBuffer(sortedDrawCommands.begin() + range.first, sortedDrawCommands.begin() + range.second + 1);
                 }
             }
+
+            auto [combinedMVPMatrixBuffer, combinedVertexBuffer, combinedElementBuffer] = getCombinedRenderDataBuffers(sortedDrawCommands);
 
             /*TODO:
              * Create 3 buffers; 1 mvpMatrixBuffer, 1 vertex buffer, 1 element buffer
