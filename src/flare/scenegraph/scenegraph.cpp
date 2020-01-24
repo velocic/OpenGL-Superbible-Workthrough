@@ -328,19 +328,17 @@ namespace Flare
                 }
 
                 //Bind per-mesh data
-                drawCommand.meshData.elementBuffer->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
+                combinedElementBuffer->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
                 drawCommand.shaderData.vertexArray->linkBuffers(
-                    std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*drawCommand.meshData.vertexBuffer, *drawCommand.meshData.mvpMatrixBuffer}
+                    std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*combinedVertexBuffer, *combinedMVPMatrixBuffer}
                 );
 
                 //TODO: abstract the GL call here into a platform-independent wrapper
                 glMultiDrawElementsIndirect(
                     RenderSystem::RS_TRIANGLES,
                     RenderSystem::RS_UNSIGNED_INT,
-                    reinterpret_cast<void *>(drawCommandIndex * sizeof(RenderSystem::DrawElementsIndirectCommand)),//TODO: indirect buffer offset
-                    // 0,//TODO: indirect buffer offset
-                    1,//TODO: draw count (num entries in current command group for this call?)
-                    // 0,//TODO: draw count (num entries in current command group for this call?)
+                    reinterpret_cast<void *>(drawCommandIndex * sizeof(RenderSystem::DrawElementsIndirectCommand)),
+                    1,
                     0
                 );
             }
