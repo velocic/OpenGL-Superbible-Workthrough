@@ -315,21 +315,17 @@ namespace Flare
             indirectRenderCommandsBuffer.get()->bind(RenderSystem::RS_DRAW_INDIRECT_BUFFER);
 
             //Submit the indirect render commands
-            for (size_t drawCommandIndex = 0; drawCommandIndex < sortedDrawCommands.size(); ++drawCommandIndex) {
-                const auto &drawCommand = sortedDrawCommands[drawCommandIndex];
+            while (!commandGroupQueue.empty()) {
+                const auto &drawCommandGroup = commandGroupQueue.front();
+                const auto &firstDrawCommandInGroup = sortedDrawCommands[drawCommandGroup.first];
 
                 //Bind shader & material for draw command group
-                if (drawCommandIndex == commandGroupQueue.front().first) {
-                    commandGroupQueue.pop();
+                firstDrawCommandInGroup.shaderData.shader->bind();
+                firstDrawCommandInGroup.shaderData.vertexArray->bind();
+                bindMaterialTextures(firstDrawCommandInGroup.shaderData.shader, firstDrawCommandInGroup.textures);
 
-                    drawCommand.shaderData.shader->bind();
-                    drawCommand.shaderData.vertexArray->bind();
-                    bindMaterialTextures(drawCommand.shaderData.shader, drawCommand.textures);
-                }
-
-                //Bind per-mesh data
                 combinedElementBuffer->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
-                drawCommand.shaderData.vertexArray->linkBuffers(
+                firstDrawCommandInGroup.shaderData.vertexArray->linkBuffers(
                     std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*combinedVertexBuffer, *combinedMVPMatrixBuffer}
                 );
 
@@ -337,10 +333,12 @@ namespace Flare
                 glMultiDrawElementsIndirect(
                     RenderSystem::RS_TRIANGLES,
                     RenderSystem::RS_UNSIGNED_INT,
-                    reinterpret_cast<void *>(drawCommandIndex * sizeof(RenderSystem::DrawElementsIndirectCommand)),
-                    1,
+                    reinterpret_cast<void *>(drawCommandGroup.first * sizeof(RenderSystem::DrawElementsIndirectCommand)),
+                    drawCommandGroup.second - drawCommandGroup.first,//number of draw commands in the group
                     0
                 );
+
+                commandGroupQueue.pop();
             }
         }
 
