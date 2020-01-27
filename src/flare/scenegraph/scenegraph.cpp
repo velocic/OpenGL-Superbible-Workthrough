@@ -152,7 +152,13 @@ namespace Flare
                     if ((currentDrawCommand.shaderData.hashedAlias != startOfRangeDrawCommand.shaderData.hashedAlias)
                         || (getMaterialId(currentDrawCommand.textures) != getMaterialId(startOfRangeDrawCommand.textures))
                         || isLastIteration) {
-                        commandGroupRangeIndices.emplace_back(lastCommandGroupIndexStart, i);
+
+                        if (isLastIteration) {
+                            commandGroupRangeIndices.emplace_back(lastCommandGroupIndexStart, i);
+                        } else {
+                            commandGroupRangeIndices.emplace_back(lastCommandGroupIndexStart, i - 1);
+                        }
+
                         lastCommandGroupIndexStart = i;
                     }
                 }
@@ -285,13 +291,8 @@ namespace Flare
             //Sort each group of related render commands so that each command that shares a set of buffers is adjacent
             for (size_t currentRange = 0; currentRange < commandGroupRanges.size(); ++currentRange) {
                 const auto &range = commandGroupRanges[currentRange];
-                auto isLastIteration = currentRange == commandGroupRanges.size() - 1;
 
-                if (!isLastIteration) {
-                    sortDrawCommandRangeByMVPMatrixBuffer(sortedDrawCommands.begin() + range.first, sortedDrawCommands.begin() + range.second);
-                } else {
-                    sortDrawCommandRangeByMVPMatrixBuffer(sortedDrawCommands.begin() + range.first, sortedDrawCommands.begin() + range.second + 1);
-                }
+                sortDrawCommandRangeByMVPMatrixBuffer(sortedDrawCommands.begin() + range.first, sortedDrawCommands.begin() + range.second + 1);
             }
 
             auto [combinedMVPMatrixBuffer, combinedVertexBuffer, combinedElementBuffer] = getCombinedRenderDataBuffers(sortedDrawCommands, commandGroupRanges);
@@ -334,7 +335,7 @@ namespace Flare
                     RenderSystem::RS_TRIANGLES,
                     RenderSystem::RS_UNSIGNED_INT,
                     reinterpret_cast<void *>(drawCommandGroup.first * sizeof(RenderSystem::DrawElementsIndirectCommand)),
-                    drawCommandGroup.second - drawCommandGroup.first,//number of draw commands in the group
+                    (drawCommandGroup.second - drawCommandGroup.first) + 1,//number of draw commands in the group
                     0
                 );
 
