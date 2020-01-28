@@ -223,10 +223,8 @@ namespace Flare
                 for (size_t currentRange = 0; currentRange < commandGroupRanges.size(); ++currentRange) {
                     const auto &commandGroupRange = commandGroupRanges[currentRange];
                     auto baseInstanceWithinCommandGroup = size_t{0};
-                    auto isLastRange = currentRange == commandGroupRanges.size() - 1;
-                    auto lastCommandIndexInRange = isLastRange ? commandGroupRange.second + 1 : commandGroupRange.second;
 
-                    for (size_t drawCommandIndex = commandGroupRange.first; drawCommandIndex < lastCommandIndexInRange; ++drawCommandIndex) {
+                    for (size_t drawCommandIndex = commandGroupRange.first; drawCommandIndex < commandGroupRange.second + 1; ++drawCommandIndex) {
                         auto &drawCommand = sortedDrawCommands[drawCommandIndex];
 
                         const auto &sourceMVPMatrixBuffer = *drawCommand.meshData.mvpMatrixBuffer;
