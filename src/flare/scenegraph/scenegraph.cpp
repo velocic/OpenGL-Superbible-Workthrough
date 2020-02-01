@@ -100,7 +100,6 @@ namespace Flare
                     }
                 } else if (std::holds_alternative<RenderSystem::PBRMaterialTextures>(textures)) {
                     const auto &PBRTextures = std::get<RenderSystem::PBRMaterialTextures>(textures);
-
                     for (size_t materialTextureIndex = 0; materialTextureIndex < PBRTextures.baseColor.size(); ++materialTextureIndex) {
                         shader->setTexture("textureBaseColor" + std::to_string(materialTextureIndex), PBRTextures.baseColor[materialTextureIndex]);
                     }
@@ -222,7 +221,6 @@ namespace Flare
 
                 for (size_t currentRange = 0; currentRange < commandGroupRanges.size(); ++currentRange) {
                     const auto &commandGroupRange = commandGroupRanges[currentRange];
-                    auto baseInstanceWithinCommandGroup = size_t{0};
 
                     for (size_t drawCommandIndex = commandGroupRange.first; drawCommandIndex < commandGroupRange.second + 1; ++drawCommandIndex) {
                         auto &drawCommand = sortedDrawCommands[drawCommandIndex];
@@ -242,7 +240,14 @@ namespace Flare
                         if (hasNotCopiedThisMVPMatrixBuffer) {
                             mvpMatrixBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
                             mvpMatrixBuffer->copyRange(sourceMVPMatrixBuffer, 0, mvpMatrixBufferBytesCopiedSoFar, sourceMVPMatrixBuffer.getSizeInBytes());
+
+                            drawCommand.drawElementsIndirectCommand.baseInstance = mvpMatrixBufferBytesCopiedSoFar / sizeof(glm::mat4);
+
                             mvpMatrixBufferBytesCopiedSoFar += sourceMVPMatrixBuffer.getSizeInBytes();
+                        } else {
+                            auto relativeBaseInstance = drawCommand.drawElementsIndirectCommand.baseInstance;
+                            auto offsetWithinCombinedBuffer = mvpMatrixBufferBytesCopiedSoFar - sourceMVPMatrixBuffer.getSizeInBytes();
+                            drawCommand.drawElementsIndirectCommand.baseInstance = relativeBaseInstance + offsetWithinCombinedBuffer / sizeof(glm::mat4);
                         }
 
                         if (hasNotCopiedThisVertexBuffer) {
@@ -268,9 +273,6 @@ namespace Flare
                             auto indicesStartWithinCombinedBuffer = elementBufferSearchIterator->second;
                             drawCommand.drawElementsIndirectCommand.firstIndex = indicesStartWithinCombinedBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
                         }
-
-                        drawCommand.drawElementsIndirectCommand.baseInstance = baseInstanceWithinCommandGroup;
-                        baseInstanceWithinCommandGroup += drawCommand.drawElementsIndirectCommand.instanceCount;
                     }
                 }
 
