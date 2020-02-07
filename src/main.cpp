@@ -10,6 +10,7 @@
 #include <7a-instancing/instancing.h>
 #include <7b-packed-mesh-rendering/packed-mesh-rendering.h>
 #include <7c-scenegraph/scenegraph.h>
+#include <gs-1-simple-ads-shader/simple-ads-shader.h>
 
 #include <flare/gl/uniformblock.h>
 
@@ -26,7 +27,8 @@ int main()
     // Tutorial::ModelFileLoading selectedTutorial;
     // Tutorial::Instancing selectedTutorial;
     // Tutorial::PackedMeshRendering selectedTutorial;
-    Tutorial::SceneGraph selectedTutorial;
+    // Tutorial::SceneGraph selectedTutorial;
+    Tutorial::SimpleADSShader selectedTutorial;
 
     Flare::Application* demoApp = &selectedTutorial;
 
