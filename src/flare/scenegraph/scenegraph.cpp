@@ -143,6 +143,11 @@ namespace Flare
                 auto lastCommandGroupIndexStart = size_t{0};
                 auto commandGroupRangeIndices = std::vector<std::pair<size_t, size_t>>{};
 
+                if (drawCommandsSortedByMaterial.size() == 1) {
+                    commandGroupRangeIndices.emplace_back(lastCommandGroupIndexStart, 0);
+                    return commandGroupRangeIndices;
+                }
+
                 for (size_t i = 1; i < drawCommandsSortedByMaterial.size(); ++i) {
                     const auto &startOfRangeDrawCommand = drawCommandsSortedByMaterial[lastCommandGroupIndexStart];
                     const auto &currentDrawCommand = drawCommandsSortedByMaterial[i];
