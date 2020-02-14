@@ -27,6 +27,7 @@ add_executable(
     src/flare/gl/texturemanager.cpp
     src/flare/gl/texture.cpp
     src/flare/gl/texture2d.cpp
+    src/flare/gl/transformfeedbackbuffermanager.cpp
     src/flare/gl/arraytexture2d.cpp
     src/flare/gl/sampler.cpp
     src/flare/rendersystem/resizablebuffer.cpp
