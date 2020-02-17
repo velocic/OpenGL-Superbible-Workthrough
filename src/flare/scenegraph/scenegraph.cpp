@@ -207,9 +207,9 @@ namespace Flare
                     }
                 }
 
-                mvpMatrixBuffer->allocateBufferStorage(combinedMVPMatrixBufferSize, nullptr, RenderSystem::RS_DYNAMIC_STORAGE_BIT);
-                vertexBuffer->allocateBufferStorage(combinedVertexBufferSize, nullptr, RenderSystem::RS_DYNAMIC_STORAGE_BIT);
-                elementBuffer->allocateBufferStorage(combinedElementBufferSize, nullptr, RenderSystem::RS_DYNAMIC_STORAGE_BIT);
+                mvpMatrixBuffer->allocateBufferStorage(combinedMVPMatrixBufferSize, nullptr, 0);
+                vertexBuffer->allocateBufferStorage(combinedVertexBufferSize, nullptr, 0);
+                elementBuffer->allocateBufferStorage(combinedElementBufferSize, nullptr, 0);
 
                 //copy separated buffers into combined buffers, and update DrawElementsIndirectCommand(s) to point to the
                 //correct offsets within the new buffers
