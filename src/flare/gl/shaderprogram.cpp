@@ -129,6 +129,11 @@ namespace Flare
             return glGetAttribLocation(shaderProgram, attributeName.c_str());
         }
 
+        GLuint ShaderProgram::getProgramId() const
+        {
+            return shaderProgram;
+        }
+
         GLint ShaderProgram::getUniformAttribute(const std::string &uniformName)
         {
             auto mapIterator = uniformAttributes.find(uniformName);

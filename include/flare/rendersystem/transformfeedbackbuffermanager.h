@@ -14,13 +14,13 @@ namespace Flare
         class TransformFeedbackBufferManager
         {
             public:
-                using TransformFeedbackBuffers = std::vector<Buffer *>;
-
                 virtual ~TransformFeedbackBufferManager() {}
 
-                virtual const TransformFeedbackBuffers *create(ShaderData shaderData, RSsizei count, const std::vector<std::string> &varyings, RSenum bufferMode) = 0;
-                virtual const TransformFeedbackBuffers *get(const std::string &alias) const = 0;
-                virtual const TransformFeedbackBuffers *get(ShaderData shaderData) const = 0;
+                virtual const Buffer *create(ShaderData shaderData, const VertexDataLayout &bufferLayout, RSsizei count, const std::vector<std::string> &varyings) = 0;
+                virtual void destroy(const std::string &alias) = 0;
+                virtual void destroy(ShaderData shaderData) = 0;
+                virtual const Buffer *get(const std::string &alias) const = 0;
+                virtual const Buffer *get(ShaderData shaderData) const = 0;
                 virtual void clear() = 0;
                 virtual void beginTransformFeedback(RSenum primitiveMode) = 0;
                 virtual void endTransformFeedback() = 0;

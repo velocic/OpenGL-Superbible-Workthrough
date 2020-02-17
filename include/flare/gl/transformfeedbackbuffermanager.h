@@ -11,23 +11,30 @@ namespace Flare
         class TransformFeedbackBufferManager : public RenderSystem::TransformFeedbackBufferManager
         {
             private:
-                using TransformFeedbackBuffers = std::vector<std::unique_ptr<RenderSystem::Buffer>>;
+                struct ShaderToOutputBuffer {
+                    std::unique_ptr<RenderSystem::Buffer> transformFeedbackBuffer;
+                    RenderSystem::ShaderProgram *linkedShader = nullptr;
+                };
 
-                std::unordered_map<size_t, TransformFeedbackBuffers> transformFeedbackBufferMap;
+                std::unordered_map<size_t, ShaderToOutputBuffer> transformFeedbackBufferMap;
                 std::hash<std::string> stringHasher;
+                const std::string createdBufferBaseName = "transformFeedbackBuffer";
+                size_t buffersCreated = 0;
                 bool isCurrentlyEnabled = false;
 
             public:
-                TransformFeedbackBufferManager();
+                TransformFeedbackBufferManager() {};
                 virtual ~TransformFeedbackBufferManager() override;
                 TransformFeedbackBufferManager(TransformFeedbackBufferManager &&other);
                 TransformFeedbackBufferManager &operator=(TransformFeedbackBufferManager &&other);
                 TransformFeedbackBufferManager(const TransformFeedbackBufferManager &other) = delete;
                 TransformFeedbackBufferManager &operator=(const TransformFeedbackBufferManager &other) = delete;
 
-                virtual const RenderSystem::TransformFeedbackBufferManager::TransformFeedbackBuffers *create(RenderSystem::ShaderData shaderData, RenderSystem::RSsizei count, const std::vector<std::string> &varyings, RenderSystem::RSenum bufferMode) override;
-                virtual const RenderSystem::TransformFeedbackBufferManager::TransformFeedbackBuffers *get(const std::string &alias) const override;
-                virtual const RenderSystem::TransformFeedbackBufferManager::TransformFeedbackBuffers *get(RenderSystem::ShaderData shaderData) const override;
+                virtual const RenderSystem::Buffer *create(RenderSystem::ShaderData shaderData, const RenderSystem::VertexDataLayout &bufferLayout, RenderSystem::RSsizei count, const std::vector<std::string> &varyings) override;
+                virtual void destroy(const std::string &alias) override;
+                virtual void destroy(RenderSystem::ShaderData shaderData) override;
+                virtual const RenderSystem::Buffer *get(const std::string &alias) const override;
+                virtual const RenderSystem::Buffer *get(RenderSystem::ShaderData shaderData) const override;
                 virtual void clear() override;
                 virtual void beginTransformFeedback(RenderSystem::RSenum primitiveMode) override;
                 virtual void endTransformFeedback() override;

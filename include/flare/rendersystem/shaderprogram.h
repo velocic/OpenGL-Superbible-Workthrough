@@ -21,6 +21,7 @@ namespace Flare
                 virtual bool addUniformAttribute(const std::string &uniformName) = 0;
                 virtual void bind() = 0;
                 virtual RSint getAttribute(const std::string &attributeName) const = 0;
+                virtual RSuint getProgramId() const = 0;
                 virtual RSint getUniformAttribute(const std::string &uniformName) = 0;
                 virtual bool isShaderProgramValid() const = 0;
                 virtual bool setTexture(size_t textureUnitName, RenderSystem::Texture *texture) = 0;

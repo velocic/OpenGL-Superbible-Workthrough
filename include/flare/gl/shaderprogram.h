@@ -8,6 +8,7 @@
 
 #include <GL/gl3w.h>
 
+#include <flare/gl/transformfeedbackbuffermanager.h>
 #include <flare/rendersystem/sampler.h>
 #include <flare/rendersystem/texture.h>
 #include <flare/rendersystem/shaderprogram.h>
@@ -102,8 +103,9 @@ namespace Flare
                 virtual bool addUniformAttribute(const std::string &uniformName) override;
                 virtual void bind() override;
                 virtual GLint getAttribute(const std::string &attributeName) const override;
+                virtual GLuint getProgramId() const override;
                 virtual GLint getUniformAttribute(const std::string &uniformName) override;
-                virtual inline bool isShaderProgramValid() const override {return isValid;}
+                virtual bool isShaderProgramValid() const override {return isValid;}
                 virtual bool setTexture(size_t textureUnitName, RenderSystem::Texture *texture) override;
                 virtual bool setTextureArrayElement(size_t textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture) override;
                 virtual bool setTextureArray(size_t textureUnitArrayName, const std::vector<RenderSystem::Texture *> &textures) override;
