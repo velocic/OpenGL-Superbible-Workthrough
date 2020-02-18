@@ -51,9 +51,9 @@ namespace Flare
                         if constexpr (numArgs == 4) { setUniform4i(location, values...); }
                     } else if constexpr ((std::is_same<Ts, RSuint>::value && ...)) {
                         if constexpr (numArgs == 1) { setUniform1ui(location, values...); }
-                        if constexpr (numArgs == 2) { setUniform1ui(location, values...); }
-                        if constexpr (numArgs == 3) { setUniform1ui(location, values...); }
-                        if constexpr (numArgs == 4) { setUniform1ui(location, values...); }
+                        if constexpr (numArgs == 2) { setUniform2ui(location, values...); }
+                        if constexpr (numArgs == 3) { setUniform3ui(location, values...); }
+                        if constexpr (numArgs == 4) { setUniform4ui(location, values...); }
                     }
                 }
 
