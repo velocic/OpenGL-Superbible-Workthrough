@@ -14,28 +14,29 @@ namespace Flare
         TransformFeedbackBufferManager::TransformFeedbackBufferManager(TransformFeedbackBufferManager &&other)
         :
             transformFeedbackBufferMap(std::move(other.transformFeedbackBufferMap)),
-            isCurrentlyEnabled(std::exchange(other.isCurrentlyEnabled, false)),
-            buffersCreated(std::exchange(other.buffersCreated, 0))
+            buffersCreated(std::exchange(other.buffersCreated, 0)),
+            isCurrentlyEnabled(std::exchange(other.isCurrentlyEnabled, false))
         {
         }
 
         TransformFeedbackBufferManager &TransformFeedbackBufferManager::operator=(TransformFeedbackBufferManager &&other)
         {
             transformFeedbackBufferMap = std::move(other.transformFeedbackBufferMap);
-            isCurrentlyEnabled = std::exchange(other.isCurrentlyEnabled, false);
             buffersCreated = std::exchange(other.buffersCreated, 0);
+            isCurrentlyEnabled = std::exchange(other.isCurrentlyEnabled, false);
 
             return *this;
         }
 
-        const RenderSystem::Buffer *TransformFeedbackBufferManager::create(RenderSystem::ShaderData shaderData, const RenderSystem::VertexDataLayout &bufferLayout, RenderSystem::RSsizei count, const std::vector<std::string> &varyings)
+        const RenderSystem::Buffer *TransformFeedbackBufferManager::create(RenderSystem::ShaderData shaderData, const RenderSystem::VertexDataLayout &bufferLayout, RenderSystem::RSsizei bufferSizeInBytes, RenderSystem::RSsizei count, const std::vector<std::string> &varyings)
         {
             auto buffer = RenderSystem::createBuffer(
                 createdBufferBaseName + std::to_string(buffersCreated++),
                 bufferLayout
             );
 
-            //TODO: allocate storage in buffer + set GL_DYNAMIC_COPY
+            buffer->allocateBufferStorage(bufferSizeInBytes, nullptr, 0);
+            auto result = buffer.get();
 
             auto CStringVaryings = std::vector<const char *>{};
             CStringVaryings.reserve(varyings.size());
@@ -64,40 +65,36 @@ namespace Flare
             );
 
             //TODO: re-link shader
+
+            return result;
+        }
+
+        void TransformFeedbackBufferManager::destroy(size_t hashedAlias)
+        {
+            auto target = transformFeedbackBufferMap.find(hashedAlias);
+
+            if (target != transformFeedbackBufferMap.end()) {
+                glTransformFeedbackVaryings(
+                    target->second.linkedShader->getProgramId(),
+                    0,
+                    nullptr,
+                    GL_INTERLEAVED_ATTRIBS
+                );
+
+                //TODO: re-link shader
+
+                transformFeedbackBufferMap.erase(target);
+            }
         }
 
         void TransformFeedbackBufferManager::destroy(const std::string &alias)
         {
-            auto target = transformFeedbackBufferMap.find(stringHasher(alias));
-
-            if (target != transformFeedbackBufferMap.end()) {
-                glTransformFeedbackVaryings(
-                    target->second.linkedShader->getProgramId(),
-                    0,
-                    nullptr,
-                    GL_INTERLEAVED_ATTRIBS
-                );
-                //TODO: re-link shader
-
-                transformFeedbackBufferMap.erase(target);
-            }
+            destroy(stringHasher(alias));
         }
 
         void TransformFeedbackBufferManager::destroy(RenderSystem::ShaderData shaderData)
         {
-            auto target = transformFeedbackBufferMap.find(shaderData.hashedAlias);
-
-            if (target != transformFeedbackBufferMap.end()) {
-                glTransformFeedbackVaryings(
-                    target->second.linkedShader->getProgramId(),
-                    0,
-                    nullptr,
-                    GL_INTERLEAVED_ATTRIBS
-                );
-                //TODO: re-link shader
-
-                transformFeedbackBufferMap.erase(target);
-            }
+            destroy(shaderData.hashedAlias);
         }
 
         const RenderSystem::Buffer *TransformFeedbackBufferManager::get(const std::string &alias) const
@@ -124,30 +121,50 @@ namespace Flare
 
         void TransformFeedbackBufferManager::clear()
         {
+            for (const auto &it : transformFeedbackBufferMap) {
+                glTransformFeedbackVaryings(
+                    it.second.linkedShader->getProgramId(),
+                    0,
+                    nullptr,
+                    GL_INTERLEAVED_ATTRIBS
+                );
+
+                //TODO: re-link shader
+            }
+
+            transformFeedbackBufferMap.clear();
         }
 
         void TransformFeedbackBufferManager::beginTransformFeedback(RenderSystem::RSenum primitiveMode)
         {
+            isCurrentlyEnabled = true;
+            glBeginTransformFeedback(primitiveMode);
         }
 
         void TransformFeedbackBufferManager::endTransformFeedback()
         {
+            glEndTransformFeedback();
+            isCurrentlyEnabled = false;
         }
 
         void TransformFeedbackBufferManager::pauseTransformFeedback()
         {
+            glPauseTransformFeedback();
         }
 
         void TransformFeedbackBufferManager::resumeTransformFeedback()
         {
+            glResumeTransformFeedback();
         }
 
         void TransformFeedbackBufferManager::disableRasterization()
         {
+            glEnable(GL_RASTERIZER_DISCARD);
         }
 
         void TransformFeedbackBufferManager::enableRasterization()
         {
+            glDisable(GL_RASTERIZER_DISCARD);
         }
     }
 }

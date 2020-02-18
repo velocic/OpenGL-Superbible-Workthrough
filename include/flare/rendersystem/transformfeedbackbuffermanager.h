@@ -16,7 +16,8 @@ namespace Flare
             public:
                 virtual ~TransformFeedbackBufferManager() {}
 
-                virtual const Buffer *create(ShaderData shaderData, const VertexDataLayout &bufferLayout, RSsizei count, const std::vector<std::string> &varyings) = 0;
+                virtual const Buffer *create(ShaderData shaderData, const VertexDataLayout &bufferLayout, RSsizei bufferSizeInBytes, RSsizei count, const std::vector<std::string> &varyings) = 0;
+                virtual void destroy(size_t hashedAlias) = 0;
                 virtual void destroy(const std::string &alias) = 0;
                 virtual void destroy(ShaderData shaderData) = 0;
                 virtual const Buffer *get(const std::string &alias) const = 0;
