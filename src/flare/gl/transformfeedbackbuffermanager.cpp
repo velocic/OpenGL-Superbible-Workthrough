@@ -28,14 +28,14 @@ namespace Flare
             return *this;
         }
 
-        const RenderSystem::Buffer *TransformFeedbackBufferManager::create(RenderSystem::ShaderData shaderData, const RenderSystem::VertexDataLayout &bufferLayout, RenderSystem::RSsizei bufferSizeInBytes, RenderSystem::RSsizei count, const std::vector<std::string> &varyings)
+        const RenderSystem::Buffer *TransformFeedbackBufferManager::create(RenderSystem::ShaderData shaderData, const RenderSystem::VertexDataLayout &bufferLayout, RenderSystem::RSsizei bufferSizeInBytes, RenderSystem::RSbitfield bufferUsageFlags, RenderSystem::RSsizei count, const std::vector<std::string> &varyings)
         {
             auto buffer = RenderSystem::createBuffer(
                 createdBufferBaseName + std::to_string(buffersCreated++),
                 bufferLayout
             );
 
-            buffer->allocateBufferStorage(bufferSizeInBytes, nullptr, 0);
+            buffer->allocateBufferStorage(bufferSizeInBytes, nullptr, bufferUsageFlags);
             auto result = buffer.get();
 
             auto CStringVaryings = std::vector<const char *>{};
