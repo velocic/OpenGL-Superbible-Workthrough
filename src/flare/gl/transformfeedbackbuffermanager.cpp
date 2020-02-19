@@ -1,5 +1,6 @@
 #include <flare/gl/transformfeedbackbuffermanager.h>
 
+#include <flare/gl/shaderprogram.h>
 #include <flare/rendersystem/factory.h>
 
 namespace Flare
@@ -64,7 +65,7 @@ namespace Flare
                 }
             );
 
-            //TODO: re-link shader
+            static_cast<GL::ShaderProgram *>(shaderData.shader)->reLink();
 
             return result;
         }
@@ -81,7 +82,7 @@ namespace Flare
                     GL_INTERLEAVED_ATTRIBS
                 );
 
-                //TODO: re-link shader
+                static_cast<GL::ShaderProgram *>(target->second.linkedShader)->reLink();
 
                 transformFeedbackBufferMap.erase(target);
             }
@@ -129,7 +130,7 @@ namespace Flare
                     GL_INTERLEAVED_ATTRIBS
                 );
 
-                //TODO: re-link shader
+                static_cast<GL::ShaderProgram *>(it.second.linkedShader)->reLink();
             }
 
             transformFeedbackBufferMap.clear();

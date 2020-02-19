@@ -33,6 +33,15 @@ namespace Flare
             std::vector<uint8_t> sourceCode;
         };
 
+        struct ShaderSourceFiles
+        {
+            ShaderSourceFile vertexShaderSourceFile;
+            ShaderSourceFile tessellationControlShaderSourceFile;
+            ShaderSourceFile tessellationEvaluationShaderSourceFile;
+            ShaderSourceFile geometryShaderSourceFile;
+            ShaderSourceFile fragmentShaderSourceFile;
+        };
+
         class ShaderProgram : public RenderSystem::ShaderProgram
         {
             friend class ShaderProgramBuilder;
@@ -66,6 +75,7 @@ namespace Flare
                 };
 
                 ShaderProgramStages shaderStages;
+                ShaderSourceFiles shaderSourceFiles;
                 GLuint shaderProgram = 0;
                 std::unordered_map<std::string, GLint> uniformAttributes;
                 std::unordered_map<size_t, TextureUnit> textureUnits;
@@ -74,7 +84,7 @@ namespace Flare
                 bool isValid = false;
 
                 GLuint compileShaderProgramFromSource(const ShaderSourceFile &shaderSourceFile, GLenum shaderType);
-                GLuint linkShaderProgram(const ShaderProgramStages& shaderStages);
+                GLuint linkShaderProgram(ShaderProgramStages &shaderStages);
                 
                 void bindTextureUnits();
 
@@ -85,13 +95,7 @@ namespace Flare
                 //of texture samplers in glsl
                 void setTextureUnitArrays(const std::vector<std::pair<RenderSystem::Sampler *, unsigned int>> &textureUnitArraySamplers);
             public:
-                ShaderProgram(
-                    const ShaderSourceFile &vertexShaderSource,
-                    const ShaderSourceFile &tessellationControlShaderSource,
-                    const ShaderSourceFile &tessellationEvaluationShaderSource,
-                    const ShaderSourceFile &geometryShaderSource,
-                    const ShaderSourceFile &fragmentShaderSource
-                );
+                ShaderProgram(const ShaderSourceFiles &shaderSourceFiles);
                 ShaderProgram(ShaderProgram &&other);
                 ShaderProgram &operator=(ShaderProgram &&other);
                 ShaderProgram(const ShaderProgram &other) = delete;
@@ -113,6 +117,8 @@ namespace Flare
                 virtual bool setTextureArrayElement(const std::string &textureUnitArrayName, unsigned int index, RenderSystem::Texture *texture) override;
                 virtual bool setTextureArray(const std::string &textureUnitArrayName, const std::vector<RenderSystem::Texture *> &textures) override;
                 virtual void unbind() override;
+
+                void reLink();
         };
 
         class ShaderProgramBuilder : public RenderSystem::ShaderProgramBuilder
@@ -182,11 +188,13 @@ namespace Flare
                 virtual std::unique_ptr<RenderSystem::ShaderProgram> build() override
                 {
                     auto shader = std::make_unique<Flare::GL::ShaderProgram>(
-                        vertexShaderSource,
-                        tessellationControlShaderSource,
-                        tessellationEvaluationShaderSource,
-                        geometryShaderSource,
-                        fragmentShaderSource
+                        ShaderSourceFiles{
+                            vertexShaderSource,
+                            tessellationControlShaderSource,
+                            tessellationEvaluationShaderSource,
+                            geometryShaderSource,
+                            fragmentShaderSource
+                        }
                     );
 
                     shader->setTextureUnits(textureUnitSamplers);

@@ -7,32 +7,28 @@ namespace Flare
 {
     namespace GL
     {
-        ShaderProgram::ShaderProgram(
-            const ShaderSourceFile &vertexShaderSourceFile,
-            const ShaderSourceFile &tessellationControlShaderSourceFile,
-            const ShaderSourceFile &tessellationEvaluationShaderSourceFile,
-            const ShaderSourceFile &geometryShaderSourceFile,
-            const ShaderSourceFile &fragmentShaderSourceFile
-        )
+        ShaderProgram::ShaderProgram(const ShaderSourceFiles &shaderSourceFiles)
+        :
+            shaderSourceFiles(shaderSourceFiles)
         {
-            if (vertexShaderSourceFile.sourceCode.size() > 0) {
-                shaderStages.vertexShader = compileShaderProgramFromSource(vertexShaderSourceFile, GL_VERTEX_SHADER);
+            if (shaderSourceFiles.vertexShaderSourceFile.sourceCode.size() > 0) {
+                shaderStages.vertexShader = compileShaderProgramFromSource(shaderSourceFiles.vertexShaderSourceFile, GL_VERTEX_SHADER);
             }
 
-            if (tessellationControlShaderSourceFile.sourceCode.size() > 0) {
-                shaderStages.tessellationControlShader = compileShaderProgramFromSource(tessellationControlShaderSourceFile, GL_TESS_CONTROL_SHADER);
+            if (shaderSourceFiles.tessellationControlShaderSourceFile.sourceCode.size() > 0) {
+                shaderStages.tessellationControlShader = compileShaderProgramFromSource(shaderSourceFiles.tessellationControlShaderSourceFile, GL_TESS_CONTROL_SHADER);
             }
 
-            if (tessellationEvaluationShaderSourceFile.sourceCode.size() > 0) {
-                shaderStages.tessellationEvaluationShader = compileShaderProgramFromSource(tessellationEvaluationShaderSourceFile, GL_TESS_EVALUATION_SHADER);
+            if (shaderSourceFiles.tessellationEvaluationShaderSourceFile.sourceCode.size() > 0) {
+                shaderStages.tessellationEvaluationShader = compileShaderProgramFromSource(shaderSourceFiles.tessellationEvaluationShaderSourceFile, GL_TESS_EVALUATION_SHADER);
             }
 
-            if (geometryShaderSourceFile.sourceCode.size() > 0) {
-                shaderStages.geometryShader = compileShaderProgramFromSource(geometryShaderSourceFile, GL_GEOMETRY_SHADER);
+            if (shaderSourceFiles.geometryShaderSourceFile.sourceCode.size() > 0) {
+                shaderStages.geometryShader = compileShaderProgramFromSource(shaderSourceFiles.geometryShaderSourceFile, GL_GEOMETRY_SHADER);
             }
 
-            if (fragmentShaderSourceFile.sourceCode.size() > 0) {
-                shaderStages.fragmentShader = compileShaderProgramFromSource(fragmentShaderSourceFile, GL_FRAGMENT_SHADER);
+            if (shaderSourceFiles.fragmentShaderSourceFile.sourceCode.size() > 0) {
+                shaderStages.fragmentShader = compileShaderProgramFromSource(shaderSourceFiles.fragmentShaderSourceFile, GL_FRAGMENT_SHADER);
             }
 
             shaderProgram = linkShaderProgram(shaderStages);
@@ -44,36 +40,25 @@ namespace Flare
 
         ShaderProgram::ShaderProgram(ShaderProgram &&other)
         :
-            shaderStages(std::move(other.shaderStages)),
-            shaderProgram(other.shaderProgram),
-            uniformAttributes(std::move(other.uniformAttributes)),
-            textureUnits(std::move(other.textureUnits)),
-            textureUnitArrays(std::move(other.textureUnitArrays)),
-            isValid(other.isValid)
+            shaderStages(std::exchange(other.shaderStages, ShaderProgramStages{})),
+            shaderSourceFiles(std::exchange(other.shaderSourceFiles, ShaderSourceFiles{})),
+            shaderProgram(std::exchange(other.shaderProgram, 0)),
+            uniformAttributes(std::exchange(other.uniformAttributes, std::unordered_map<std::string, GLint>{})),
+            textureUnits(std::exchange(other.textureUnits, std::unordered_map<size_t, TextureUnit>{})),
+            textureUnitArrays(std::exchange(other.textureUnitArrays, std::unordered_map<size_t, TextureUnitArray>{})),
+            isValid(std::exchange(other.isValid, false))
         {
-            other.shaderStages = ShaderProgramStages{};
-            other.shaderProgram = 0;
-            other.isValid = false;
-            other.uniformAttributes = std::unordered_map<std::string, GLint>{};
-            other.textureUnits = std::unordered_map<size_t, TextureUnit>{};
-            other.textureUnitArrays = std::unordered_map<size_t, TextureUnitArray>{};
         }
 
         ShaderProgram &ShaderProgram::operator=(ShaderProgram &&other)
         {
-            shaderStages = std::move(other.shaderStages);
-            shaderProgram = other.shaderProgram;
-            uniformAttributes = std::move(other.uniformAttributes);
-            textureUnits = std::move(other.textureUnits);
-            textureUnitArrays = std::move(other.textureUnitArrays);
-            isValid = other.isValid;
-
-            other.shaderStages = ShaderProgramStages{};
-            other.shaderProgram = 0;
-            other.isValid = false;
-            other.uniformAttributes = std::unordered_map<std::string, GLint>{};
-            other.textureUnits = std::unordered_map<size_t, TextureUnit>{};
-            other.textureUnitArrays = std::unordered_map<size_t, TextureUnitArray>{};
+            shaderStages = std::exchange(other.shaderStages, ShaderProgramStages{});
+            shaderSourceFiles = std::exchange(other.shaderSourceFiles, ShaderSourceFiles{});
+            shaderProgram = std::exchange(other.shaderProgram, 0);
+            uniformAttributes = std::exchange(other.uniformAttributes, std::unordered_map<std::string, GLint>{});
+            textureUnits = std::exchange(other.textureUnits, std::unordered_map<size_t, TextureUnit>{});
+            textureUnitArrays = std::exchange(other.textureUnitArrays, std::unordered_map<size_t, TextureUnitArray>{});
+            isValid = std::exchange(other.isValid, false);
 
             return *this;
         }
@@ -151,6 +136,69 @@ namespace Flare
             glBindVertexArray(0);
 
             //TODO: unbind all textures/samplers?
+        }
+
+        void ShaderProgram::reLink()
+        {
+            bool vertexShaderAttached = false;
+            bool tessellationControlShaderAttached = false;
+            bool tessellationEvaluationShaderAttached = false;
+            bool geometryShaderAttached = false;
+            bool fragmentShaderAttached = false;
+
+            auto compileAndAttachShader = [this](
+                auto program,
+                const auto &sourceFile,
+                auto &stageOutput,
+                auto type,
+                auto &isAttachedFlag){
+                if (sourceFile.sourceCode.size() > 0) {
+                    stageOutput = compileShaderProgramFromSource(sourceFile, type);
+                    if (stageOutput != 0) {
+                        glAttachShader(program, stageOutput);
+                        isAttachedFlag = true;
+                    }
+                }
+            };
+
+            auto detachAndDeleteShader = [](auto program, auto &shader, auto isAttachedFlag){
+                if (isAttachedFlag) {
+                    glDetachShader(program, shader);
+                    glDeleteShader(shader);
+                    shader = 0;
+                }
+            };
+
+            compileAndAttachShader(shaderProgram, shaderSourceFiles.vertexShaderSourceFile, shaderStages.vertexShader, GL_VERTEX_SHADER, vertexShaderAttached);
+            compileAndAttachShader(shaderProgram, shaderSourceFiles.tessellationControlShaderSourceFile, shaderStages.tessellationControlShader, GL_TESS_CONTROL_SHADER, tessellationControlShaderAttached);
+            compileAndAttachShader(shaderProgram, shaderSourceFiles.tessellationEvaluationShaderSourceFile, shaderStages.tessellationEvaluationShader, GL_TESS_EVALUATION_SHADER, tessellationEvaluationShaderAttached);
+            compileAndAttachShader(shaderProgram, shaderSourceFiles.geometryShaderSourceFile, shaderStages.geometryShader, GL_GEOMETRY_SHADER, geometryShaderAttached);
+            compileAndAttachShader(shaderProgram, shaderSourceFiles.fragmentShaderSourceFile, shaderStages.fragmentShader, GL_FRAGMENT_SHADER, fragmentShaderAttached);
+            glLinkProgram(shaderProgram);
+
+            GLint linkSuccess = 0;
+            glGetProgramiv(shaderProgram, GL_LINK_STATUS, &linkSuccess);
+
+            if (!linkSuccess) {
+                GLint infoLogLength = 0;
+                glGetProgramiv(shaderProgram, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+                std::vector<GLchar> infoLog;
+                infoLog.resize(infoLogLength);
+
+                glGetProgramInfoLog(shaderProgram, infoLogLength, nullptr, infoLog.data());
+
+                for (int i = 0; i < infoLogLength; ++i) {
+                    std::cout << infoLog[i];
+                }
+                std::cout << std::endl;
+            }
+
+            detachAndDeleteShader(shaderProgram, shaderStages.vertexShader, vertexShaderAttached);
+            detachAndDeleteShader(shaderProgram, shaderStages.tessellationControlShader, tessellationControlShaderAttached);
+            detachAndDeleteShader(shaderProgram, shaderStages.tessellationEvaluationShader, tessellationEvaluationShaderAttached);
+            detachAndDeleteShader(shaderProgram, shaderStages.geometryShader, geometryShaderAttached);
+            detachAndDeleteShader(shaderProgram, shaderStages.fragmentShader, fragmentShaderAttached);
         }
 
         GLuint ShaderProgram::compileShaderProgramFromSource(const ShaderSourceFile &shaderSourceFile, GLenum shaderType)
@@ -245,7 +293,7 @@ namespace Flare
             }
         }
 
-        GLuint ShaderProgram::linkShaderProgram(const ShaderProgramStages& shaderStages)
+        GLuint ShaderProgram::linkShaderProgram(ShaderProgramStages &shaderStages)
         {
             GLuint program = glCreateProgram();
             bool vertexShaderAttached = false;
@@ -284,26 +332,31 @@ namespace Flare
             if (vertexShaderAttached) {
                 glDetachShader(program, shaderStages.vertexShader);
                 glDeleteShader(shaderStages.vertexShader);
+                shaderStages.vertexShader = 0;
             }
 
             if (tessellationControlShaderAttached) {
                 glDetachShader(program, shaderStages.tessellationControlShader);
                 glDeleteShader(shaderStages.tessellationControlShader);
+                shaderStages.tessellationControlShader = 0;
             }
 
             if (tessellationEvaluationShaderAttached) {
                 glDetachShader(program, shaderStages.tessellationEvaluationShader);
                 glDeleteShader(shaderStages.tessellationEvaluationShader);
+                shaderStages.tessellationEvaluationShader = 0;
             }
 
             if (geometryShaderAttached) {
                 glDetachShader(program, shaderStages.geometryShader);
                 glDeleteShader(shaderStages.geometryShader);
+                shaderStages.geometryShader = 0;
             }
 
             if (fragmentShaderAttached) {
                 glDetachShader(program, shaderStages.fragmentShader);
                 glDeleteShader(shaderStages.fragmentShader);
+                shaderStages.fragmentShader = 0;
             }
 
             GLint linkSuccess = 0;
