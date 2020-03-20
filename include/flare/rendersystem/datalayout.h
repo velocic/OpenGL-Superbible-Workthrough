@@ -50,24 +50,13 @@ namespace Flare
                 const RSuint divisor = 0;
                 const std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>> vertexAttributes;
 
-                const std::variant<VertexAttribute, MatrixVertexAttribute> *getAttribute(const std::string &attributeName)
-                {
-                    const auto& result = std::find_if(
-                        vertexAttributes.begin(),
-                        vertexAttributes.end(),
-                        [&attributeName](const auto& entry) {
-                            auto findResult = false;
-                            std::visit([&attributeName, &findResult](const auto &vertexAttribute){ findResult = vertexAttribute.name == attributeName; }, entry);
-                            return findResult;
-                        }
-                    );
+                ~VertexDataLayout() {}
+                VertexDataLayout(const VertexDataLayout &other);
+                VertexDataLayout &operator=(const VertexDataLayout &other) = delete;
+                VertexDataLayout(VertexDataLayout &&other) = delete;
+                VertexDataLayout &operator=(VertexDataLayout &&other) = delete;
 
-                    if (result == std::end(vertexAttributes)) {
-                        return nullptr;
-                    }
-
-                    return &(*result);
-                }
+                const std::variant<VertexAttribute, MatrixVertexAttribute> *getAttribute(const std::string &attributeName);
         };
 
         class VertexDataLayoutBuilder
@@ -78,46 +67,12 @@ namespace Flare
                 RSintptr offset = 0;
                 RSuint divisor = 0;
             public:
-                VertexDataLayoutBuilder &addAttribute(const std::string &attributeName, RSint size, RSenum type, RSboolean normalized, RSuint relativeOffset)
-                {
-                    vertexAttributes.push_back(VertexAttribute{attributeName, size, type, normalized, relativeOffset});
-                    return *this;
-                }
-
-                VertexDataLayoutBuilder &addMatrixAttribute(const std::string &attributeName, RSint rows, RSint cols, RSenum type, RSboolean normalized, RSuint relativeOffset)
-                {
-                    vertexAttributes.push_back(MatrixVertexAttribute{attributeName, rows, cols, type, normalized, relativeOffset});
-                    return *this;
-                }
-
-                VertexDataLayoutBuilder &setStride(RSsizei stride)
-                {
-                    this->stride = stride;
-                    return *this;
-                }
-
-                VertexDataLayoutBuilder &setOffset(RSintptr offset)
-                {
-                    this->offset = offset;
-                    return *this;
-                }
-
-                VertexDataLayoutBuilder &setDivisor(RSuint divisor)
-                {
-                    this->divisor = divisor;
-                    return *this;
-                }
-
-                VertexDataLayout build()
-                {
-                    VertexDataLayout result = VertexDataLayout(stride, offset, divisor, std::move(vertexAttributes));
-                    vertexAttributes = std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>>();
-                    stride = 0;
-                    offset = 0;
-                    divisor = 0;
-
-                    return result;
-                }
+                VertexDataLayoutBuilder &addAttribute(const std::string &attributeName, RSint size, RSenum type, RSboolean normalized, RSuint relativeOffset);
+                VertexDataLayoutBuilder &addMatrixAttribute(const std::string &attributeName, RSint rows, RSint cols, RSenum type, RSboolean normalized, RSuint relativeOffset);
+                VertexDataLayoutBuilder &setStride(RSsizei stride);
+                VertexDataLayoutBuilder &setOffset(RSintptr offset);
+                VertexDataLayoutBuilder &setDivisor(RSuint divisor);
+                VertexDataLayout build();
         };
 
         struct VertexBufferVertexDataLayout

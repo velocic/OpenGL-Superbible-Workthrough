@@ -30,6 +30,7 @@ add_executable(
     src/flare/gl/transformfeedbackbuffermanager.cpp
     src/flare/gl/arraytexture2d.cpp
     src/flare/gl/sampler.cpp
+    src/flare/rendersystem/datalayout.cpp
     src/flare/rendersystem/resizablebuffer.cpp
     src/flare/rendersystem/factory.cpp
     src/flare/rendersystem/samplermanager.cpp
