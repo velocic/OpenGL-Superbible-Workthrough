@@ -6,12 +6,17 @@ namespace Flare
 {
     namespace GL
     {
-        Buffer::Buffer(const std::string &name, const RenderSystem::VertexDataLayout& bufferContentDescription)
+        Buffer::Buffer(const std::string &name, const RenderSystem::VertexDataLayout& bufferContentDescription, RenderSystem::BufferType bufferType)
         :
             name(name),
-            bufferContentDescription(bufferContentDescription)
+            bufferContentDescription(bufferContentDescription),
+            bufferType(bufferType)
         {
-            glCreateBuffers(1, &glBuffer);
+            if (bufferType == RenderSystem::BufferType::BASIC) {
+                glCreateBuffers(1, &glBuffer);
+            } else if (bufferType == RenderSystem::BufferType::TRANSFORMFEEDBACK) {
+                glCreateTransformFeedbacks(1, &glBuffer);
+            }
         }
 
         Buffer::~Buffer()
@@ -21,41 +26,25 @@ namespace Flare
 
         Buffer::Buffer(Buffer&& other)
         :
-            name(std::move(other.name)),
+            name(std::exchange(other.name, std::string{})),
             bufferContentDescription(other.bufferContentDescription),
-            usageFlags(std::move(other.usageFlags)),
-            glBuffer(std::move(other.glBuffer)),
-            dataCapacityBytes(std::move(other.dataCapacityBytes)),
-            isGPUStorageInitialized(std::move(other.isGPUStorageInitialized))
+            bufferType(other.bufferType),
+            usageFlags(std::exchange(other.usageFlags, UsageFlags{})),
+            glBuffer(std::exchange(other.glBuffer, 0)),
+            dataCapacityBytes(std::exchange(other.dataCapacityBytes, 0)),
+            isGPUStorageInitialized(std::exchange(other.isGPUStorageInitialized, false))
         {
-            other.glBuffer = 0;
-            other.dataCapacityBytes = 0;
-            other.isGPUStorageInitialized = false;
-            other.usageFlags.dynamicStorage = false;
-            other.usageFlags.mapRead = false;
-            other.usageFlags.mapWrite = false;
-            other.usageFlags.mapPersistent = false;
-            other.usageFlags.mapCoherent = false;
-            other.usageFlags.clientStorage = false;
         }
 
         Buffer& Buffer::operator=(Buffer&& other)
         {
-            name = std::move(other.name);
-            glBuffer = std::move(other.glBuffer);
-            dataCapacityBytes = std::move(other.dataCapacityBytes);
-            isGPUStorageInitialized = std::move(other.isGPUStorageInitialized);
-            usageFlags = std::move(other.usageFlags);
-
-            other.glBuffer = 0;
-            other.dataCapacityBytes = 0;
-            other.isGPUStorageInitialized = false;
-            other.usageFlags.dynamicStorage = false;
-            other.usageFlags.mapRead = false;
-            other.usageFlags.mapWrite = false;
-            other.usageFlags.mapPersistent = false;
-            other.usageFlags.mapCoherent = false;
-            other.usageFlags.clientStorage = false;
+            name = std::exchange(other.name, std::string{});
+            bufferContentDescription = other.bufferContentDescription;
+            bufferType = other.bufferType;
+            usageFlags = std::exchange(other.usageFlags, UsageFlags{});
+            glBuffer = std::exchange(other.glBuffer, 0);
+            dataCapacityBytes = std::exchange(other.dataCapacityBytes, 0);
+            isGPUStorageInitialized = std::exchange(other.isGPUStorageInitialized, false);
 
             return *this;
         }
@@ -170,7 +159,12 @@ namespace Flare
 
         void Buffer::destroy()
         {
-            glDeleteBuffers(1, &glBuffer);
+            if (bufferType == RenderSystem::BufferType::BASIC) {
+                glDeleteBuffers(1, &glBuffer);
+            } else if (bufferType == RenderSystem::BufferType::TRANSFORMFEEDBACK) {
+                glDeleteTransformFeedbacks(1, &glBuffer);
+            }
+
             isGPUStorageInitialized = false;
             dataCapacityBytes = 0;
             usageFlags = UsageFlags{};

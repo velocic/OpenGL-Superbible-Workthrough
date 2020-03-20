@@ -30,6 +30,7 @@ namespace Flare
 
                 std::string name;
                 RenderSystem::VertexDataLayout bufferContentDescription;
+                RenderSystem::BufferType bufferType;
                 UsageFlags usageFlags;
                 GLuint glBuffer = 0;
                 GLsizei dataCapacityBytes = 0;
@@ -39,7 +40,7 @@ namespace Flare
 
                 void checkDynamicStorageFlagBeforeWrite();
             public:
-                Buffer(const std::string &name, const RenderSystem::VertexDataLayout& bufferContentDescription);
+                Buffer(const std::string &name, const RenderSystem::VertexDataLayout& bufferContentDescription, RenderSystem::BufferType bufferType = RenderSystem::BufferType::BASIC);
                 virtual ~Buffer();
                 Buffer(Buffer&& other);
                 Buffer& operator=(Buffer&& other);

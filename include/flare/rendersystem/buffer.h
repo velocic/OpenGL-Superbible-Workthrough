@@ -10,6 +10,11 @@ namespace Flare
 {
     namespace RenderSystem
     {
+        enum class BufferType {
+            BASIC,
+            TRANSFORMFEEDBACK
+        };
+
         class MappedBufferRange;
 
         class Buffer
