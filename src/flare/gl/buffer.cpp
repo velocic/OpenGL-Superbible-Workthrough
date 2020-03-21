@@ -27,7 +27,7 @@ namespace Flare
         Buffer::Buffer(Buffer&& other)
         :
             name(std::exchange(other.name, std::string{})),
-            bufferContentDescription(other.bufferContentDescription),
+            bufferContentDescription(std::move(other.bufferContentDescription)),
             bufferType(other.bufferType),
             usageFlags(std::exchange(other.usageFlags, UsageFlags{})),
             glBuffer(std::exchange(other.glBuffer, 0)),
@@ -39,7 +39,7 @@ namespace Flare
         Buffer& Buffer::operator=(Buffer&& other)
         {
             name = std::exchange(other.name, std::string{});
-            bufferContentDescription = other.bufferContentDescription;
+            bufferContentDescription = std::move(other.bufferContentDescription);
             bufferType = other.bufferType;
             usageFlags = std::exchange(other.usageFlags, UsageFlags{});
             glBuffer = std::exchange(other.glBuffer, 0);
@@ -207,12 +207,12 @@ namespace Flare
 
         size_t Buffer::getSizeInElements() const
         {
-            if (bufferContentDescription.stride == 0) {
+            if (bufferContentDescription.getStride() == 0) {
                 const std::string errorMessage = "Attempted to calculate buffer capacity in elements, stride was 0. To fix this error, provide an explicit stride value.";
                 throw std::runtime_error(errorMessage);
             }
 
-            return dataCapacityBytes / bufferContentDescription.stride;
+            return dataCapacityBytes / bufferContentDescription.getStride();
         }
 
         RenderSystem::RSbitfield Buffer::getUsageFlags() const

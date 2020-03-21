@@ -51,7 +51,7 @@ namespace Flare
                 auto hashedBufferName = std::hash<std::string>{}(bufferLayout.bufferName);
                 linkedBufferBindingIndices[hashedBufferName] = bufferBindingIndex;
 
-                for (const auto &vertexAttributeVariant : bufferLayout.bufferContentDescription.vertexAttributes) {
+                for (const auto &vertexAttributeVariant : bufferLayout.bufferContentDescription.getVertexAttributes()) {
                     if (std::holds_alternative<RenderSystem::VertexAttribute>(vertexAttributeVariant)) {
                         const auto &vertexAttribute = std::get<RenderSystem::VertexAttribute>(vertexAttributeVariant);
 
@@ -100,8 +100,8 @@ namespace Flare
                     }
                 }
 
-                if (bufferLayout.bufferContentDescription.divisor != 0) {
-                    glVertexArrayBindingDivisor(VAO, bufferBindingIndex, bufferLayout.bufferContentDescription.divisor);
+                if (bufferLayout.bufferContentDescription.getDivisor() != 0) {
+                    glVertexArrayBindingDivisor(VAO, bufferBindingIndex, bufferLayout.bufferContentDescription.getDivisor());
                 }
             }
         }
@@ -129,9 +129,9 @@ namespace Flare
                     throw std::runtime_error("Attempting to link an incompatible buffer to a vertex array.");
                 }
 
-                glVertexArrayVertexBuffer(VAO, bindingIndexIterator->second, buffer.getId(), bufferLayout.offset, bufferLayout.stride);
+                glVertexArrayVertexBuffer(VAO, bindingIndexIterator->second, buffer.getId(), bufferLayout.getOffset(), bufferLayout.getStride());
 
-                for (const auto &vertexAttributeVariant : bufferLayout.vertexAttributes) {
+                for (const auto &vertexAttributeVariant : bufferLayout.getVertexAttributes()) {
                     if (std::holds_alternative<RenderSystem::VertexAttribute>(vertexAttributeVariant)) {
                         const auto &vertexAttribute = std::get<RenderSystem::VertexAttribute>(vertexAttributeVariant);
                         auto attributeIndex = shaderProgram->getAttribute(vertexAttribute.name);

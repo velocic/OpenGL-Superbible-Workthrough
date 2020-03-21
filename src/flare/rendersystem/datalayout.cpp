@@ -21,7 +21,24 @@ namespace Flare
             vertexAttributes = other.vertexAttributes;
         }
 
-        const std::variant<VertexAttribute, MatrixVertexAttribute> *VertexDataLayout::getAttribute(const std::string &attributeName)
+        VertexDataLayout::VertexDataLayout(VertexDataLayout &&other)
+        :
+            stride(std::exchange(other.stride, 0)),
+            offset(std::exchange(other.offset, 0)),
+            divisor(std::exchange(other.divisor, 0)),
+            vertexAttributes(std::move(other.vertexAttributes))
+        {
+        }
+
+        VertexDataLayout &VertexDataLayout::operator=(VertexDataLayout &&other)
+        {
+            stride = std::exchange(other.stride, 0);
+            offset = std::exchange(other.offset, 0);
+            divisor = std::exchange(other.divisor, 0);
+            vertexAttributes = std::move(other.vertexAttributes);
+        }
+
+        const std::variant<VertexAttribute, MatrixVertexAttribute> *VertexDataLayout::getAttribute(const std::string &attributeName) const
         {
             const auto& result = std::find_if(
                 vertexAttributes.begin(),
@@ -39,6 +56,27 @@ namespace Flare
 
             return &(*result);
         }
+
+        RSuint VertexDataLayout::getDivisor() const
+        {
+            return divisor;
+        }
+
+        RSintptr VertexDataLayout::getOffset() const
+        {
+            return offset;
+        }
+
+        RSsizei VertexDataLayout::getStride() const
+        {
+            return stride;
+        }
+
+        const std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>> &VertexDataLayout::getVertexAttributes() const
+        {
+            return vertexAttributes;
+        }
+
 
         VertexDataLayoutBuilder &VertexDataLayoutBuilder::addAttribute(const std::string &attributeName, RSint size, RSenum type, RSboolean normalized, RSuint relativeOffset)
         {

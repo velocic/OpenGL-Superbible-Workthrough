@@ -54,7 +54,7 @@ namespace Flare
         Buffer *ResizableBuffer::resizeElements(size_t sizeInElements)
         {
             auto newBuffer = RenderSystem::createBuffer(buffer->getAlias(), buffer->getContentDescription());
-            auto sizeInBytes = sizeInElements * buffer->getContentDescription().stride;
+            auto sizeInBytes = sizeInElements * buffer->getContentDescription().getStride();
 
             newBuffer->allocateBufferStorage(
                 sizeInBytes,

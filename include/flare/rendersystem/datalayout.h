@@ -36,27 +36,31 @@ namespace Flare
             friend class VertexDataLayoutBuilder;
 
             private:
+                //if stride is set to 0, glVertexArrayVertexBuffer() will autocalculate it
+                //based on the assigned vertex attributes
+                RSsizei stride = 0;
+                //always set to zero unless interleaving data blocks within a single buffer
+                RSintptr offset = 0;
+                RSuint divisor = 0;
+                std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>> vertexAttributes;
+
                 VertexDataLayout(RSsizei stride, RSintptr offset, RSuint divisor, std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>> &&vertexAttributes)
                 : stride(stride), offset(offset), divisor(divisor), vertexAttributes(vertexAttributes)
                 {
                 }
 
             public:
-                //if stride is set to 0, glVertexArrayVertexBuffer() will autocalculate it
-                //based on the assigned vertex attributes
-                const RSsizei stride = 0;
-                //always set to zero unless interleaving data blocks within a single buffer
-                const RSintptr offset = 0;
-                const RSuint divisor = 0;
-                const std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>> vertexAttributes;
-
                 ~VertexDataLayout() {}
                 VertexDataLayout(const VertexDataLayout &other);
-                VertexDataLayout &operator=(const VertexDataLayout &other) = delete;
-                VertexDataLayout(VertexDataLayout &&other) = delete;
-                VertexDataLayout &operator=(VertexDataLayout &&other) = delete;
+                VertexDataLayout &operator=(const VertexDataLayout &other);
+                VertexDataLayout(VertexDataLayout &&other);
+                VertexDataLayout &operator=(VertexDataLayout &&other);
 
-                const std::variant<VertexAttribute, MatrixVertexAttribute> *getAttribute(const std::string &attributeName);
+                const std::variant<VertexAttribute, MatrixVertexAttribute> *getAttribute(const std::string &attributeName) const;
+                RSuint getDivisor() const;
+                RSintptr getOffset() const;
+                RSsizei getStride() const;
+                const std::vector<std::variant<VertexAttribute, MatrixVertexAttribute>> &getVertexAttributes() const;
         };
 
         class VertexDataLayoutBuilder
