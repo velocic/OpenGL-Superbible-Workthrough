@@ -33,7 +33,8 @@ namespace Flare
         {
             auto buffer = RenderSystem::createBuffer(
                 createdBufferBaseName + std::to_string(buffersCreated++),
-                bufferLayout
+                bufferLayout,
+                RenderSystem::BufferType::TRANSFORMFEEDBACK
             );
 
             buffer->allocateBufferStorage(bufferSizeInBytes, nullptr, bufferUsageFlags);
@@ -139,6 +140,18 @@ namespace Flare
         void TransformFeedbackBufferManager::beginTransformFeedback(RenderSystem::RSenum primitiveMode)
         {
             isCurrentlyEnabled = true;
+
+            auto bufferNames = std::vector<GLuint>{};
+            for (const auto &[key, value] : transformFeedbackBufferMap) {
+                bufferNames.push_back(value.transformFeedbackBuffer->getId());
+            }
+
+            glBindBuffersBase(
+                GL_TRANSFORM_FEEDBACK_BUFFER,
+                0,
+                transformFeedbackBufferMap.size(),
+                bufferNames.data()
+            );
             glBeginTransformFeedback(primitiveMode);
         }
 

@@ -19,6 +19,8 @@ namespace Flare
             offset = other.offset;
             divisor = other.divisor;
             vertexAttributes = other.vertexAttributes;
+
+            return *this;
         }
 
         VertexDataLayout::VertexDataLayout(VertexDataLayout &&other)
@@ -36,6 +38,8 @@ namespace Flare
             offset = std::exchange(other.offset, 0);
             divisor = std::exchange(other.divisor, 0);
             vertexAttributes = std::move(other.vertexAttributes);
+
+            return *this;
         }
 
         const std::variant<VertexAttribute, MatrixVertexAttribute> *VertexDataLayout::getAttribute(const std::string &attributeName) const
