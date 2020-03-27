@@ -10,7 +10,7 @@ namespace Flare
             return std::make_unique<Flare::GL::Buffer>(name, bufferContentDescription, bufferType);
         }
 
-        std::unique_ptr<VertexArray> createVertexArray(const RenderSystem::ShaderProgram *shaderProgram,const std::vector<RenderSystem::VertexBufferVertexDataLayout> &requiredBufferLayouts)
+        std::unique_ptr<VertexArray> createVertexArray(const RenderSystem::ShaderProgram *shaderProgram, const std::vector<RenderSystem::VertexBufferVertexDataLayout> &requiredBufferLayouts)
         {
             return std::make_unique<Flare::GL::VertexArray>(shaderProgram, requiredBufferLayouts);
         }

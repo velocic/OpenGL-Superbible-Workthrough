@@ -30,7 +30,7 @@ namespace Flare
                 TransformFeedbackBufferManager(const TransformFeedbackBufferManager &other) = delete;
                 TransformFeedbackBufferManager &operator=(const TransformFeedbackBufferManager &other) = delete;
 
-                virtual const RenderSystem::Buffer *create(RenderSystem::ShaderData shaderData, const RenderSystem::VertexDataLayout &bufferLayout, RenderSystem::RSsizei bufferSizeInBytes, RenderSystem::RSbitfield bufferUsageFlags, RenderSystem::RSsizei count, const std::vector<std::string> &varyings) override;
+                virtual const RenderSystem::Buffer *create(RenderSystem::ShaderData shaderData, const RenderSystem::VertexDataLayout &bufferLayout, RenderSystem::RSsizei bufferSizeInBytes, RenderSystem::RSbitfield bufferUsageFlags, const std::vector<std::string> &varyings, void *initialData = nullptr) override;
                 virtual void destroy(size_t hashedAlias) override;
                 virtual void destroy(const std::string &alias) override;
                 virtual void destroy(RenderSystem::ShaderData shaderData) override;

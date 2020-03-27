@@ -29,7 +29,7 @@ namespace Flare
             return *this;
         }
 
-        const RenderSystem::Buffer *TransformFeedbackBufferManager::create(RenderSystem::ShaderData shaderData, const RenderSystem::VertexDataLayout &bufferLayout, RenderSystem::RSsizei bufferSizeInBytes, RenderSystem::RSbitfield bufferUsageFlags, RenderSystem::RSsizei count, const std::vector<std::string> &varyings)
+        const RenderSystem::Buffer *TransformFeedbackBufferManager::create(RenderSystem::ShaderData shaderData, const RenderSystem::VertexDataLayout &bufferLayout, RenderSystem::RSsizei bufferSizeInBytes, RenderSystem::RSbitfield bufferUsageFlags, const std::vector<std::string> &varyings, void *initialData)
         {
             auto buffer = RenderSystem::createBuffer(
                 createdBufferBaseName + std::to_string(buffersCreated++),
@@ -37,7 +37,7 @@ namespace Flare
                 RenderSystem::BufferType::TRANSFORMFEEDBACK
             );
 
-            buffer->allocateBufferStorage(bufferSizeInBytes, nullptr, bufferUsageFlags);
+            buffer->allocateBufferStorage(bufferSizeInBytes, initialData, bufferUsageFlags);
             auto result = buffer.get();
 
             auto CStringVaryings = std::vector<const char *>{};
@@ -53,7 +53,7 @@ namespace Flare
 
             glTransformFeedbackVaryings(
                 shaderData.shader->getProgramId(),
-                count,
+                varyings.size(),
                 CStringVaryings.data(),
                 GL_INTERLEAVED_ATTRIBS
             );
