@@ -1,7 +1,8 @@
 #include <7d-transform-feedback/transformfeedback.h>
 
-#include <flare/rendersystem/factory.h>
+#include <cmath>
 
+#include <flare/rendersystem/factory.h>
 #include <flare/gl/texturemanager.h>
 #include <flare/gl/transformfeedbackbuffermanager.h>
 #include <flare/gl/shaderprogram.h>
@@ -76,5 +77,51 @@ namespace Tutorial
 
     void TransformFeedback::setInitialVertexBufferState()
     {
+        constexpr auto totalVertices = verticesPerAxis * verticesPerAxis;
+
+        auto initialPositions = std::vector<glm::vec4>(totalVertices);
+        auto connectionVectors = std::vector<glm::ivec4>(totalVertices);
+        auto initialVelocities = std::vector<glm::vec3>(totalVertices);
+
+        auto parallelIndex = size_t{0};
+
+        for (size_t yIndex = 0; yIndex < verticesPerAxis; ++yIndex) {
+            auto normalizedY = yIndex / static_cast<float>(verticesPerAxis);
+
+            for (size_t xIndex = 0; xIndex < verticesPerAxis; ++xIndex) {
+                auto normalizedX = xIndex / static_cast<float>(verticesPerAxis);
+
+                initialPositions[parallelIndex] = glm::vec4{
+                    (normalizedX - 0.5f) * verticesPerAxis,
+                    (normalizedY - 0.5f) * verticesPerAxis,
+                    0.6f * sinf(normalizedX) * cosf(normalizedY),
+                    1.0f
+                };
+                initialVelocities[parallelIndex] = glm::vec3(0.0f);
+                connectionVectors[parallelIndex] = glm::ivec4(-1);
+
+                if (yIndex != (verticesPerAxis - 1)) {
+                    if (xIndex != 0) {
+                        connectionVectors[parallelIndex].x = parallelIndex - 1;
+                    }
+
+                    if (yIndex != 0) {
+                        connectionVectors[parallelIndex].y = parallelIndex - verticesPerAxis;
+                    }
+
+                    if (xIndex != verticesPerAxis - 1) {
+                        connectionVectors[parallelIndex].z = parallelIndex + 1;
+                    }
+
+                    if (yIndex != verticesPerAxis - 1) {
+                        connectionVectors[parallelIndex].w = parallelIndex + verticesPerAxis;
+                    }
+                }
+
+                ++parallelIndex;
+            }
+        }
+
+        //TODO: buffer data to textures
     }
 }

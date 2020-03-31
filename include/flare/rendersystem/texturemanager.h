@@ -116,7 +116,7 @@ namespace Flare
                 virtual void loadTexture1D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) = 0;
                 virtual void loadTexture2D(const PBRTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PBRMaterialTextures)> onLoadComplete) = 0;
                 virtual void loadTexture2D(const PhongTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PhongMaterialTextures)> onLoadComplete) = 0;
-                virtual void loadTexture2D(const TextureFile &fiel, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) = 0;
+                virtual void loadTexture2D(const TextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete) = 0;
                 virtual void loadArrayTexture2D(const ArrayTextureFiles &files, const TextureInitParams &initParams, std::function<void(Texture *)> onLoadComplete) = 0;
 
                 //TODO: support loading in-memory textures (for making runtime-generated textures available)
