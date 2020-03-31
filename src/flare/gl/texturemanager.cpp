@@ -93,6 +93,11 @@ namespace Flare
             throw std::runtime_error("GL::TextureManager::loadTexture1D() not yet implemented.");
         }
 
+        void TextureManager::loadTexture1D(const InMemoryTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
+        {
+            throw std::runtime_error("GL::TextureManager::loadTexture1D() not yet implemented.");
+        }
+
         void TextureManager::loadTexture2D(const PBRTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PBRMaterialTextures)> onLoadComplete)
         {
             auto width = 0u;
@@ -186,6 +191,21 @@ namespace Flare
 
             auto result = newTexture.get();
             textures.insert_or_assign(lookupKey, std::move(newTexture));
+            onLoadComplete(result);
+        }
+
+        void TextureManager::loadTexture2D(const InMemoryTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::Texture *)> onLoadComplete)
+        {
+            auto newTexture = std::make_unique<Texture2D>(
+                initParams.numMipmapLevels,
+                initParams.internalFormat,
+                file.width,
+                file.height
+            );
+            newTexture->bufferPixelData(file.pixelDataFormat, GL_UNSIGNED_BYTE, file.data, initParams.generateMipmaps);
+
+            auto result = newTexture.get();
+            textures.insert_or_assign(stringHasher(file.alias), std::move(newTexture));
             onLoadComplete(result);
         }
 
