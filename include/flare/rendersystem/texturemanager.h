@@ -6,7 +6,9 @@
 #include <string>
 #include <vector>
 
+#include <flare/rendersystem/buffer.h>
 #include <flare/rendersystem/texture.h>
+#include <flare/rendersystem/texturebuffer.h>
 
 namespace Flare
 {
@@ -119,6 +121,8 @@ namespace Flare
                 virtual void batchLoadTexture2D(const std::vector<PhongTextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
                 virtual void batchLoadTexture2D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
                 virtual void batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) = 0;
+
+                virtual RenderSystem::TextureBuffer *createTextureBuffer(const std::string &alias, const TextureInitParams &initParams) = 0;
 
                 virtual void loadTexture1D(const PBRTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PBRMaterialTextures)> onLoadComplete) = 0;
                 virtual void loadTexture1D(const PhongTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PhongMaterialTextures)> onLoadComplete) = 0;

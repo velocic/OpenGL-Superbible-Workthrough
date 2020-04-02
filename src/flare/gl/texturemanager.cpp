@@ -78,6 +78,20 @@ namespace Flare
             onLoadComplete();
         }
 
+        RenderSystem::TextureBuffer *TextureManager::createTextureBuffer(const std::string &alias, const TextureInitParams &initParams)
+        {
+            auto newTexture = std::make_unique<TextureBuffer>(
+                initParams.numMipmapLevels,
+                initParams.internalFormat,
+                0
+            );
+
+            auto result = newTexture.get();
+            textures.insert_or_assign(stringHasher(alias), std::move(newTexture));
+
+            return result;
+        }
+
         void TextureManager::loadTexture1D(const PBRTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PBRMaterialTextures)> onLoadComplete)
         {
             throw std::runtime_error("GL::TextureManager::loadTexture1D() not yet implemented.");

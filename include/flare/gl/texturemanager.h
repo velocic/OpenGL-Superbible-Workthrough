@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <flare/gl/texture.h>
+#include <flare/gl/texturebuffer.h>
 #include <flare/rendersystem/texturemanager.h>
 
 namespace Flare
@@ -38,6 +39,8 @@ namespace Flare
                 virtual void batchLoadTexture2D(const std::vector<PhongTextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) override;
                 virtual void batchLoadTexture2D(const std::vector<TextureFile> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) override;
                 virtual void batchLoadArrayTexture2D(const std::vector<ArrayTextureFiles> &targets, const TextureInitParams &initParams, std::function<void()> onLoadComplete) override;
+
+                virtual RenderSystem::TextureBuffer *createTextureBuffer(const std::string &alias, const TextureInitParams &initParams) override;
 
                 virtual void loadTexture1D(const PBRTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PBRMaterialTextures)> onLoadComplete) override;
                 virtual void loadTexture1D(const PhongTextureFile &file, const TextureInitParams &initParams, std::function<void(RenderSystem::PhongMaterialTextures)> onLoadComplete) override;
