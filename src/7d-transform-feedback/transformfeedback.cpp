@@ -75,6 +75,10 @@ namespace Tutorial
     {
     }
 
+    void TransformFeedback::initSamplers()
+    {
+    }
+
     void TransformFeedback::setInitialVertexBufferState()
     {
         constexpr auto totalVertices = verticesPerAxis * verticesPerAxis;

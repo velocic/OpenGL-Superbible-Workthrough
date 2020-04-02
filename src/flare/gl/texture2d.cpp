@@ -23,9 +23,8 @@ namespace Flare
         Texture2D::Texture2D(Texture2D&& other)
         :
             Texture(std::move(other)),
-            textureHeight(other.textureHeight)
+            textureHeight(std::exchange(other.textureHeight, 0))
         {
-            other.textureHeight = 0;
         }
 
         Texture2D& Texture2D::operator=(Texture2D&& other)
@@ -133,7 +132,7 @@ namespace Flare
         void Texture2D::bind(GLuint textureUnitIndex)
         {
             if (glTexture == 0) {
-                throw std::runtime_error("Attempting to bind an OpenGL texture that's uninitialized");
+                throw std::runtime_error("Attempting to bind an OpenGL texture that's uninitialized.");
             }
 
             glBindTextureUnit(textureUnitIndex, glTexture);
@@ -142,7 +141,7 @@ namespace Flare
         void Texture2D::bindImageTexture(GLuint unit, GLint level, [[maybe_unused]] GLboolean layered, [[maybe_unused]] GLint layer, GLenum access, GLenum format)
         {
             if (glTexture == 0) {
-                throw std::runtime_error("Attempting to bind an OpenGL image texture that's uninitialized");
+                throw std::runtime_error("Attempting to bind an OpenGL image texture that's uninitialized.");
             }
 
             glBindImageTexture(

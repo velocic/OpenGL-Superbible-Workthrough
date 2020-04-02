@@ -26,6 +26,7 @@ namespace Tutorial
             const std::string transformFeedbackFragmentShaderPath{"../src/7d-transform-feedback/shaders/transformfeedback-fragment.glsl"};
             static constexpr auto verticesPerAxis = 50;
 
+            void initSamplers();
             void setInitialVertexBufferState();
         public:
             virtual void initialize() override;
