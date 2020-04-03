@@ -109,10 +109,11 @@ namespace Flare
             EBO = nullptr;
         }
 
-        void BasicMesh::bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer)
+        void BasicMesh::bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, const std::vector<const RenderSystem::Buffer *> &userProvidedShaderBuffers)
         {
             boundData.shaderData = shaderData;
             boundData.mvpMatrixBuffer = &mvpMatrixBuffer;
+            boundData.userProvidedShaderBuffers = userProvidedShaderBuffers;
 
             if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(textures)) {
                 const auto &phongTextures = std::get<RenderSystem::PhongMaterialTextures>(textures);
@@ -141,9 +142,12 @@ namespace Flare
                 }
             }
 
-            shaderData.vertexArray->linkBuffers(
-                std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*VBO, mvpMatrixBuffer}
-            );
+            auto buffersToLink = std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*VBO, mvpMatrixBuffer};
+            for (const auto buffer : userProvidedShaderBuffers) {
+                buffersToLink.push_back(*buffer);
+            }
+
+            shaderData.vertexArray->linkBuffers(buffersToLink);
             shaderData.shader->bind();
             shaderData.vertexArray->bind();
             EBO->bind(GL_ELEMENT_ARRAY_BUFFER);
@@ -173,6 +177,12 @@ namespace Flare
 
         std::vector<Mesh::SortableDrawElementsIndirectCommand> BasicMesh::getIndirectDrawCommands(size_t instanceCount, size_t subMeshIndex) const
         {
+            if (boundData.shaderData.shader == nullptr
+                || boundData.shaderData.vertexArray == nullptr
+                || boundData.mvpMatrixBuffer == nullptr) {
+                throw std::runtime_error("Packed mesh has not been bound; Invalid render operation.");
+            }
+
             auto result = std::vector<Mesh::SortableDrawElementsIndirectCommand>{};
             auto drawCommand = Mesh::SortableDrawElementsIndirectCommand{};
             drawCommand.textures = textures;
@@ -188,6 +198,7 @@ namespace Flare
                 boundData.mvpMatrixBuffer,
                 VBO.get(),
                 EBO.get(),
+                &boundData.userProvidedShaderBuffers,
                 getName()
             };
 

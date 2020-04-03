@@ -105,7 +105,7 @@ namespace Tutorial
         glClearBufferfv(GL_COLOR, 0, clearColor);
         auto instanceShaderData = shaderManager->get("instanceShader");
         auto bunnyModel = modelManager->get("stanford-bunny");
-        bunnyModel->render(instanceShaderData, *mvpMatrixBuffer.get(), 1000);
+        bunnyModel->render(instanceShaderData, *mvpMatrixBuffer.get(), additionalBuffersForModelShader, 1000);
         renderWindow->swapWindow();
     }
 

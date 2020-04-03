@@ -38,7 +38,7 @@ namespace Flare
                 BasicMesh &operator=(const BasicMesh &other) = delete;
 
                 virtual void destroy() override;
-                virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer) override;
+                virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, const std::vector<const RenderSystem::Buffer *> &userProvidedShaderBuffers) override;
                 virtual std::vector<glm::mat4> getLocalTransforms() const override;
                 virtual size_t getName() const override;
                 virtual size_t getPackedMeshCount() const override { return 1; }

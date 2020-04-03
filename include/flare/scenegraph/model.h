@@ -31,8 +31,8 @@ namespace Flare
 
                 std::vector<glm::mat4> getMeshLocalTransforms() const;
                 size_t getMeshCount() const;
-                void render(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount);
-                std::vector<Mesh::SortableDrawElementsIndirectCommand> getIndirectDrawCommands(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount) const;
+                void render(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, const std::vector<const RenderSystem::Buffer *> &userProvidedShaderBuffers, size_t instanceCount);
+                std::vector<Mesh::SortableDrawElementsIndirectCommand> getIndirectDrawCommands(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, const std::vector<const RenderSystem::Buffer *> &userProvidedShaderBuffers, size_t instanceCount) const;
         };
     }
 }

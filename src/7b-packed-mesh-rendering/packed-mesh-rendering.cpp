@@ -110,7 +110,7 @@ namespace Tutorial
         glClearBufferfv(GL_COLOR, 0, clearColor);
         auto shaderData = shaderManager->get("shader");
         auto lanternModel = modelManager->get("lantern");
-        lanternModel->render(shaderData, *mvpMatrixBuffer.get(), 1);
+        lanternModel->render(shaderData, *mvpMatrixBuffer.get(), additionalBuffersForModelShader, 1);
         renderWindow->swapWindow();
     }
 

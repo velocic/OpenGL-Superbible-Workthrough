@@ -20,6 +20,7 @@ namespace Tutorial
             std::unique_ptr<Flare::RenderSystem::TextureManager> textureManager = nullptr;
             std::unique_ptr<Flare::SceneGraph::ModelManager> modelManager = nullptr;
             std::unique_ptr<Flare::RenderSystem::Buffer> mvpMatrixBuffer = nullptr;
+            std::vector<const Flare::RenderSystem::Buffer *> additionalBuffersForModelShader;
             const std::string vertexShaderPath{"../src/7a-instancing/shaders/vertex.glsl"};
             const std::string fragmentShaderPath{"../src/7a-instancing/shaders/fragment.glsl"};
 

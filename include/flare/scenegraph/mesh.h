@@ -19,12 +19,14 @@ namespace Flare
                 struct BoundData {
                     RenderSystem::ShaderData shaderData;
                     const RenderSystem::Buffer *mvpMatrixBuffer = nullptr;
+                    std::vector<const RenderSystem::Buffer *> userProvidedShaderBuffers;
                 };
 
                 struct MeshRenderData {
                     const RenderSystem::Buffer *mvpMatrixBuffer = nullptr;
                     const RenderSystem::Buffer *vertexBuffer = nullptr;
                     RenderSystem::Buffer *elementBuffer = nullptr;
+                    const std::vector<const RenderSystem::Buffer *> *userProvidedShaderBuffers = nullptr;
                     size_t meshId = 0;
                 };
 
@@ -37,7 +39,7 @@ namespace Flare
 
                 virtual ~Mesh() {}
                 virtual void destroy() = 0;
-                virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer) = 0;
+                virtual void bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, const std::vector<const RenderSystem::Buffer *> &userProvidedShaderBuffers) = 0;
                 virtual std::vector<glm::mat4> getLocalTransforms() const = 0;
                 virtual size_t getName() const = 0;
                 virtual size_t getPackedMeshCount() const = 0;

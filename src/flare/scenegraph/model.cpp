@@ -52,22 +52,22 @@ namespace Flare
             return result;
         }
 
-        void Model::render(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount)
+        void Model::render(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, const std::vector<const RenderSystem::Buffer *> &userProvidedShaderBuffers, size_t instanceCount)
         {
             for (size_t meshIndex = 0; meshIndex < meshes.size(); ++meshIndex) {
                 auto &mesh = meshes[meshIndex];
-                mesh->bind(shaderData, mvpMatrixBuffer);
+                mesh->bind(shaderData, mvpMatrixBuffer, userProvidedShaderBuffers);
                 mesh->render(instanceCount, meshIndex);
             }
         }
 
-        std::vector<Mesh::SortableDrawElementsIndirectCommand> Model::getIndirectDrawCommands(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, size_t instanceCount) const
+        std::vector<Mesh::SortableDrawElementsIndirectCommand> Model::getIndirectDrawCommands(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer, const std::vector<const RenderSystem::Buffer *> &userProvidedShaderBuffers, size_t instanceCount) const
         {
             auto result = std::vector<Mesh::SortableDrawElementsIndirectCommand>{};
 
             for (size_t meshIndex = 0; meshIndex < meshes.size(); ++meshIndex) {
                 auto &mesh = meshes[meshIndex];
-                mesh->bind(shaderData, mvpMatrixBuffer);
+                mesh->bind(shaderData, mvpMatrixBuffer, userProvidedShaderBuffers);
                 auto meshDrawCommands = mesh->getIndirectDrawCommands(instanceCount, meshIndex);
                 std::move(meshDrawCommands.begin(), meshDrawCommands.end(), std::back_inserter(result));
             }

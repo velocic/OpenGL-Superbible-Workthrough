@@ -6,6 +6,7 @@
 
 #include <flare/application.h>
 #include <flare/ui/renderwindow.h>
+#include <flare/rendersystem/buffer.h>
 #include <flare/rendersystem/texturemanager.h>
 #include <flare/rendersystem/shadermanager.h>
 #include <flare/scenegraph/modelmanager.h>
@@ -24,6 +25,7 @@ namespace Tutorial
             std::unique_ptr<Flare::RenderSystem::TextureManager> textureManager = nullptr;
             std::unique_ptr<Flare::SceneGraph::ModelManager> modelManager = nullptr;
             std::unique_ptr<Flare::RenderSystem::Buffer> mvpMatrixBuffer = nullptr;
+            std::vector<const Flare::RenderSystem::Buffer *> additionalBuffersForModelShader;
             const std::string vertexShaderPath{"../src/6a-model-file-loading/shaders/vertex.glsl"};
             const std::string fragmentShaderPath{"../src/6a-model-file-loading/shaders/fragment.glsl"};
             const std::string textureDisplayVertexShaderPath{"../src/6a-model-file-loading/shaders/texture-display-vsh.glsl"};

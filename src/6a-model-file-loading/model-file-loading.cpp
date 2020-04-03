@@ -203,7 +203,7 @@ namespace Tutorial
 
         auto bunnyModel = modelManager->get("stanford-bunny");
         auto lanternModel = modelManager->get("lantern");
-        bunnyModel->render(untexturedUnlitMeshDisplayShaderData, *mvpMatrixBuffer.get(), 1);
+        bunnyModel->render(untexturedUnlitMeshDisplayShaderData, *mvpMatrixBuffer.get(), additionalBuffersForModelShader, 1);
 
         auto rotationAngle = elapsedTime * .001f;
         std::cout << rotationAngle << std::endl;
@@ -223,7 +223,7 @@ namespace Tutorial
             &lanternMVMatrix[0][0]
         );
 
-        lanternModel->render(texturedDisplayShaderData, *mvpMatrixBuffer.get(), 1);
+        lanternModel->render(texturedDisplayShaderData, *mvpMatrixBuffer.get(), additionalBuffersForModelShader, 1);
         renderWindow->swapWindow();
     }
 

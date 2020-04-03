@@ -44,10 +44,11 @@ namespace Flare
             std::vector<SubMeshEntry>().swap(subMeshEntries);
         }
 
-        void PackedMesh::bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer)
+        void PackedMesh::bind(RenderSystem::ShaderData shaderData, const RenderSystem::Buffer &mvpMatrixBuffer,  const std::vector<const RenderSystem::Buffer *> &userProvidedShaderBuffers)
         {
             boundData.shaderData = shaderData;
             boundData.mvpMatrixBuffer = &mvpMatrixBuffer;
+            boundData.userProvidedShaderBuffers = userProvidedShaderBuffers;
         }
 
         std::vector<glm::mat4> PackedMesh::getLocalTransforms() const
@@ -74,9 +75,12 @@ namespace Flare
                 throw std::runtime_error("Packed mesh has not been bound; Invalid render operation.");
             }
 
-            boundData.shaderData.vertexArray->linkBuffers(
-                std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*VBO, *boundData.mvpMatrixBuffer}
-            );
+            auto buffersToLink = std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{*VBO, *boundData.mvpMatrixBuffer};
+            for (const auto buffer : boundData.userProvidedShaderBuffers) {
+                buffersToLink.push_back(*buffer);
+            }
+
+            boundData.shaderData.vertexArray->linkBuffers(buffersToLink);
             boundData.shaderData.shader->bind();
             boundData.shaderData.vertexArray->bind();
             EBO->bind(GL_ELEMENT_ARRAY_BUFFER);
@@ -155,6 +159,7 @@ namespace Flare
                     boundData.mvpMatrixBuffer,
                     VBO.get(),
                     EBO.get(),
+                    &boundData.userProvidedShaderBuffers,
                     getName()
                 };
 

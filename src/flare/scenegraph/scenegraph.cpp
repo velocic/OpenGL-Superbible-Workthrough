@@ -396,10 +396,13 @@ namespace Flare
 
         Node::Node(Node &&other)
         :
+            nextInstanceIdToAssign(std::exchange(other.nextInstanceIdToAssign, 0)),
             TRSData(std::move(other.TRSData)),
             instanceData(std::move(other.instanceData)),
             children(std::move(other.children)),
             name(std::exchange(other.name, 0)),
+            shaderData(std::move(other.shaderData)),
+            userProvidedShaderBuffers(std::move(other.userProvidedShaderBuffers)),
             modelMatrixBuffer(std::move(other.modelMatrixBuffer)),
             sceneGraph(std::exchange(other.sceneGraph, nullptr)),
             parent(std::exchange(other.parent, nullptr)),
@@ -409,12 +412,15 @@ namespace Flare
 
         Node &Node::operator=(Node &&other)
         {
+            nextInstanceIdToAssign = std::exchange(other.nextInstanceIdToAssign, 0);
             TRSData = std::move(other.TRSData);
             instanceData = std::move(other.instanceData);
             children = std::move(other.children);
             name = std::exchange(other.name, 0);
-            sceneGraph = std::exchange(other.sceneGraph, nullptr);
+            shaderData = std::move(other.shaderData);
+            userProvidedShaderBuffers = std::move(other.userProvidedShaderBuffers);
             modelMatrixBuffer = std::move(other.modelMatrixBuffer);
+            sceneGraph = std::exchange(other.sceneGraph, nullptr);
             parent = std::exchange(other.parent, nullptr);
             model = std::exchange(other.model, nullptr);
 
@@ -508,6 +514,11 @@ namespace Flare
         void Node::setShaderData(RenderSystem::ShaderData newShaderData)
         {
             shaderData = newShaderData;
+        }
+
+        void Node::setShaderBuffers(const std::vector<const RenderSystem::Buffer *> &buffers)
+        {
+            userProvidedShaderBuffers = buffers;
         }
 
         void Node::translateNode(const glm::vec3 &translation)

@@ -68,6 +68,7 @@ namespace Flare
                 std::vector<std::unique_ptr<Node>> children;
                 size_t name = 0;
                 RenderSystem::ShaderData shaderData;
+                std::vector<const RenderSystem::Buffer *> userProvidedShaderBuffers;
                 RenderSystem::ResizableBuffer modelMatrixBuffer;
                 SceneGraph *sceneGraph = nullptr;
                 Node *parent = nullptr;
@@ -109,6 +110,7 @@ namespace Flare
 
                 void setModel(Model *newModel);
                 void setShaderData(RenderSystem::ShaderData newShaderData);
+                void setShaderBuffers(const std::vector<const RenderSystem::Buffer *> &buffers);
 
                 void translateNode(const glm::vec3 &translation);
                 void rotateNode(float angleRadians, const glm::vec3 &axis);

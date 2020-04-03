@@ -25,6 +25,7 @@ namespace Tutorial
             std::unique_ptr<Flare::RenderSystem::Sampler> diffuse1TextureSampler = nullptr;
             std::unique_ptr<Flare::RenderSystem::Sampler> specularTextureSampler = nullptr;
             std::unique_ptr<Flare::RenderSystem::Sampler> normalTextureSampler = nullptr;
+            std::vector<const Flare::RenderSystem::Buffer *> additionalBuffersForModelShader;
             const std::string vertexShaderPath{"../src/7b-packed-mesh-rendering/shaders/vertex.glsl"};
             const std::string fragmentShaderPath{"../src/7b-packed-mesh-rendering/shaders/fragment.glsl"};
 
