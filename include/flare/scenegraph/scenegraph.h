@@ -1,6 +1,8 @@
 #ifndef FLARE_SCENEGRAPH_SCENEGRAPH_H
 #define FLARE_SCENEGRAPH_SCENEGRAPH_H
 
+#include <cstddef>
+
 namespace Flare
 {
     namespace SceneGraph
@@ -12,7 +14,6 @@ namespace Flare
                 virtual void destroy() = 0;
                 virtual Node *getRootNode() const = 0;
                 virtual void render() = 0;
-                virtual void renderIndirect() = 0;
 
                 //Used by Nodes for fetching a unique numeric id for nodes on creation.
                 //Public so that nodes can request this in their copy constructor

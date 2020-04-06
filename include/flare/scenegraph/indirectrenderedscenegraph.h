@@ -1,6 +1,9 @@
 #ifndef FLARE_SCENEGRAPH_INDIRECTRENDEREDSCENEGRAPH_H
 #define FLARE_SCENEGRAPH_INDIRECTRENDEREDSCENEGRAPH_H
 
+#include <memory>
+
+#include <flare/rendersystem/resizablebuffer.h>
 #include <flare/scenegraph/scenegraph.h>
 
 namespace Flare

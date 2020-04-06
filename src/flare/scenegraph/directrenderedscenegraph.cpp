@@ -1,5 +1,7 @@
 #include <flare/scenegraph/directrenderedscenegraph.h>
 
+#include <flare/scenegraph/node.h>
+
 namespace Flare
 {
     namespace SceneGraph

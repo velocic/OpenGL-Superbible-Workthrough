@@ -1,6 +1,8 @@
 #ifndef FLARE_SCENEGRAPH_DIRECTRENDEREDSCENEGRAPH_H
 #define FLARE_SCENEGRAPH_DIRECTRENDEREDSCENEGRAPH_H
 
+#include <memory>
+
 #include <flare/scenegraph/scenegraph.h>
 
 namespace Flare

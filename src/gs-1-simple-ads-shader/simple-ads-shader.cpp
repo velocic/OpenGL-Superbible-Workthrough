@@ -3,6 +3,7 @@
 #include <flare/gl/texturemanager.h>
 #include <flare/gl/shaderprogram.h>
 #include <flare/rendersystem/factory.h>
+#include <flare/scenegraph/indirectrenderedscenegraph.h>
 
 namespace Tutorial
 {
@@ -17,7 +18,7 @@ namespace Tutorial
         textureManager = std::make_unique<Flare::GL::TextureManager>();
         modelManager = std::make_unique<Flare::SceneGraph::ModelManager>(*textureManager.get());
         shaderManager = std::make_unique<Flare::RenderSystem::ShaderManager>();
-        sceneGraph = std::make_unique<Flare::SceneGraph::SceneGraph>();
+        sceneGraph = std::make_unique<Flare::SceneGraph::IndirectRenderedSceneGraph>();
 
         loadShader("basicVertexLightingShaderA");
         loadShader("basicVertexLightingShaderB");
@@ -47,7 +48,7 @@ namespace Tutorial
         glClearBufferfv(GL_COLOR, 0, clearColor);
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        sceneGraph->renderIndirect();
+        sceneGraph->render();
 
         renderWindow->swapWindow();
     }

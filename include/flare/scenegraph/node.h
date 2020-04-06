@@ -23,7 +23,9 @@ namespace Flare
         class SceneGraph;
         class Node
         {
-            friend class SceneGraph;
+            friend class DirectRenderedSceneGraph;
+            friend class IndirectRenderedSceneGraph;
+
             private:
                 struct TranslateRotateScaleData {
                     glm::mat4 translation = Math::identityMatrix;

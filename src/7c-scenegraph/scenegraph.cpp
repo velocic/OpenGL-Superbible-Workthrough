@@ -6,6 +6,7 @@
 #include <flare/gl/sampler.h>
 #include <flare/gl/shaderprogram.h>
 #include <flare/rendersystem/factory.h>
+#include <flare/scenegraph/indirectrenderedscenegraph.h>
 
 namespace Tutorial
 {
@@ -21,7 +22,7 @@ namespace Tutorial
         modelManager = std::make_unique<Flare::SceneGraph::ModelManager>(*textureManager.get());
         shaderManager = std::make_unique<Flare::RenderSystem::ShaderManager>();
         samplerManager = std::make_unique<Flare::RenderSystem::SamplerManager>();
-        sceneGraph = std::make_unique<Flare::SceneGraph::SceneGraph>();
+        sceneGraph = std::make_unique<Flare::SceneGraph::IndirectRenderedSceneGraph>();
         initSamplers();
 
         auto vertexBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
@@ -113,7 +114,7 @@ namespace Tutorial
         const GLfloat clearColor[] = {0.0f, 0.0f, 0.0f, 0.0f};
         glClearBufferfv(GL_COLOR, 0, clearColor);
         glClear(GL_DEPTH_BUFFER_BIT);
-        sceneGraph->renderIndirect();
+        sceneGraph->render();
         renderWindow->swapWindow();
     }
 

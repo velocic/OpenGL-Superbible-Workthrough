@@ -1,5 +1,12 @@
 #include <flare/scenegraph/indirectrenderedscenegraph.h>
 
+#include <queue>
+#include <unordered_set>
+#include <variant>
+
+#include <flare/scenegraph/node.h>
+#include <flare/rendersystem/factory.h>
+
 namespace Flare
 {
     namespace SceneGraph
