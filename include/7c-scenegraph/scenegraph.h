@@ -9,6 +9,7 @@
 #include <flare/rendersystem/texturemanager.h>
 #include <flare/scenegraph/modelmanager.h>
 #include <flare/scenegraph/scenegraph.h>
+#include <flare/scenegraph/node.h>
 #include <flare/ui/renderwindow.h>
 
 namespace Tutorial
