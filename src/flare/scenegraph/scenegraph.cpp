@@ -793,7 +793,7 @@ namespace Flare
             if (model != nullptr && modelMatrixBuffer.get() != nullptr && instanceData.numActive > 0) {
                 updateModelMatrixBuffer(localCoordinateSpace, model->getMeshLocalTransforms());
 
-                model->render(shaderData, *modelMatrixBuffer.get(), instanceData.numActive);
+                model->render(shaderData, *modelMatrixBuffer.get(), userProvidedShaderBuffers, instanceData.numActive);
             }
 
             for (auto &child : children) {
@@ -809,7 +809,7 @@ namespace Flare
 
             if (model != nullptr && modelMatrixBuffer.get() != nullptr && instanceData.numActive > 0) {
                 updateModelMatrixBuffer(localCoordinateSpace, model->getMeshLocalTransforms());
-                auto modelDrawCommands = model->getIndirectDrawCommands(shaderData, *modelMatrixBuffer.get(), instanceData.numActive);
+                auto modelDrawCommands = model->getIndirectDrawCommands(shaderData, *modelMatrixBuffer.get(), userProvidedShaderBuffers, instanceData.numActive);
                 std::move(modelDrawCommands.begin(), modelDrawCommands.end(), std::back_inserter(accumulatedResults));
             }
 
