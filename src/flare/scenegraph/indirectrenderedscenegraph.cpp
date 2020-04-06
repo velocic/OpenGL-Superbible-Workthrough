@@ -1,21 +1,10 @@
-#include <flare/scenegraph/scenegraph.h>
-
-#include <unordered_set>
-#include <queue>
-
-#include <flare/scenegraph/node.h>
-#include <flare/rendersystem/factory.h>
+#include <flare/scenegraph/indirectrenderedscenegraph.h>
 
 namespace Flare
 {
     namespace SceneGraph
     {
-        size_t SceneGraph::requestName()
-        {
-            return nextNameToAssign++;
-        }
-
-        SceneGraph::SceneGraph()
+        IndirectRenderedSceneGraph::IndirectRenderedSceneGraph()
         {
             rootNode = std::unique_ptr<Node>(new Node(*this, requestName(), nullptr));
             auto commandBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
@@ -37,11 +26,11 @@ namespace Flare
             );
         }
 
-        SceneGraph::~SceneGraph()
+        IndirectRenderedSceneGraph::~IndirectRenderedSceneGraph()
         {
         }
 
-        SceneGraph::SceneGraph(SceneGraph &&other)
+        IndirectRenderedSceneGraph::IndirectRenderedSceneGraph(IndirectRenderedSceneGraph &&other)
         :
             indirectRenderCommandsBuffer(std::move(other.indirectRenderCommandsBuffer)),
             rootNode(std::move(other.rootNode)),
@@ -49,7 +38,7 @@ namespace Flare
         {
         }
 
-        SceneGraph &SceneGraph::operator=(SceneGraph &&other)
+        IndirectRenderedSceneGraph &IndirectRenderedSceneGraph::operator=(IndirectRenderedSceneGraph &&other)
         {
             indirectRenderCommandsBuffer = (std::move(other.indirectRenderCommandsBuffer));
             rootNode = std::move(other.rootNode);
@@ -58,22 +47,17 @@ namespace Flare
             return *this;
         }
 
-        void SceneGraph::destroy()
+        void IndirectRenderedSceneGraph::destroy()
         {
             rootNode = nullptr;
         }
 
-        Node *SceneGraph::getRootNode() const
+        Node *IndirectRenderedSceneGraph::getRootNode() const
         {
             return rootNode.get();
         }
 
-        void SceneGraph::render()
-        {
-            rootNode->render(Math::identityMatrix);
-        }
-
-        void SceneGraph::renderIndirect()
+        void IndirectRenderedSceneGraph::render()
         {
             using CommandGroupRange = std::pair<size_t, size_t>;
 
@@ -346,6 +330,11 @@ namespace Flare
 
                 commandGroupQueue.pop();
             }
+        }
+
+        size_t IndirectRenderedSceneGraph::requestName()
+        {
+            return nextNameToAssign++;
         }
     }
 }
