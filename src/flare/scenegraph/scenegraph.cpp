@@ -33,9 +33,7 @@ namespace Flare
             indirectRenderCommandsBuffer.get()->allocateBufferStorage(
                 32 * sizeof(RenderSystem::DrawElementsIndirectCommand),
                 nullptr,
-                RenderSystem::RSbitfield{} |
-                    RenderSystem::RS_DYNAMIC_STORAGE_BIT |
-                    RenderSystem::RS_MAP_WRITE_BIT
+                RenderSystem::RSbitfield{} | RenderSystem::RS_DYNAMIC_STORAGE_BIT
             );
         }
 
