@@ -7,6 +7,7 @@
 #include <flare/gl/shaderprogram.h>
 #include <flare/rendersystem/factory.h>
 #include <flare/scenegraph/indirectrenderedscenegraph.h>
+#include <flare/scenegraph/directrenderedscenegraph.h>
 
 namespace Tutorial
 {
@@ -23,6 +24,7 @@ namespace Tutorial
         shaderManager = std::make_unique<Flare::RenderSystem::ShaderManager>();
         samplerManager = std::make_unique<Flare::RenderSystem::SamplerManager>();
         sceneGraph = std::make_unique<Flare::SceneGraph::IndirectRenderedSceneGraph>();
+        // sceneGraph = std::make_unique<Flare::SceneGraph::DirectRenderedSceneGraph>();
         initSamplers();
 
         auto vertexBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
