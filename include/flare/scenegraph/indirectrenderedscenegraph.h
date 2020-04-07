@@ -13,9 +13,27 @@ namespace Flare
         class IndirectRenderedSceneGraph : public SceneGraph
         {
             private:
+                struct CombinedRenderDataBuffers {
+                    std::unique_ptr<RenderSystem::Buffer> mvpMatrixBuffer;
+                    std::unique_ptr<RenderSystem::Buffer> vertexBuffer;
+                    std::unique_ptr<RenderSystem::Buffer> elementBuffer;
+                };
+
+                using MaterialTextures = std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, std::nullptr_t>;
+                using SortableDrawCommands = std::vector<Mesh::SortableDrawElementsIndirectCommand>;
+                using CommandGroupRanges = std::vector<std::pair<size_t, size_t>>{};
+
                 RenderSystem::ResizableBuffer indirectRenderCommandsBuffer;
                 std::unique_ptr<Node> rootNode;
                 size_t nextNameToAssign = 0;
+
+                size_t getMaterialId(const MaterialTextures &textures);
+                void bindMaterialTextures(RenderSystem::ShaderProgram &shader, const Material &textures);
+                void sortDrawCommandsByMaterial(SortableDrawCommands &unsortedDrawCommands);
+                void sortDrawCommandRangeByMVPMatrixBuffer(SortableDrawCommands::iterator begin, SortableDrawCommands::iterator end);
+                CommandGroupRanges getCommandGroupRanges(const SortableDrawCommands &drawCommandsSortedByMaterial);
+                CombinedRenderDataBuffers getCombinedRenderDataBuffers(SortableDrawCommands &sortedDrawCommands, const CommandGroupRanges &commandGroupRanges);
+
             public:
                 IndirectRenderedSceneGraph();
                 virtual ~IndirectRenderedSceneGraph();
