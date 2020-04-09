@@ -28,9 +28,9 @@ int main()
     // Tutorial::ModelFileLoading selectedTutorial;
     // Tutorial::Instancing selectedTutorial;
     // Tutorial::PackedMeshRendering selectedTutorial;
-    // Tutorial::SceneGraph selectedTutorial;
+    Tutorial::SceneGraph selectedTutorial;
     // Tutorial::SimpleADSShader selectedTutorial;
-    Tutorial::TransformFeedback selectedTutorial;
+    // Tutorial::TransformFeedback selectedTutorial;
 
     Flare::Application* demoApp = &selectedTutorial;
 
