@@ -18,15 +18,25 @@ namespace Flare
                 using MaterialTextures = std::variant<RenderSystem::PhongMaterialTextures, RenderSystem::PBRMaterialTextures, std::nullptr_t>;
                 using SortableDrawCommands = std::vector<Mesh::SortableDrawElementsIndirectCommand>;
 
-                struct MaterialGroup {
-                    size_t firstIndex = 0;
-                    size_t lastIndex = 0;
-                };
+                struct ShaderGroup;
+                struct MaterialGroup;
+                struct BufferGroup;
 
                 struct ShaderGroup {
                     size_t firstIndex = 0;
                     size_t lastIndex = 0;
                     std::vector<MaterialGroup> materialGroups;
+                };
+
+                struct MaterialGroup {
+                    size_t firstIndex = 0;
+                    size_t lastIndex = 0;
+                    std::vector<BufferGroup> bufferGroups;
+                };
+
+                struct BufferGroup {
+                    size_t firstIndex = 0;
+                    size_t lastIndex = 0;
                 };
 
                 struct CombinedRenderDataBuffers {
@@ -44,8 +54,9 @@ namespace Flare
                 std::vector<ShaderGroup> sortDrawCommandsByShader(SortableDrawCommands &unsortedDrawCommands);
 
                 void sortDrawCommandsWithinShaderGroupByMaterial(SortableDrawCommands &unsortedDrawCommands, ShaderGroup &shaderGroup);
-                void sortDrawCommandRangeByMVPMatrixBuffer(SortableDrawCommands::iterator begin, SortableDrawCommands::iterator end);
+                void sortDrawCommandsWithinMaterialGroupByMVPMatrixBuffer(SortableDrawCommands &unsortedDrawCommands, MaterialGroup &materialGroup);
                 std::vector<MaterialGroup> getMaterialGroups(const SortableDrawCommands &drawCommandsSortedByMaterial, const ShaderGroup &shaderGroup);
+                std::vector<BufferGroup> getBufferGroups(const SortableDrawCommands &drawCommandsSortedByMVPMatrixBuffer, const MaterialGroup &materialGroup);
                 // CombinedRenderDataBuffers getCombinedRenderDataBuffers(SortableDrawCommands &sortedDrawCommands, const std::vector<ShaderGroup> &shaderGroupRanges);
 
             public:

@@ -75,6 +75,10 @@ namespace Flare
 
             for (auto &shaderGroup : shaderGroups) {
                 sortDrawCommandsWithinShaderGroupByMaterial(sortedDrawCommands, shaderGroup);
+
+                for (auto &materialGroup : shaderGroup.materialGroups) {
+                    sortDrawCommandsWithinMaterialGroupByMVPMatrixBuffer(sortedDrawCommands, materialGroup);
+                }
             }
 
             // sortDrawCommandsByMaterial(sortedDrawCommands);
@@ -244,15 +248,18 @@ namespace Flare
             shaderGroup.materialGroups = getMaterialGroups(unsortedDrawCommands, shaderGroup);
         }
 
-        void IndirectRenderedSceneGraph::sortDrawCommandRangeByMVPMatrixBuffer(SortableDrawCommands::iterator begin, SortableDrawCommands::iterator end)
+        void IndirectRenderedSceneGraph::sortDrawCommandsWithinMaterialGroupByMVPMatrixBuffer(SortableDrawCommands &unsortedDrawCommands, MaterialGroup &materialGroup)
         {
             std::sort(
-                begin,
-                end,
+                unsortedDrawCommands.begin() + materialGroup.firstIndex,
+                unsortedDrawCommands.begin() + materialGroup.lastIndex + 1,
                 [](const auto &command1, const auto &command2){
-                    return command1.meshData.mvpMatrixBuffer->getName() == command2.meshData.mvpMatrixBuffer->getName();
+                    // return command1.meshData.mvpMatrixBuffer->getName() == command2.meshData.mvpMatrixBuffer->getName();
+                    return command1.meshData.mvpMatrixBuffer == command2.meshData.mvpMatrixBuffer;
                 }
             );
+
+            materialGroup.bufferGroups = getBufferGroups(unsortedDrawCommands, materialGroup);
         }
 
         std::vector<IndirectRenderedSceneGraph::MaterialGroup> IndirectRenderedSceneGraph::getMaterialGroups(const SortableDrawCommands &drawCommandsSortedByMaterial, const ShaderGroup &shaderGroup)
@@ -263,7 +270,7 @@ namespace Flare
             auto numDrawCommandsInShaderGroup = (shaderGroup.lastIndex - shaderGroup.firstIndex) + 1;
 
             if (numDrawCommandsInShaderGroup == 1) {
-                materialGroups.push_back(MaterialGroup{shaderGroup.firstIndex, shaderGroup.firstIndex});
+                materialGroups.push_back(MaterialGroup{shaderGroup.firstIndex, shaderGroup.firstIndex, std::vector<BufferGroup>{}});
                 return materialGroups;
             }
 
@@ -272,21 +279,59 @@ namespace Flare
                 const auto &currentDrawCommand = drawCommandsSortedByMaterial[i];
                 auto isLastIteration = i == shaderGroup.lastIndex;
 
-                if ((currentDrawCommand.shaderData.hashedAlias != startOfRangeDrawCommand.shaderData.hashedAlias)
-                    || (getMaterialId(currentDrawCommand.textures) != getMaterialId(startOfRangeDrawCommand.textures))
-                    || isLastIteration) {
+                auto drawCommandsAreInSameMaterialGroup = (currentDrawCommand.shaderData.hashedAlias == startOfRangeDrawCommand.shaderData.hashedAlias)
+                    && (getMaterialId(currentDrawCommand.textures) == getMaterialId(startOfRangeDrawCommand.textures));
 
-                    if (isLastIteration) {
-                        materialGroups.push_back(MaterialGroup{lastMaterialGroupIndexStart, i});
-                    } else {
-                        materialGroups.push_back(MaterialGroup{lastMaterialGroupIndexStart, i - 1});
+                if (isLastIteration) {
+                    if (drawCommandsAreInSameMaterialGroup) {
+                        materialGroups.push_back(MaterialGroup{lastMaterialGroupIndexStart, i, std::vector<BufferGroup>{}});
+                        continue;
                     }
 
+                    materialGroups.push_back(MaterialGroup{lastMaterialGroupIndexStart, i - 1, std::vector<BufferGroup>{}});
+                    materialGroups.push_back(MaterialGroup{i, i, std::vector<BufferGroup>{}});
+                } else if (!drawCommandsAreInSameMaterialGroup) {
+                    materialGroups.push_back(MaterialGroup{lastMaterialGroupIndexStart, i - 1, std::vector<BufferGroup>{}});
                     lastMaterialGroupIndexStart = i;
                 }
             }
 
             return materialGroups;
+        }
+
+        std::vector<IndirectRenderedSceneGraph::BufferGroup> IndirectRenderedSceneGraph::getBufferGroups(const SortableDrawCommands &drawCommandsSortedByMVPMatrixBuffer, const MaterialGroup &materialGroup)
+        {
+            auto lastBufferGroupIndexStart = materialGroup.firstIndex;
+            auto bufferGroups = std::vector<BufferGroup>{};
+            auto numDrawCommandsInMaterialGroup = (materialGroup.lastIndex - materialGroup.firstIndex) + 1;
+
+            if (numDrawCommandsInMaterialGroup == 1) {
+                bufferGroups.push_back(BufferGroup{materialGroup.firstIndex, materialGroup.firstIndex});
+                return bufferGroups;
+            }
+
+            for (size_t i = materialGroup.firstIndex; i <= materialGroup.lastIndex; ++i) {
+                const auto &startOfRangeDrawCommand = drawCommandsSortedByMVPMatrixBuffer[lastBufferGroupIndexStart];
+                const auto &currentDrawCommand = drawCommandsSortedByMVPMatrixBuffer[i];
+                auto isLastIteration = i == materialGroup.lastIndex;
+
+                auto drawCommandsAreInSameBufferGroup = currentDrawCommand.meshData.mvpMatrixBuffer == startOfRangeDrawCommand.meshData.mvpMatrixBuffer;
+
+                if (isLastIteration) {
+                    if (drawCommandsAreInSameBufferGroup) {
+                        bufferGroups.push_back(BufferGroup{lastBufferGroupIndexStart, i});
+                        continue;
+                    }
+
+                    bufferGroups.push_back(BufferGroup{lastBufferGroupIndexStart, i - 1});
+                    bufferGroups.push_back(BufferGroup{i, i});
+                } else if (!drawCommandsAreInSameBufferGroup) {
+                    bufferGroups.push_back(BufferGroup{lastBufferGroupIndexStart, i - 1});
+                    lastBufferGroupIndexStart = i;
+                }
+            }
+
+            return bufferGroups;
         }
 
         // IndirectRenderedSceneGraph::CombinedRenderDataBuffers IndirectRenderedSceneGraph::getCombinedRenderDataBuffers(SortableDrawCommands &sortedDrawCommands, const std::vector<ShaderGroup> &shaderGroupRanges)
