@@ -39,17 +39,19 @@ namespace Flare
                     size_t lastIndex = 0;
                 };
 
-                struct CombinedRenderDataBuffers {
-                    std::unique_ptr<RenderSystem::Buffer> mvpMatrixBuffer;
-                    std::unique_ptr<RenderSystem::Buffer> vertexBuffer;
-                    std::unique_ptr<RenderSystem::Buffer> elementBuffer;
+                struct ShaderGroupRenderDataBuffers {
+                    RenderSystem::ResizableBuffer mvpMatrixBuffer;
+                    RenderSystem::ResizableBuffer vertexBuffer;
+                    RenderSystem::ResizableBuffer elementBuffer;
+                    bool buffersHaveBeenInitialized = false;
                 };
 
+                ShaderGroupRenderDataBuffers shaderGroupRenderDataBuffers;
                 RenderSystem::ResizableBuffer indirectRenderCommandsBuffer;
                 std::unique_ptr<Node> rootNode;
                 size_t nextNameToAssign = 0;
 
-                size_t getMaterialId(const MaterialTextures &textures);
+                size_t getMaterialId(const MaterialTextures &textures) const;
                 void bindMaterialTextures(RenderSystem::ShaderProgram &shader, const MaterialTextures &textures);
                 std::vector<ShaderGroup> sortDrawCommandsByShader(SortableDrawCommands &unsortedDrawCommands);
 
@@ -57,7 +59,9 @@ namespace Flare
                 void sortDrawCommandsWithinMaterialGroupByMVPMatrixBuffer(SortableDrawCommands &unsortedDrawCommands, MaterialGroup &materialGroup);
                 std::vector<MaterialGroup> getMaterialGroups(const SortableDrawCommands &drawCommandsSortedByMaterial, const ShaderGroup &shaderGroup);
                 std::vector<BufferGroup> getBufferGroups(const SortableDrawCommands &drawCommandsSortedByMVPMatrixBuffer, const MaterialGroup &materialGroup);
-                // CombinedRenderDataBuffers getCombinedRenderDataBuffers(SortableDrawCommands &sortedDrawCommands, const std::vector<ShaderGroup> &shaderGroupRanges);
+                void initializeShaderGroupRenderDataBuffers(const RenderSystem::VertexDataLayout &mvpMatrixBufferLayout, const RenderSystem::VertexDataLayout &vertexBufferLayout, const RenderSystem::VertexDataLayout &elementBufferLayout);
+                void fillShaderGroupRenderDataBuffers(SortableDrawCommands &sortedDrawCommands, const ShaderGroup &shaderGroup);
+                void fillIndirectRenderCommandsBuffer(const SortableDrawCommands &sortedDrawCommands, const ShaderGroup &shaderGroup);
 
             public:
                 IndirectRenderedSceneGraph();

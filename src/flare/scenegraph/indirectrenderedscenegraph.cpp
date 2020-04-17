@@ -14,7 +14,7 @@ namespace Flare
         IndirectRenderedSceneGraph::IndirectRenderedSceneGraph()
         {
             rootNode = std::unique_ptr<Node>(new Node(*this, requestName(), nullptr));
-            auto commandBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+            auto commandBufferLayout = RenderSystem::VertexDataLayoutBuilder()
                 .addAttribute("count", 1, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, 0)
                 .addAttribute("instanceCount", 1, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(RenderSystem::RSuint))
                 .addAttribute("firstIndex", 1, RenderSystem::RS_FLOAT, RenderSystem::RS_FALSE, sizeof(RenderSystem::RSuint) * 2)
@@ -81,65 +81,35 @@ namespace Flare
                 }
             }
 
-            // sortDrawCommandsByMaterial(sortedDrawCommands);
-            // auto drawCommandGroups = getMaterialGroups(sortedDrawCommands);
-            // auto commandGroupQueue = std::queue<CommandGroupRange>(std::deque<CommandGroupRange>(commandGroupRanges.begin(), commandGroupRanges.end()));
+            for (const auto &shaderGroup : shaderGroups) {
+                fillShaderGroupRenderDataBuffers(sortedDrawCommands, shaderGroup);
+                fillIndirectRenderCommandsBuffer(sortedDrawCommands, shaderGroup);
 
-            // // Sort each group of related render commands so that each command that shares a set of buffers is adjacent
-            // for (size_t currentRange = 0; currentRange < drawCommandGroups.size(); ++currentRange) {
-            //     const auto &range = drawCommandGroups[currentRange];
-            //
-            //     sortDrawCommandRangeByMVPMatrixBuffer(sortedDrawCommands.begin() + range.first, sortedDrawCommands.begin() + range.second + 1);
-            // }
+                //bind the shader associated with the shader group
+                const auto &shaderDataForGroup = sortedDrawCommands[shaderGroup.firstIndex].shaderData;
+                shaderDataForGroup.shader->bind();
+                shaderDataForGroup.vertexArray->bind();
 
-            // auto combinedRenderDataBuffers = getCombinedRenderDataBuffers(sortedDrawCommands, commandGroupRanges);
-            //
-            // //Guarantee the indirect commands GPU buffer is at least large enough to fit the current command set
-            // if (indirectRenderCommandsBuffer.get()->getSizeInElements() < sortedDrawCommands.size()) {
-            //     indirectRenderCommandsBuffer.resizeElements(indirectRenderCommandsBuffer.get()->getSizeInElements() * 2);
-            // }
-            //
-            // //Fill indirect render commands GPU buffer
-            // auto indirectRenderCommands = std::vector<RenderSystem::DrawElementsIndirectCommand>{};
-            // indirectRenderCommands.reserve(sortedDrawCommands.size());
-            // for (const auto &drawCommand : sortedDrawCommands) {
-            //     indirectRenderCommands.push_back(drawCommand.drawElementsIndirectCommand);
-            // }
-            // indirectRenderCommandsBuffer.get()->bufferRange(
-            //     0,
-            //     indirectRenderCommands.size() * sizeof(RenderSystem::DrawElementsIndirectCommand),
-            //     indirectRenderCommands.data()
-            // );
-            // indirectRenderCommandsBuffer.get()->bind(RenderSystem::RS_DRAW_INDIRECT_BUFFER);
-            //
-            // //Submit the indirect render commands
-            // while (!commandGroupQueue.empty()) {
-            //     const auto &drawCommandGroup = commandGroupQueue.front();
-            //     const auto &firstDrawCommandInGroup = sortedDrawCommands[drawCommandGroup.first];
-            //
-            //     //Bind shader & material for draw command group
-            //     firstDrawCommandInGroup.shaderData.shader->bind();
-            //     firstDrawCommandInGroup.shaderData.vertexArray->bind();
-            //     bindMaterialTextures(*firstDrawCommandInGroup.shaderData.shader, firstDrawCommandInGroup.textures);
-            //
-            //     combinedRenderDataBuffers.elementBuffer->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
-            //     firstDrawCommandInGroup.shaderData.vertexArray->linkBuffers(
-            //         std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{
-            //             *combinedRenderDataBuffers.vertexBuffer,
-            //             *combinedRenderDataBuffers.mvpMatrixBuffer
-            //         }
-            //     );
-            //
-            //     glMultiDrawElementsIndirect(
-            //         RenderSystem::RS_TRIANGLES,
-            //         RenderSystem::RS_UNSIGNED_INT,
-            //         reinterpret_cast<void *>(drawCommandGroup.first * sizeof(RenderSystem::DrawElementsIndirectCommand)),
-            //         (drawCommandGroup.second - drawCommandGroup.first) + 1,//number of draw commands in the group
-            //         0
-            //     );
-            //
-            //     commandGroupQueue.pop();
-            // }
+                for (const auto &materialGroup : shaderGroup.materialGroups) {
+                    bindMaterialTextures(*shaderDataForGroup.shader, sortedDrawCommands[materialGroup.firstIndex].textures);
+
+                    shaderGroupRenderDataBuffers.elementBuffer.get()->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
+                    shaderDataForGroup.vertexArray->linkBuffers(
+                        std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{
+                            *shaderGroupRenderDataBuffers.vertexBuffer.get(),
+                            *shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()
+                        }
+                    );
+
+                    glMultiDrawElementsIndirect(
+                        RenderSystem::RS_TRIANGLES,
+                        RenderSystem::RS_UNSIGNED_INT,
+                        reinterpret_cast<void *>(materialGroup.firstIndex * sizeof(RenderSystem::DrawElementsIndirectCommand)),
+                        (materialGroup.lastIndex - materialGroup.firstIndex) + 1,
+                        0
+                    );
+                }
+            }
         }
 
         size_t IndirectRenderedSceneGraph::requestName()
@@ -147,7 +117,7 @@ namespace Flare
             return nextNameToAssign++;
         }
 
-        size_t IndirectRenderedSceneGraph::getMaterialId(const MaterialTextures &textures)
+        size_t IndirectRenderedSceneGraph::getMaterialId(const MaterialTextures &textures) const
         {
             if (std::holds_alternative<RenderSystem::PhongMaterialTextures>(textures)) {
                 return std::get<RenderSystem::PhongMaterialTextures>(textures).materialId;
@@ -334,120 +304,184 @@ namespace Flare
             return bufferGroups;
         }
 
-        // IndirectRenderedSceneGraph::CombinedRenderDataBuffers IndirectRenderedSceneGraph::getCombinedRenderDataBuffers(SortableDrawCommands &sortedDrawCommands, const std::vector<ShaderGroup> &shaderGroupRanges)
-        // {
-        //     auto combinedBuffers = CombinedRenderDataBuffers{};
-        //     combinedBuffers.mvpMatrixBuffer = RenderSystem::createBuffer("mvpMatrix", sortedDrawCommands[0].meshData.mvpMatrixBuffer->getContentDescription());
-        //     combinedBuffers.vertexBuffer = RenderSystem::createBuffer("vertexBuffer", sortedDrawCommands[0].meshData.vertexBuffer->getContentDescription());
-        //     combinedBuffers.elementBuffer = RenderSystem::createBuffer("elementBuffer", sortedDrawCommands[0].meshData.elementBuffer->getContentDescription());
-        //
-        //     //calc required size for each buffer, then allocate storage
-        //     auto combinedMVPMatrixBufferSize = size_t{0};
-        //     auto combinedVertexBufferSize = size_t{0};
-        //     auto combinedElementBufferSize = size_t{0};
-        //
-        //     {
-        //         auto mvpMatrixBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
-        //         auto vertexBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
-        //         auto elementBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
-        //
-        //         for (const auto &drawCommand : sortedDrawCommands) {
-        //             auto hasCountedThisMVPMatrixBuffer = mvpMatrixBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer) != mvpMatrixBuffersEncountered.end();
-        //             auto hasCountedThisVertexBuffer = vertexBuffersEncountered.find(drawCommand.meshData.vertexBuffer) != vertexBuffersEncountered.end();
-        //             auto hasCountedThisElementBuffer = elementBuffersEncountered.find(drawCommand.meshData.elementBuffer) != elementBuffersEncountered.end();
-        //
-        //             if (!hasCountedThisMVPMatrixBuffer) {
-        //                 combinedMVPMatrixBufferSize += drawCommand.meshData.mvpMatrixBuffer->getSizeInBytes();
-        //                 mvpMatrixBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
-        //             }
-        //
-        //             if (!hasCountedThisVertexBuffer) {
-        //                 combinedVertexBufferSize += drawCommand.meshData.vertexBuffer->getSizeInBytes();
-        //                 vertexBuffersEncountered.insert(drawCommand.meshData.vertexBuffer);
-        //             }
-        //
-        //             if (!hasCountedThisElementBuffer) {
-        //                 combinedElementBufferSize += drawCommand.meshData.elementBuffer->getSizeInBytes();
-        //                 elementBuffersEncountered.insert(drawCommand.meshData.elementBuffer);
-        //             }
-        //         }
-        //     }
-        //
-        //     combinedBuffers.mvpMatrixBuffer->allocateBufferStorage(combinedMVPMatrixBufferSize, nullptr, 0);
-        //     combinedBuffers.vertexBuffer->allocateBufferStorage(combinedVertexBufferSize, nullptr, 0);
-        //     combinedBuffers.elementBuffer->allocateBufferStorage(combinedElementBufferSize, nullptr, 0);
-        //
-        //     //copy separated buffers into combined buffers, and update DrawElementsIndirectCommand(s) to point to the
-        //     //correct offsets within the new buffers
-        //     auto mvpMatrixBufferBytesCopiedSoFar = size_t{0};
-        //     auto vertexBufferBytesCopiedSoFar = size_t{0};
-        //     auto elementBufferBytesCopiedSoFar = size_t{0};
-        //
-        //     auto baseVertexWithinNewBuffer = size_t{0};
-        //     auto firstIndexWithinNewBuffer = size_t{0};
-        //
-        //     auto mvpMatrixBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
-        //     auto vertexBufferToBaseVertex = std::unordered_map<const RenderSystem::Buffer *, size_t>{};
-        //     auto elementBufferToFirstIndex = std::unordered_map<const RenderSystem::Buffer *, size_t>{};
-        //
-        //     for (size_t currentRange = 0; currentRange < commandGroupRanges.size(); ++currentRange) {
-        //         const auto &commandGroupRange = commandGroupRanges[currentRange];
-        //
-        //         for (size_t drawCommandIndex = commandGroupRange.first; drawCommandIndex < commandGroupRange.second + 1; ++drawCommandIndex) {
-        //             auto &drawCommand = sortedDrawCommands[drawCommandIndex];
-        //
-        //             const auto &sourceMVPMatrixBuffer = *drawCommand.meshData.mvpMatrixBuffer;
-        //             const auto &sourceVertexBuffer = *drawCommand.meshData.vertexBuffer;
-        //             const auto &sourceElementBuffer = *drawCommand.meshData.elementBuffer;
-        //
-        //             auto mvpMatrixBufferSearchIterator = mvpMatrixBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer);
-        //             auto vertexBufferSearchIterator = vertexBufferToBaseVertex.find(drawCommand.meshData.vertexBuffer);
-        //             auto elementBufferSearchIterator = elementBufferToFirstIndex.find(drawCommand.meshData.elementBuffer);
-        //
-        //             auto hasNotCopiedThisMVPMatrixBuffer = mvpMatrixBufferSearchIterator == mvpMatrixBuffersEncountered.end();
-        //             auto hasNotCopiedThisVertexBuffer = vertexBufferSearchIterator == vertexBufferToBaseVertex.end();
-        //             auto hasNotCopiedThisElementBuffer = elementBufferSearchIterator == elementBufferToFirstIndex.end();
-        //
-        //             if (hasNotCopiedThisMVPMatrixBuffer) {
-        //                 mvpMatrixBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
-        //                 combinedBuffers.mvpMatrixBuffer->copyRange(sourceMVPMatrixBuffer, 0, mvpMatrixBufferBytesCopiedSoFar, sourceMVPMatrixBuffer.getSizeInBytes());
-        //
-        //                 drawCommand.drawElementsIndirectCommand.baseInstance = mvpMatrixBufferBytesCopiedSoFar / sizeof(glm::mat4);
-        //
-        //                 mvpMatrixBufferBytesCopiedSoFar += sourceMVPMatrixBuffer.getSizeInBytes();
-        //             } else {
-        //                 auto relativeBaseInstance = drawCommand.drawElementsIndirectCommand.baseInstance;
-        //                 auto offsetWithinCombinedBuffer = mvpMatrixBufferBytesCopiedSoFar - sourceMVPMatrixBuffer.getSizeInBytes();
-        //                 drawCommand.drawElementsIndirectCommand.baseInstance = relativeBaseInstance + offsetWithinCombinedBuffer / sizeof(glm::mat4);
-        //             }
-        //
-        //             if (hasNotCopiedThisVertexBuffer) {
-        //                 vertexBufferToBaseVertex.insert_or_assign(drawCommand.meshData.vertexBuffer, baseVertexWithinNewBuffer);
-        //                 combinedBuffers.vertexBuffer->copyRange(sourceVertexBuffer, 0, vertexBufferBytesCopiedSoFar, sourceVertexBuffer.getSizeInBytes());
-        //                 drawCommand.drawElementsIndirectCommand.baseVertex = baseVertexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.baseVertex;
-        //
-        //                 vertexBufferBytesCopiedSoFar += sourceVertexBuffer.getSizeInBytes();
-        //                 baseVertexWithinNewBuffer += sourceVertexBuffer.getSizeInElements();
-        //             } else {
-        //                 auto meshStartWithinCombinedBuffer = vertexBufferSearchIterator->second;
-        //                 drawCommand.drawElementsIndirectCommand.baseVertex = meshStartWithinCombinedBuffer + drawCommand.drawElementsIndirectCommand.baseVertex;
-        //             }
-        //
-        //             if (hasNotCopiedThisElementBuffer) {
-        //                 elementBufferToFirstIndex.insert_or_assign(drawCommand.meshData.elementBuffer, firstIndexWithinNewBuffer);
-        //                 combinedBuffers.elementBuffer->copyRange(sourceElementBuffer, 0, elementBufferBytesCopiedSoFar, sourceElementBuffer.getSizeInBytes());
-        //                 drawCommand.drawElementsIndirectCommand.firstIndex = firstIndexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
-        //
-        //                 elementBufferBytesCopiedSoFar += sourceElementBuffer.getSizeInBytes();
-        //                 firstIndexWithinNewBuffer += sourceElementBuffer.getSizeInElements();
-        //             } else {
-        //                 auto indicesStartWithinCombinedBuffer = elementBufferSearchIterator->second;
-        //                 drawCommand.drawElementsIndirectCommand.firstIndex = indicesStartWithinCombinedBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
-        //             }
-        //         }
-        //     }
-        //
-        //     return combinedBuffers;
-        // }
+        void IndirectRenderedSceneGraph::initializeShaderGroupRenderDataBuffers(const RenderSystem::VertexDataLayout &mvpMatrixBufferLayout, const RenderSystem::VertexDataLayout &vertexBufferLayout, const RenderSystem::VertexDataLayout &elementBufferLayout)
+        {
+            shaderGroupRenderDataBuffers.mvpMatrixBuffer.create("mvpMatrix", mvpMatrixBufferLayout);
+            shaderGroupRenderDataBuffers.vertexBuffer.create("vertexBuffer", vertexBufferLayout);
+            shaderGroupRenderDataBuffers.elementBuffer.create("elementBuffer", elementBufferLayout);
+
+            shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()->allocateBufferStorage(
+                32 * sizeof(glm::mat4),
+                nullptr,
+                RenderSystem::RSbitfield{} | RenderSystem::RS_DYNAMIC_STORAGE_BIT
+            );
+            shaderGroupRenderDataBuffers.vertexBuffer.get()->allocateBufferStorage(
+                32 * sizeof(DataTypes::Vertex),
+                nullptr,
+                RenderSystem::RSbitfield{} | RenderSystem::RS_DYNAMIC_STORAGE_BIT
+            );
+            shaderGroupRenderDataBuffers.elementBuffer.get()->allocateBufferStorage(
+                32 * sizeof(unsigned int),
+                nullptr,
+                RenderSystem::RSbitfield{} | RenderSystem::RS_DYNAMIC_STORAGE_BIT
+            );
+            
+            shaderGroupRenderDataBuffers.buffersHaveBeenInitialized = true;
+        }
+
+        void IndirectRenderedSceneGraph::fillShaderGroupRenderDataBuffers(SortableDrawCommands &sortedDrawCommands, const ShaderGroup &shaderGroup)
+        {
+            auto calcRequiredBufferSizes = [](const auto &drawCommands){
+                auto combinedMVPMatrixBufferSize = size_t{0};
+                auto combinedVertexBufferSize = size_t{0};
+                auto combinedElementBufferSize = size_t{0};
+                auto mvpMatrixBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+                auto vertexBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+                auto elementBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+
+                for (const auto &drawCommand : drawCommands) {
+                    auto hasCountedThisMVPMatrixBuffer = mvpMatrixBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer) != mvpMatrixBuffersEncountered.end();
+                    auto hasCountedThisVertexBuffer = vertexBuffersEncountered.find(drawCommand.meshData.vertexBuffer) != vertexBuffersEncountered.end();
+                    auto hasCountedThisElementBuffer = elementBuffersEncountered.find(drawCommand.meshData.elementBuffer) != elementBuffersEncountered.end();
+
+                    if (!hasCountedThisMVPMatrixBuffer) {
+                        combinedMVPMatrixBufferSize += drawCommand.meshData.mvpMatrixBuffer->getSizeInBytes();
+                        mvpMatrixBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
+                    }
+
+                    if (!hasCountedThisVertexBuffer) {
+                        combinedVertexBufferSize += drawCommand.meshData.vertexBuffer->getSizeInBytes();
+                        vertexBuffersEncountered.insert(drawCommand.meshData.vertexBuffer);
+                    }
+
+                    if (!hasCountedThisElementBuffer) {
+                        combinedElementBufferSize += drawCommand.meshData.elementBuffer->getSizeInBytes();
+                        elementBuffersEncountered.insert(drawCommand.meshData.elementBuffer);
+                    }
+                }
+
+                return std::make_tuple(combinedMVPMatrixBufferSize, combinedVertexBufferSize, combinedElementBufferSize);
+            };
+
+            auto resizeBuffersIfRequired = [this](auto mvpMatrixBufferSize, auto vertexBufferSize, auto elementBufferSize){
+                if (shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()->getSizeInBytes() < mvpMatrixBufferSize) {
+                    shaderGroupRenderDataBuffers.mvpMatrixBuffer.resizeBytes(mvpMatrixBufferSize);
+                }
+
+                if (shaderGroupRenderDataBuffers.vertexBuffer.get()->getSizeInBytes() < vertexBufferSize) {
+                    shaderGroupRenderDataBuffers.vertexBuffer.resizeBytes(vertexBufferSize);
+                }
+
+                if (shaderGroupRenderDataBuffers.elementBuffer.get()->getSizeInBytes() < elementBufferSize) {
+                    shaderGroupRenderDataBuffers.elementBuffer.resizeBytes(elementBufferSize);
+                }
+            };
+
+            if (sortedDrawCommands.size() == 0) {
+                return;
+            }
+
+            if (!shaderGroupRenderDataBuffers.buffersHaveBeenInitialized) {
+                initializeShaderGroupRenderDataBuffers(
+                    sortedDrawCommands[0].meshData.mvpMatrixBuffer->getContentDescription(),
+                    sortedDrawCommands[0].meshData.vertexBuffer->getContentDescription(),
+                    sortedDrawCommands[0].meshData.elementBuffer->getContentDescription()
+                );
+            }
+
+            const auto [mvpMatrixBufferSize, vertexBufferSize, elementBufferSize] = calcRequiredBufferSizes(sortedDrawCommands);
+            resizeBuffersIfRequired(mvpMatrixBufferSize, vertexBufferSize, elementBufferSize);
+
+            //copy separated buffers into combined buffers, and update DrawElementsIndirectCommand(s) to point to the
+            //correct offsets within the new buffers
+            auto mvpMatrixBufferBytesCopiedSoFar = size_t{0};
+            auto vertexBufferBytesCopiedSoFar = size_t{0};
+            auto elementBufferBytesCopiedSoFar = size_t{0};
+
+            auto baseVertexWithinNewBuffer = size_t{0};
+            auto firstIndexWithinNewBuffer = size_t{0};
+
+            auto mvpMatrixBuffersEncountered = std::unordered_set<const RenderSystem::Buffer *>{};
+            auto vertexBufferToBaseVertex = std::unordered_map<const RenderSystem::Buffer *, size_t>{};
+            auto elementBufferToFirstIndex = std::unordered_map<const RenderSystem::Buffer *, size_t>{};
+
+            for (size_t drawCommandIndex = shaderGroup.firstIndex; drawCommandIndex <= shaderGroup.lastIndex; ++drawCommandIndex) {
+                auto &drawCommand = sortedDrawCommands[drawCommandIndex];
+
+                const auto &sourceMVPMatrixBuffer = *drawCommand.meshData.mvpMatrixBuffer;
+                const auto &sourceVertexBuffer = *drawCommand.meshData.vertexBuffer;
+                const auto &sourceElementBuffer = *drawCommand.meshData.elementBuffer;
+
+                auto mvpMatrixBufferSearchIterator = mvpMatrixBuffersEncountered.find(drawCommand.meshData.mvpMatrixBuffer);
+                auto vertexBufferSearchIterator = vertexBufferToBaseVertex.find(drawCommand.meshData.vertexBuffer);
+                auto elementBufferSearchIterator = elementBufferToFirstIndex.find(drawCommand.meshData.elementBuffer);
+
+                auto hasNotCopiedThisMVPMatrixBuffer = mvpMatrixBufferSearchIterator == mvpMatrixBuffersEncountered.end();
+                auto hasNotCopiedThisVertexBuffer = vertexBufferSearchIterator == vertexBufferToBaseVertex.end();
+                auto hasNotCopiedThisElementBuffer = elementBufferSearchIterator == elementBufferToFirstIndex.end();
+
+                if (hasNotCopiedThisMVPMatrixBuffer) {
+                    mvpMatrixBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
+                    shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()->copyRange(sourceMVPMatrixBuffer, 0, mvpMatrixBufferBytesCopiedSoFar, sourceMVPMatrixBuffer.getSizeInBytes());
+
+                    drawCommand.drawElementsIndirectCommand.baseInstance = mvpMatrixBufferBytesCopiedSoFar / sizeof(glm::mat4);
+
+                    mvpMatrixBufferBytesCopiedSoFar += sourceMVPMatrixBuffer.getSizeInBytes();
+                } else {
+                    auto relativeBaseInstance = drawCommand.drawElementsIndirectCommand.baseInstance;
+                    auto offsetWithinCombinedBuffer = mvpMatrixBufferBytesCopiedSoFar - sourceMVPMatrixBuffer.getSizeInBytes();
+                    drawCommand.drawElementsIndirectCommand.baseInstance = relativeBaseInstance + offsetWithinCombinedBuffer / sizeof(glm::mat4);
+                }
+
+                if (hasNotCopiedThisVertexBuffer) {
+                    vertexBufferToBaseVertex.insert_or_assign(drawCommand.meshData.vertexBuffer, baseVertexWithinNewBuffer);
+                    shaderGroupRenderDataBuffers.vertexBuffer.get()->copyRange(sourceVertexBuffer, 0, vertexBufferBytesCopiedSoFar, sourceVertexBuffer.getSizeInBytes());
+                    drawCommand.drawElementsIndirectCommand.baseVertex = baseVertexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.baseVertex;
+
+                    vertexBufferBytesCopiedSoFar += sourceVertexBuffer.getSizeInBytes();
+                    baseVertexWithinNewBuffer += sourceVertexBuffer.getSizeInElements();
+                } else {
+                    auto meshStartWithinCombinedBuffer = vertexBufferSearchIterator->second;
+                    drawCommand.drawElementsIndirectCommand.baseVertex = meshStartWithinCombinedBuffer + drawCommand.drawElementsIndirectCommand.baseVertex;
+                }
+
+                if (hasNotCopiedThisElementBuffer) {
+                    elementBufferToFirstIndex.insert_or_assign(drawCommand.meshData.elementBuffer, firstIndexWithinNewBuffer);
+                    shaderGroupRenderDataBuffers.elementBuffer.get()->copyRange(sourceElementBuffer, 0, elementBufferBytesCopiedSoFar, sourceElementBuffer.getSizeInBytes());
+                    drawCommand.drawElementsIndirectCommand.firstIndex = firstIndexWithinNewBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
+
+                    elementBufferBytesCopiedSoFar += sourceElementBuffer.getSizeInBytes();
+                    firstIndexWithinNewBuffer += sourceElementBuffer.getSizeInElements();
+                } else {
+                    auto indicesStartWithinCombinedBuffer = elementBufferSearchIterator->second;
+                    drawCommand.drawElementsIndirectCommand.firstIndex = indicesStartWithinCombinedBuffer + drawCommand.drawElementsIndirectCommand.firstIndex;
+                }
+            }
+        }
+
+        void IndirectRenderedSceneGraph::fillIndirectRenderCommandsBuffer(const SortableDrawCommands &sortedDrawCommands, const ShaderGroup &shaderGroup)
+        {
+            auto numDrawCommandsInShaderGroup = (shaderGroup.lastIndex - shaderGroup.firstIndex) + 1;
+
+            //Guarantee the indirect commands GPU buffer is at least large enough to fit the current command set
+            if (indirectRenderCommandsBuffer.get()->getSizeInElements() < numDrawCommandsInShaderGroup) {
+                indirectRenderCommandsBuffer.resizeElements(indirectRenderCommandsBuffer.get()->getSizeInElements() * 2);
+            }
+
+            //Fill indirect render commands GPU buffer
+            auto indirectRenderCommands = std::vector<RenderSystem::DrawElementsIndirectCommand>{};
+            indirectRenderCommands.reserve(numDrawCommandsInShaderGroup);
+
+            for (size_t i = shaderGroup.firstIndex; i <= shaderGroup.lastIndex; ++i) {
+                indirectRenderCommands.push_back(sortedDrawCommands[i].drawElementsIndirectCommand);
+            }
+
+            indirectRenderCommandsBuffer.get()->bufferRange(
+                0,
+                indirectRenderCommands.size() * sizeof(RenderSystem::DrawElementsIndirectCommand),
+                indirectRenderCommands.data()
+            );
+            indirectRenderCommandsBuffer.get()->bind(RenderSystem::RS_DRAW_INDIRECT_BUFFER);
+        }
     }
 }
