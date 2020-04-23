@@ -85,7 +85,6 @@ namespace Flare
                 fillShaderGroupRenderDataBuffers(sortedDrawCommands, shaderGroup);
                 fillIndirectRenderCommandsBuffer(sortedDrawCommands, shaderGroup);
 
-                //bind the shader associated with the shader group
                 const auto &shaderDataForGroup = sortedDrawCommands[shaderGroup.firstIndex].shaderData;
                 shaderDataForGroup.shader->bind();
                 shaderDataForGroup.vertexArray->bind();
@@ -104,7 +103,7 @@ namespace Flare
                     glMultiDrawElementsIndirect(
                         RenderSystem::RS_TRIANGLES,
                         RenderSystem::RS_UNSIGNED_INT,
-                        reinterpret_cast<void *>(materialGroup.firstIndex * sizeof(RenderSystem::DrawElementsIndirectCommand)),
+                        0,
                         (materialGroup.lastIndex - materialGroup.firstIndex) + 1,
                         0
                     );
@@ -224,7 +223,6 @@ namespace Flare
                 unsortedDrawCommands.begin() + materialGroup.firstIndex,
                 unsortedDrawCommands.begin() + materialGroup.lastIndex + 1,
                 [](const auto &command1, const auto &command2){
-                    // return command1.meshData.mvpMatrixBuffer->getName() == command2.meshData.mvpMatrixBuffer->getName();
                     return command1.meshData.mvpMatrixBuffer == command2.meshData.mvpMatrixBuffer;
                 }
             );
@@ -424,7 +422,8 @@ namespace Flare
                     mvpMatrixBuffersEncountered.insert(drawCommand.meshData.mvpMatrixBuffer);
                     shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()->copyRange(sourceMVPMatrixBuffer, 0, mvpMatrixBufferBytesCopiedSoFar, sourceMVPMatrixBuffer.getSizeInBytes());
 
-                    drawCommand.drawElementsIndirectCommand.baseInstance = mvpMatrixBufferBytesCopiedSoFar / sizeof(glm::mat4);
+                    auto relativeBaseInstance = drawCommand.drawElementsIndirectCommand.baseInstance;
+                    drawCommand.drawElementsIndirectCommand.baseInstance = relativeBaseInstance + mvpMatrixBufferBytesCopiedSoFar / sizeof(glm::mat4);
 
                     mvpMatrixBufferBytesCopiedSoFar += sourceMVPMatrixBuffer.getSizeInBytes();
                 } else {
