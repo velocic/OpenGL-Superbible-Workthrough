@@ -89,16 +89,16 @@ namespace Flare
                 shaderDataForGroup.shader->bind();
                 shaderDataForGroup.vertexArray->bind();
 
+                shaderGroupRenderDataBuffers.elementBuffer.get()->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
+                shaderDataForGroup.vertexArray->linkBuffers(
+                    std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{
+                        *shaderGroupRenderDataBuffers.vertexBuffer.get(),
+                        *shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()
+                    }
+                );
+
                 for (const auto &materialGroup : shaderGroup.materialGroups) {
                     bindMaterialTextures(*shaderDataForGroup.shader, sortedDrawCommands[materialGroup.firstIndex].textures);
-
-                    shaderGroupRenderDataBuffers.elementBuffer.get()->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
-                    shaderDataForGroup.vertexArray->linkBuffers(
-                        std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{
-                            *shaderGroupRenderDataBuffers.vertexBuffer.get(),
-                            *shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()
-                        }
-                    );
 
                     glMultiDrawElementsIndirect(
                         RenderSystem::RS_TRIANGLES,
