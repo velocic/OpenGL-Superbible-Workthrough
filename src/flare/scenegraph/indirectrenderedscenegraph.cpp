@@ -82,31 +82,13 @@ namespace Flare
             }
 
             for (const auto &shaderGroup : shaderGroups) {
-                fillShaderGroupRenderDataBuffers(sortedDrawCommands, shaderGroup);
-                fillIndirectRenderCommandsBuffer(sortedDrawCommands, shaderGroup);
+                auto hasUserProvidedShaderBuffers = sortedDrawCommands[shaderGroup.firstIndex].meshData.userProvidedShaderBuffers != nullptr &&
+                    sortedDrawCommands[shaderGroup.firstIndex].meshData.userProvidedShaderBuffers->size() != 0;
 
-                const auto &shaderDataForGroup = sortedDrawCommands[shaderGroup.firstIndex].shaderData;
-                shaderDataForGroup.shader->bind();
-                shaderDataForGroup.vertexArray->bind();
-
-                shaderGroupRenderDataBuffers.elementBuffer.get()->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
-                shaderDataForGroup.vertexArray->linkBuffers(
-                    std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{
-                        *shaderGroupRenderDataBuffers.vertexBuffer.get(),
-                        *shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()
-                    }
-                );
-
-                for (const auto &materialGroup : shaderGroup.materialGroups) {
-                    bindMaterialTextures(*shaderDataForGroup.shader, sortedDrawCommands[materialGroup.firstIndex].textures);
-
-                    glMultiDrawElementsIndirect(
-                        RenderSystem::RS_TRIANGLES,
-                        RenderSystem::RS_UNSIGNED_INT,
-                        0,
-                        (materialGroup.lastIndex - materialGroup.firstIndex) + 1,
-                        0
-                    );
+                if (hasUserProvidedShaderBuffers == false) {
+                    combineBuffersAndMultiDrawEachMaterialGroup(sortedDrawCommands, shaderGroup);
+                } else {
+                    linkUserProvidedShaderBuffersAndRenderDrawCommandsIndividually(sortedDrawCommands, shaderGroup);
                 }
             }
         }
@@ -481,6 +463,71 @@ namespace Flare
                 indirectRenderCommands.data()
             );
             indirectRenderCommandsBuffer.get()->bind(RenderSystem::RS_DRAW_INDIRECT_BUFFER);
+        }
+
+        void IndirectRenderedSceneGraph::combineBuffersAndMultiDrawEachMaterialGroup(SortableDrawCommands &sortedDrawCommands, const ShaderGroup &shaderGroup)
+        {
+            fillShaderGroupRenderDataBuffers(sortedDrawCommands, shaderGroup);
+            fillIndirectRenderCommandsBuffer(sortedDrawCommands, shaderGroup);
+
+            const auto &shaderDataForGroup = sortedDrawCommands[shaderGroup.firstIndex].shaderData;
+            shaderDataForGroup.shader->bind();
+            shaderDataForGroup.vertexArray->bind();
+
+            shaderGroupRenderDataBuffers.elementBuffer.get()->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
+            shaderDataForGroup.vertexArray->linkBuffers(
+                std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{
+                    *shaderGroupRenderDataBuffers.vertexBuffer.get(),
+                    *shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()
+                }
+            );
+
+            for (const auto &materialGroup : shaderGroup.materialGroups) {
+                bindMaterialTextures(*shaderDataForGroup.shader, sortedDrawCommands[materialGroup.firstIndex].textures);
+
+                glMultiDrawElementsIndirect(
+                    RenderSystem::RS_TRIANGLES,
+                    RenderSystem::RS_UNSIGNED_INT,
+                    0,
+                    (materialGroup.lastIndex - materialGroup.firstIndex) + 1,
+                    0
+                );
+            }
+        }
+
+        void IndirectRenderedSceneGraph::linkUserProvidedShaderBuffersAndRenderDrawCommandsIndividually(SortableDrawCommands &sortedDrawCommands, const ShaderGroup &shaderGroup)
+        {
+            fillIndirectRenderCommandsBuffer(sortedDrawCommands, shaderGroup);
+
+            const auto &shaderDataForGroup = sortedDrawCommands[shaderGroup.firstIndex].shaderData;
+            shaderDataForGroup.shader->bind();
+            shaderDataForGroup.vertexArray->bind();
+
+            shaderGroupRenderDataBuffers.elementBuffer.get()->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
+
+            for (const auto &materialGroup : shaderGroup.materialGroups) {
+                bindMaterialTextures(*shaderDataForGroup.shader, sortedDrawCommands[materialGroup.firstIndex].textures);
+
+                for (size_t drawCommandIndex = materialGroup.firstIndex; drawCommandIndex <= materialGroup.lastIndex; ++drawCommandIndex) {
+                    auto &userProvidedShaderBuffers = *sortedDrawCommands[drawCommandIndex].meshData.userProvidedShaderBuffers;
+                    auto buffersToLink = std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{
+                        *shaderGroupRenderDataBuffers.vertexBuffer.get(),
+                        *shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()
+                    };
+                    for (const auto buffer : userProvidedShaderBuffers) {
+                        buffersToLink.push_back(*buffer);
+                    }
+                    shaderDataForGroup.vertexArray->linkBuffers(buffersToLink);
+
+                    glMultiDrawElementsIndirect(
+                        RenderSystem::RS_TRIANGLES,
+                        RenderSystem::RS_UNSIGNED_INT,
+                        reinterpret_cast<void *>(drawCommandIndex * sizeof(RenderSystem::DrawElementsIndirectCommand)),
+                        1,
+                        0
+                    );
+                }
+            }
         }
     }
 }

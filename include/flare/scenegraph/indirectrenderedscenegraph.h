@@ -62,6 +62,8 @@ namespace Flare
                 void initializeShaderGroupRenderDataBuffers(const RenderSystem::VertexDataLayout &mvpMatrixBufferLayout, const RenderSystem::VertexDataLayout &vertexBufferLayout, const RenderSystem::VertexDataLayout &elementBufferLayout);
                 void fillShaderGroupRenderDataBuffers(SortableDrawCommands &sortedDrawCommands, const ShaderGroup &shaderGroup);
                 void fillIndirectRenderCommandsBuffer(const SortableDrawCommands &sortedDrawCommands, const ShaderGroup &shaderGroup);
+                void combineBuffersAndMultiDrawEachMaterialGroup(SortableDrawCommands &sortedDrawCommands, const ShaderGroup &shaderGroup);
+                void linkUserProvidedShaderBuffersAndRenderDrawCommandsIndividually(SortableDrawCommands &sortedDrawCommands, const ShaderGroup &shaderGroup);
 
             public:
                 IndirectRenderedSceneGraph();
