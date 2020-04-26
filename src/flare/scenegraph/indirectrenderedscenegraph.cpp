@@ -503,18 +503,20 @@ namespace Flare
             shaderDataForGroup.shader->bind();
             shaderDataForGroup.vertexArray->bind();
 
-            shaderGroupRenderDataBuffers.elementBuffer.get()->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
-
             for (const auto &materialGroup : shaderGroup.materialGroups) {
                 bindMaterialTextures(*shaderDataForGroup.shader, sortedDrawCommands[materialGroup.firstIndex].textures);
 
                 for (size_t drawCommandIndex = materialGroup.firstIndex; drawCommandIndex <= materialGroup.lastIndex; ++drawCommandIndex) {
-                    auto &userProvidedShaderBuffers = *sortedDrawCommands[drawCommandIndex].meshData.userProvidedShaderBuffers;
+                    auto meshDataForCommand = sortedDrawCommands[drawCommandIndex].meshData;
+
+                    meshDataForCommand.elementBuffer->bind(RenderSystem::RS_ELEMENT_ARRAY_BUFFER);
+
                     auto buffersToLink = std::vector<std::reference_wrapper<const RenderSystem::Buffer>>{
-                        *shaderGroupRenderDataBuffers.vertexBuffer.get(),
-                        *shaderGroupRenderDataBuffers.mvpMatrixBuffer.get()
+                        *meshDataForCommand.vertexBuffer,
+                        *meshDataForCommand.mvpMatrixBuffer
                     };
-                    for (const auto buffer : userProvidedShaderBuffers) {
+
+                    for (const auto buffer : *meshDataForCommand.userProvidedShaderBuffers) {
                         buffersToLink.push_back(*buffer);
                     }
                     shaderDataForGroup.vertexArray->linkBuffers(buffersToLink);
@@ -522,7 +524,7 @@ namespace Flare
                     glMultiDrawElementsIndirect(
                         RenderSystem::RS_TRIANGLES,
                         RenderSystem::RS_UNSIGNED_INT,
-                        reinterpret_cast<void *>(drawCommandIndex * sizeof(RenderSystem::DrawElementsIndirectCommand)),
+                        reinterpret_cast<void *>((drawCommandIndex - materialGroup.firstIndex) * sizeof(RenderSystem::DrawElementsIndirectCommand)),
                         1,
                         0
                     );

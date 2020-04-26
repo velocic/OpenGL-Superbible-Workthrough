@@ -396,6 +396,7 @@ namespace Flare
             copyNode->instanceData = instanceData;
             copyNode->model = model;
             copyNode->shaderData = shaderData;
+            copyNode->userProvidedShaderBuffers = userProvidedShaderBuffers;
             copyNode->deepCopyChildrenOfOtherNode(copyNode->children, *this);
             copyNode->copyModelMatrixBufferOfOtherNode(*this);
 
@@ -510,6 +511,7 @@ namespace Flare
                 newNode->instanceData = child->instanceData;
                 newNode->model = child->model;
                 newNode->shaderData = child->shaderData;
+                newNode->userProvidedShaderBuffers = child->userProvidedShaderBuffers;
                 newNode->copyModelMatrixBufferOfOtherNode(*child);
                 destination.push_back(std::move(newNode));
                 deepCopyChildrenOfOtherNode(newNode->children, *child);
