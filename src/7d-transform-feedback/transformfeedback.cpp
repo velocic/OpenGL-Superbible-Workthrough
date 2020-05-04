@@ -6,6 +6,7 @@
 #include <flare/gl/texturemanager.h>
 #include <flare/gl/transformfeedbackbuffermanager.h>
 #include <flare/gl/shaderprogram.h>
+#include <flare/scenegraph/indirectrenderedscenegraph.h>
 
 namespace Tutorial
 {
@@ -21,19 +22,20 @@ namespace Tutorial
         transformFeedbackBufferManager = std::make_unique<Flare::GL::TransformFeedbackBufferManager>();
         textureManager = std::make_unique<Flare::GL::TextureManager>();
         modelManager= std::make_unique<Flare::SceneGraph::ModelManager>(*textureManager.get());
+        sceneGraph = std::make_unique<Flare::SceneGraph::IndirectRenderedSceneGraph>();
 
         auto vertexBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
-            .addAttribute("position_mass", 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
-            .addAttribute("velocity", 3, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec4))
-            .addAttribute("connection", 4, Flare::RenderSystem::RS_INT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec4) + sizeof(glm::vec3))
-            .setStride(2 * sizeof(glm::vec4) + sizeof(glm::vec3))
+            .addAttribute("position", 3, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
+            .addAttribute("normal", 3, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec3))
+            .addAttribute("uvCoord", 2, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, sizeof(glm::vec3) * 2)
+            .setStride(sizeof(Flare::DataTypes::Vertex))
             .build();
 
-        // auto mvpMatrixBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
-        //     .addMatrixAttribute("mvpMatrix", 4, 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
-        //     .setStride(sizeof(glm::mat4))
-        //     .setDivisor(1)
-        //     .build();
+        auto mvpMatrixBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+            .addMatrixAttribute("mvpMatrix", 4, 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
+            .setStride(sizeof(glm::mat4))
+            .setDivisor(1)
+            .build();
 
         auto transformFeedbackShader = Flare::GL::ShaderProgramBuilder()
             .setVertexShader(transformFeedbackVertexShaderPath)
@@ -43,7 +45,8 @@ namespace Tutorial
         auto vertexBufferVAO = Flare::RenderSystem::createVertexArray(
             transformFeedbackShader.get(),
             std::vector<Flare::RenderSystem::VertexBufferVertexDataLayout> {
-                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout}
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"vertexBuffer", vertexBufferLayout},
+                Flare::RenderSystem::VertexBufferVertexDataLayout{"mvpMatrix", mvpMatrixBufferLayout}
             }
         );
 
@@ -126,6 +129,51 @@ namespace Tutorial
             }
         }
 
-        //TODO: buffer data to textures
+        auto positionBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+            .addAttribute("position_mass", 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
+            .build();
+        auto velocityBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+            .addAttribute("velocity", 3, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
+            .build();
+        auto connectionBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+            .addAttribute("connection", 4, Flare::RenderSystem::RS_INT, Flare::RenderSystem::RS_FALSE, 0)
+            .build();
+
+        positionBufferA = Flare::RenderSystem::createBuffer("positionBufferA", positionBufferLayout);
+        positionBufferB = Flare::RenderSystem::createBuffer("positionBufferB", positionBufferLayout);
+        velocityBufferA = Flare::RenderSystem::createBuffer("velocityBufferA", velocityBufferLayout);
+        velocityBufferB = Flare::RenderSystem::createBuffer("velocityBufferB", velocityBufferLayout);
+        connectionBuffer = Flare::RenderSystem::createBuffer("connectionBuffer", connectionBufferLayout);
+
+        positionBufferA->allocateBufferStorage(initialPositions.size() * sizeof(glm::vec4), initialPositions.data(), Flare::RenderSystem::RS_DYNAMIC_STORAGE_BIT);
+        positionBufferB->allocateBufferStorage(initialPositions.size() * sizeof(glm::vec4), initialPositions.data(), Flare::RenderSystem::RS_DYNAMIC_STORAGE_BIT);
+        velocityBufferA->allocateBufferStorage(initialVelocities.size() * sizeof(glm::vec3), initialVelocities.data(), Flare::RenderSystem::RS_DYNAMIC_STORAGE_BIT);
+        velocityBufferB->allocateBufferStorage(initialVelocities.size() * sizeof(glm::vec3), initialVelocities.data(), Flare::RenderSystem::RS_DYNAMIC_STORAGE_BIT);
+        connectionBuffer->allocateBufferStorage(connectionVectors.size() * sizeof(glm::ivec4), connectionVectors.data(), 0);
+
+        auto positionTextureA = textureManager->createTextureBuffer("positionTextureA", Flare::RenderSystem::TextureManager::TextureInitParams{1, Flare::RenderSystem::RS_RGBA32F, false});
+        auto positionTextureB = textureManager->createTextureBuffer("positionTextureB", Flare::RenderSystem::TextureManager::TextureInitParams{1, Flare::RenderSystem::RS_RGBA32F, false});
+
+        positionTextureA->attachBufferStorage(*positionBufferA);
+        positionTextureB->attachBufferStorage(*positionBufferB);
+    }
+
+    void TransformFeedback::runParticleSimulationSteps()
+    {
+        transformFeedbackBufferManager->disableRasterization();
+
+        for (size_t i = 0; i < particleSimStepsPerFrame; ++i) {
+            if (i % 2 == 0) {
+                //attach positionA, velocityA buffers to node
+            } else {
+                //attach positionB, velocityB buffers to node
+            }
+
+            transformFeedbackBufferManager->beginTransformFeedback(GL_POINTS);
+            sceneGraph->render();
+            transformFeedbackBufferManager->endTransformFeedback();
+        }
+
+        transformFeedbackBufferManager->enableRasterization();
     }
 }

@@ -20,7 +20,7 @@ namespace Flare
                 TextureBuffer(const TextureBuffer &other) = delete;
                 TextureBuffer &operator=(const TextureBuffer &other) = delete;
 
-                virtual void attachBufferStorage(RenderSystem::RSenum format, const RenderSystem::Buffer &buffer) override;
+                virtual void attachBufferStorage(const RenderSystem::Buffer &buffer) override;
 
                 virtual void destroy() override;
                 virtual void initialize() override;

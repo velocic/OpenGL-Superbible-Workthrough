@@ -29,13 +29,13 @@ namespace Flare
             return *this;
         }
 
-        void TextureBuffer::attachBufferStorage(RenderSystem::RSenum format, const RenderSystem::Buffer &buffer)
+        void TextureBuffer::attachBufferStorage(const RenderSystem::Buffer &buffer)
         {
             if (glTexture == 0) {
                 throw std::runtime_error("Attempting to attach storage to an OpenGL texture that is uninitialized.");
             }
 
-            glTextureBuffer(glTexture, format, buffer.getId());
+            glTextureBuffer(glTexture, internalFormat, buffer.getId());
         }
 
         void TextureBuffer::destroy()

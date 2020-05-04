@@ -61,6 +61,7 @@ namespace Flare
         //Texture data format enums
         constexpr auto RS_RGBA = GL_RGBA;
         constexpr auto RS_RGBA8 = GL_RGBA8;
+        constexpr auto RS_RGBA32F = GL_RGBA32F;
 
         struct DrawElementsIndirectCommand {
             GLuint count = 0;

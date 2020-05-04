@@ -13,7 +13,7 @@ namespace Flare
             public:
                 virtual ~TextureBuffer() {}
 
-                virtual void attachBufferStorage(RSenum format, const RenderSystem::Buffer &buffer) = 0;
+                virtual void attachBufferStorage(const RenderSystem::Buffer &buffer) = 0;
         };
     }
 }
