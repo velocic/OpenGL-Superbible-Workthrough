@@ -31,14 +31,23 @@ namespace Flare
 
         const RenderSystem::Buffer *TransformFeedbackBufferManager::create(RenderSystem::ShaderData shaderData, const RenderSystem::VertexDataLayout &bufferLayout, RenderSystem::RSsizei bufferSizeInBytes, RenderSystem::RSbitfield bufferUsageFlags, const std::vector<std::string> &varyings, void *initialData)
         {
-            auto buffer = RenderSystem::createBuffer(
-                createdBufferBaseName + std::to_string(buffersCreated++),
+            auto buffers = DoubleBuffer{};
+            buffers.readBuffer = RenderSystem::createBuffer(
+                createdReadBufferBaseName + std::to_string(buffersCreated),
                 bufferLayout,
                 RenderSystem::BufferType::TRANSFORMFEEDBACK
             );
+            buffers.readBuffer->allocateBufferStorage(bufferSizeInBytes, initialData, bufferUsageFlags);
 
-            buffer->allocateBufferStorage(bufferSizeInBytes, initialData, bufferUsageFlags);
-            auto result = buffer.get();
+            buffers.writeBuffer = RenderSystem::createBuffer(
+                createdWriteBufferBaseName + std::to_string(buffersCreated++),
+                bufferLayout,
+                RenderSystem::BufferType::TRANSFORMFEEDBACK
+            );
+            buffers.writeBuffer->allocateBufferStorage(bufferSizeInBytes, nullptr, bufferUsageFlags);
+            buffers.writeBuffer->copyRange(*buffers.readBuffer, 0, 0, bufferSizeInBytes);
+
+            auto result = buffers.readBuffer.get();
 
             auto CStringVaryings = std::vector<const char *>{};
             CStringVaryings.reserve(varyings.size());
@@ -60,8 +69,8 @@ namespace Flare
 
             transformFeedbackBufferMap.insert_or_assign(
                 shaderData.hashedAlias,
-                ShaderToOutputBuffer{
-                    std::move(buffer),
+                ShaderToDoubleBuffer{
+                    std::move(buffers),
                     shaderData.shader
                 }
             );
@@ -104,7 +113,7 @@ namespace Flare
             auto result = transformFeedbackBufferMap.find(stringHasher(alias));
 
             if (result != transformFeedbackBufferMap.end()) {
-                return result->second.transformFeedbackBuffer.get();
+                return result->second.transformFeedbackBuffers.readBuffer.get();
             }
 
             return nullptr;
@@ -115,7 +124,7 @@ namespace Flare
             auto result = transformFeedbackBufferMap.find(shaderData.hashedAlias);
 
             if (result != transformFeedbackBufferMap.end()) {
-                return result->second.transformFeedbackBuffer.get();
+                return result->second.transformFeedbackBuffers.readBuffer.get();
             }
 
             return nullptr;
@@ -143,7 +152,7 @@ namespace Flare
 
             auto bufferNames = std::vector<GLuint>{};
             for (const auto &[key, value] : transformFeedbackBufferMap) {
-                bufferNames.push_back(value.transformFeedbackBuffer->getId());
+                bufferNames.push_back(value.transformFeedbackBuffers.writeBuffer->getId());
             }
 
             glBindBuffersBase(
@@ -158,6 +167,12 @@ namespace Flare
         void TransformFeedbackBufferManager::endTransformFeedback()
         {
             glEndTransformFeedback();
+
+            for (auto &[key, value] : transformFeedbackBufferMap) {
+                auto &buffers = value.transformFeedbackBuffers;
+                buffers.readBuffer.swap(buffers.writeBuffer);
+            }
+
             isCurrentlyEnabled = false;
         }
 
