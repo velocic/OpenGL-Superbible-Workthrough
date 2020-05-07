@@ -52,22 +52,7 @@ namespace Tutorial
 
         shaderManager->insert(std::move(transformFeedbackShader), std::move(vertexBufferVAO), "transformFeedbackShader");
 
-        auto transformFeedbackVaryings = std::vector<std::string> {
-            "tf_position_mass",
-            "tf_velocity"
-        };
-
-        constexpr auto totalNumVertices = verticesPerAxis * verticesPerAxis;
-        constexpr auto transformFeedbackBufferSize = (totalNumVertices * (sizeof(glm::vec4) * 2))
-            + (totalNumVertices * sizeof(glm::vec3));
-
-        transformFeedbackBufferManager->create(
-            shaderManager->get("transformFeedbackShader"),
-            vertexBufferLayout,
-            transformFeedbackBufferSize,
-            0,
-            transformFeedbackVaryings
-        );
+        setInitialVertexBufferState();
     }
 
     void TransformFeedback::render(unsigned int deltaTime)
@@ -139,23 +124,28 @@ namespace Tutorial
             .addAttribute("connection", 4, Flare::RenderSystem::RS_INT, Flare::RenderSystem::RS_FALSE, 0)
             .build();
 
-        positionBufferA = Flare::RenderSystem::createBuffer("positionBufferA", positionBufferLayout);
-        positionBufferB = Flare::RenderSystem::createBuffer("positionBufferB", positionBufferLayout);
-        velocityBufferA = Flare::RenderSystem::createBuffer("velocityBufferA", velocityBufferLayout);
-        velocityBufferB = Flare::RenderSystem::createBuffer("velocityBufferB", velocityBufferLayout);
-        connectionBuffer = Flare::RenderSystem::createBuffer("connectionBuffer", connectionBufferLayout);
+        auto positionBuffer = transformFeedbackBufferManager->create(
+            shaderManager->get("transformFeedbackShader"),
+            positionBufferLayout,
+            initialPositions.size() * sizeof(glm::vec4),
+            0,
+            std::vector<std::string>{"tf_position_mass"},
+            initialPositions.data()
+        );
+        auto velocityBuffer = transformFeedbackBufferManager->create(
+            shaderManager->get("transformFeedbackShader"),
+            velocityBufferLayout,
+            initialVelocities.size() * sizeof(glm::vec3),
+            0,
+            std::vector<std::string>{"tf_velocity"},
+            initialVelocities.data()
+        );
 
-        positionBufferA->allocateBufferStorage(initialPositions.size() * sizeof(glm::vec4), initialPositions.data(), Flare::RenderSystem::RS_DYNAMIC_STORAGE_BIT);
-        positionBufferB->allocateBufferStorage(initialPositions.size() * sizeof(glm::vec4), initialPositions.data(), Flare::RenderSystem::RS_DYNAMIC_STORAGE_BIT);
-        velocityBufferA->allocateBufferStorage(initialVelocities.size() * sizeof(glm::vec3), initialVelocities.data(), Flare::RenderSystem::RS_DYNAMIC_STORAGE_BIT);
-        velocityBufferB->allocateBufferStorage(initialVelocities.size() * sizeof(glm::vec3), initialVelocities.data(), Flare::RenderSystem::RS_DYNAMIC_STORAGE_BIT);
+        connectionBuffer = Flare::RenderSystem::createBuffer("connectionBuffer", connectionBufferLayout);
         connectionBuffer->allocateBufferStorage(connectionVectors.size() * sizeof(glm::ivec4), connectionVectors.data(), 0);
 
-        auto positionTextureA = textureManager->createTextureBuffer("positionTextureA", Flare::RenderSystem::TextureManager::TextureInitParams{1, Flare::RenderSystem::RS_RGBA32F, false});
-        auto positionTextureB = textureManager->createTextureBuffer("positionTextureB", Flare::RenderSystem::TextureManager::TextureInitParams{1, Flare::RenderSystem::RS_RGBA32F, false});
-
-        positionTextureA->attachBufferStorage(*positionBufferA);
-        positionTextureB->attachBufferStorage(*positionBufferB);
+        auto positionTexture = textureManager->createTextureBuffer("positionTexture", Flare::RenderSystem::TextureManager::TextureInitParams{1, Flare::RenderSystem::RS_RGBA32F, false});
+        positionTexture->attachBufferStorage(*positionBuffer);
     }
 
     void TransformFeedback::runParticleSimulationSteps()

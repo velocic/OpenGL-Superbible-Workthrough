@@ -47,8 +47,6 @@ namespace Flare
             buffers.writeBuffer->allocateBufferStorage(bufferSizeInBytes, nullptr, bufferUsageFlags);
             buffers.writeBuffer->copyRange(*buffers.readBuffer, 0, 0, bufferSizeInBytes);
 
-            auto result = buffers.readBuffer.get();
-
             auto CStringVaryings = std::vector<const char *>{};
             CStringVaryings.reserve(varyings.size());
             std::transform(
@@ -66,6 +64,8 @@ namespace Flare
                 CStringVaryings.data(),
                 GL_INTERLEAVED_ATTRIBS
             );
+
+            auto result = buffers.readBuffer.get();
 
             transformFeedbackBufferMap.insert_or_assign(
                 shaderData.hashedAlias,

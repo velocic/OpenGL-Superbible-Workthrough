@@ -23,10 +23,6 @@ namespace Tutorial
             std::unique_ptr<Flare::SceneGraph::ModelManager> modelManager;
             std::unique_ptr<Flare::SceneGraph::SceneGraph> sceneGraph;
 
-            std::unique_ptr<Flare::RenderSystem::Buffer> positionBufferA;
-            std::unique_ptr<Flare::RenderSystem::Buffer> positionBufferB;
-            std::unique_ptr<Flare::RenderSystem::Buffer> velocityBufferA;
-            std::unique_ptr<Flare::RenderSystem::Buffer> velocityBufferB;
             std::unique_ptr<Flare::RenderSystem::Buffer> connectionBuffer;
 
             const std::string transformFeedbackVertexShaderPath{"../src/7d-transform-feedback/shaders/transformfeedback-vertex.glsl"};
