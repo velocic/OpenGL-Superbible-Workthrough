@@ -1,6 +1,12 @@
 #ifndef FLARE_RENDERSYSTEM_TRANSFORMFEEDBACKHANDLER_H
 #define FLARE_RENDERSYSTEM_TRANSFORMFEEDBACKHANDLER_H
 
+#include <string>
+#include <vector>
+
+#include <flare/rendersystem/buffer.h>
+#include <flare/rendersystem/datalayout.h>
+
 namespace Flare
 {
     namespace RenderSystem
@@ -12,7 +18,7 @@ namespace Flare
                     std::vector<std::string> varyings;
                     VertexDataLayout layout;
                     RSsizei sizeInBytes;
-                    RSBitfield usageFlags;
+                    RSbitfield usageFlags;
                     void *initialData = nullptr;
                 };
 
@@ -20,20 +26,20 @@ namespace Flare
                     std::string varying;
                     VertexDataLayout layout;
                     RSsizei sizeInBytes;
-                    RSBitfield usageFlags;
+                    RSbitfield usageFlags;
                     void *initialData = nullptr;
                 };
 
                 virtual ~TransformFeedbackHandler() {}
 
-                virtual void setup(const InterleavedBufferInitParams &bufferInitParams) = 0;
+                virtual void setup(const InterleavedAttributeBufferInitParams &bufferInitParams) = 0;
                 virtual void setup(const std::vector<SeparatedAttributeBufferInitParams> &bufferInitParams) = 0;
 
                 virtual void destroy() = 0;
 
                 virtual const Buffer *get(const std::string &varyingName) const = 0;
 
-                virtual void beginTransformFeedback(RSenum primitiveMode) = 0;
+                virtual void beginTransformFeedback(RenderSystem::RSenum primitiveMode) = 0;
                 virtual void endTransformFeedback() = 0;
                 virtual void pauseTransformFeedback() = 0;
                 virtual void resumeTransformFeedback() = 0;

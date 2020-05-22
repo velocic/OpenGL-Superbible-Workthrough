@@ -30,6 +30,7 @@ add_executable(
     src/flare/gl/texture2d.cpp
     src/flare/gl/texturebuffer.cpp
     src/flare/gl/transformfeedbackbuffermanager.cpp
+    src/flare/gl/transformfeedbackhandler.cpp
     src/flare/gl/arraytexture2d.cpp
     src/flare/gl/sampler.cpp
     src/flare/rendersystem/datalayout.cpp
