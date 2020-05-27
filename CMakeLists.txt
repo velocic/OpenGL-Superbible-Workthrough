@@ -34,6 +34,7 @@ add_executable(
     src/flare/gl/arraytexture2d.cpp
     src/flare/gl/sampler.cpp
     src/flare/rendersystem/datalayout.cpp
+    src/flare/rendersystem/doublebuffer.cpp
     src/flare/rendersystem/resizablebuffer.cpp
     src/flare/rendersystem/factory.cpp
     src/flare/rendersystem/samplermanager.cpp

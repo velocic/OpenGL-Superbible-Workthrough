@@ -4,6 +4,8 @@
 #include <glm-0.9.9/glm.hpp>
 #include <glm-0.9.9/gtc/quaternion.hpp>
 
+#include <flare/rendersystem/buffer.h>
+
 namespace Flare
 {
     namespace DataTypes
