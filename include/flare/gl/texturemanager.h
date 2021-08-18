@@ -24,7 +24,7 @@ namespace Flare
                 RenderSystem::PBRMaterialTextures getNonOwningMaterialPointers(const PBRMaterialTextures &owningPointers) const;
                 RenderSystem::PhongMaterialTextures getNonOwningMaterialPointers(const PhongMaterialTextures &owningPointers) const;
             public:
-                TextureManager() {}
+                TextureManager() = default;
                 ~TextureManager();
                 TextureManager(TextureManager &&other);
                 TextureManager &operator=(TextureManager &&other);

@@ -16,7 +16,7 @@ namespace Flare
                 std::unordered_map<size_t, std::unique_ptr<RenderSystem::Sampler>> samplers;
                 std::hash<std::string> stringHasher;
             public:
-                SamplerManager() {}
+                SamplerManager() = default;
                 ~SamplerManager();
                 SamplerManager(SamplerManager &&other);
                 SamplerManager &operator=(SamplerManager &&other);

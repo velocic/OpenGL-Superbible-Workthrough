@@ -31,7 +31,7 @@ namespace Flare
                 std::unordered_map<size_t, ShaderData> shaders;
                 std::hash<std::string> stringHasher;
             public:
-                ShaderManager() {}
+                ShaderManager() = default;
                 ~ShaderManager();
                 ShaderManager(ShaderManager &&other);
                 ShaderManager &operator=(ShaderManager &&other);

@@ -29,7 +29,7 @@ namespace Flare
                 bool isCurrentlyEnabled = false;
 
             public:
-                TransformFeedbackBufferManager() {};
+                TransformFeedbackBufferManager() = default;
                 virtual ~TransformFeedbackBufferManager() override;
                 TransformFeedbackBufferManager(TransformFeedbackBufferManager &&other);
                 TransformFeedbackBufferManager &operator=(TransformFeedbackBufferManager &&other);
