@@ -69,6 +69,24 @@ namespace Tutorial
 
     void TransformFeedback::setInitialVertexBufferState()
     {
+        auto combinePositionAndVelocityData = [](const auto &positions, const auto &velocities, size_t size){
+            auto positionVelocityData = std::vector<float>();
+            positionVelocityData.reserve(7 * size);
+
+            for (size_t i = 0; i < size; ++i) {
+                positionVelocityData.push_back(positions[i].x);
+                positionVelocityData.push_back(positions[i].y);
+                positionVelocityData.push_back(positions[i].z);
+                positionVelocityData.push_back(positions[i].w);
+
+                positionVelocityData.push_back(velocities[i].x);
+                positionVelocityData.push_back(velocities[i].y);
+                positionVelocityData.push_back(velocities[i].z);
+            }
+
+            return positionVelocityData;
+        };
+
         constexpr auto totalVertices = verticesPerAxis * verticesPerAxis;
 
         auto initialPositions = std::vector<glm::vec4>(totalVertices);
@@ -114,38 +132,31 @@ namespace Tutorial
             }
         }
 
-        auto positionBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
+        auto initialPositionVelocityData = combinePositionAndVelocityData(initialPositions, initialVelocities, parallelIndex);
+
+        auto positionVelocityBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
             .addAttribute("position_mass", 4, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
+            .addAttribute("velocity", 3, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 4)
             .build();
-        auto velocityBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
-            .addAttribute("velocity", 3, Flare::RenderSystem::RS_FLOAT, Flare::RenderSystem::RS_FALSE, 0)
-            .build();
+
         auto connectionBufferLayout = Flare::RenderSystem::VertexDataLayoutBuilder()
             .addAttribute("connection", 4, Flare::RenderSystem::RS_INT, Flare::RenderSystem::RS_FALSE, 0)
             .build();
 
-        auto positionBuffer = transformFeedbackBufferManager->create(
+        auto positionVelocityBuffer = transformFeedbackBufferManager->create(
             shaderManager->get("transformFeedbackShader"),
-            positionBufferLayout,
-            initialPositions.size() * sizeof(glm::vec4),
+            positionVelocityBufferLayout,
+            initialPositionVelocityData.size() * (sizeof(glm::vec4) + sizeof(glm::vec3)),
             0,
-            std::vector<std::string>{"tf_position_mass"},
-            initialPositions.data()
-        );
-        auto velocityBuffer = transformFeedbackBufferManager->create(
-            shaderManager->get("transformFeedbackShader"),
-            velocityBufferLayout,
-            initialVelocities.size() * sizeof(glm::vec3),
-            0,
-            std::vector<std::string>{"tf_velocity"},
-            initialVelocities.data()
+            std::vector<std::string>{"tf_position_mass", "tf_velocity"},
+            initialPositionVelocityData.data()
         );
 
         connectionBuffer = Flare::RenderSystem::createBuffer("connectionBuffer", connectionBufferLayout);
         connectionBuffer->allocateBufferStorage(connectionVectors.size() * sizeof(glm::ivec4), connectionVectors.data(), 0);
 
-        auto positionTexture = textureManager->createTextureBuffer("positionTexture", Flare::RenderSystem::TextureManager::TextureInitParams{1, Flare::RenderSystem::RS_RGBA32F, false});
-        positionTexture->attachBufferStorage(*positionBuffer);
+        auto positionVelocityTexture = textureManager->createTextureBuffer("positionVelocityTexture", Flare::RenderSystem::TextureManager::TextureInitParams{1, Flare::RenderSystem::RS_RGBA32F, false});
+        positionVelocityTexture->attachBufferStorage(*positionVelocityBuffer);
     }
 
     void TransformFeedback::runParticleSimulationSteps()
